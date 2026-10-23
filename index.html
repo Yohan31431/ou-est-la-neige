@@ -5,371 +5,310 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Où est la neige ?</title>
 <meta name="description" content="La neige la plus proche de chez toi, et où il va neiger ces 10 prochains jours.">
-<meta name="theme-color" content="#F3F7FB" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0E1D33" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#CBD3E0">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,400..900&display=swap">
 <style>
-/* Mise en page : une colonne, crête de montagne en haut, carte-verdict, bande des jours, radar, liste des stations */
+/* Mise en page : brume froide + lueur de soleil en fond fixe ; une barre de verre ; une énorme phrase-verdict ;
+   puis des sections à filets fins (jours, radar, liste). Une seule couleur d'encre, aucun arrondi. */
 :root{
-  --sky:#F3F7FB; --bg:#E6EEF6; --card:#FFFFFF; --ink:#0F2240; --muted:#5A6E8E; --line:#D6E1EE;
-  --frost:#DCEAF9; --frost-ink:#1D4F8C; --accent:#D2412A; --accent-ink:#FFFFFF;
-  --snow-bg:#0F2240; --snow-ink:#FFFFFF;
-  --radar:#10233F; --radar-line:rgba(190,215,245,.18); --radar-text:#A9C2E2;
-  --dot-now:#FFFFFF; --dot-soon:#6FB2FF; --dot-none:rgba(170,195,230,.28);
-  --ridge1:#CFDCEA; --ridge2:#AFC3DA; --ridge3:#86A1C2; --cap:#FFFFFF;
-  --shadow:0 1px 2px rgba(15,34,64,.06),0 10px 30px rgba(15,34,64,.09);
+  --ink:#0D0E11; --ink-2:#4B5263; --fade:#A2AAB8; --line:rgba(13,14,17,.11); --line-2:rgba(13,14,17,.24);
+  --paper:#E8EBF1; --glass:rgba(255,255,255,.52); --white:#FFFFFF;
+  --cold:#A3B0C7; --warm:#FFE6C2;
   --font:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   color-scheme:light;
 }
-@media (prefers-color-scheme:dark){:root{
-  --sky:#0E1D33; --bg:#0A1628; --card:#13243C; --ink:#E8F0FA; --muted:#93A8C3; --line:#22395B;
-  --frost:#1B3658; --frost-ink:#C3DCFA; --accent:#F0674C; --accent-ink:#1A0B07;
-  --snow-bg:#F2F7FD; --snow-ink:#0A1628;
-  --radar:#071121; --radar-line:rgba(170,200,240,.16); --radar-text:#8FA9CC;
-  --ridge1:#14284A; --ridge2:#1B3459; --ridge3:#26456F; --cap:#D9E6F6;
-  --shadow:0 1px 2px rgba(0,0,0,.35),0 10px 30px rgba(0,0,0,.35);
-  color-scheme:dark;
-}}
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.45;font-variant-numeric:tabular-nums}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(48% 36% at 80% 20%,rgba(255,236,207,.95) 0%,rgba(255,236,207,0) 72%),
+  radial-gradient(60% 45% at 0% 0%,rgba(140,157,188,.85) 0%,rgba(140,157,188,0) 75%),
+  radial-gradient(70% 40% at 100% 100%,rgba(176,190,214,.6) 0%,rgba(176,190,214,0) 70%),
+  linear-gradient(180deg,#C8D1DF 0%,#E4E8EF 38%,#F2F0EC 66%,#E3E8F0 100%)}
 button,input{font:inherit;color:inherit}
 a{color:inherit}
-:focus-visible{outline:3px solid var(--dot-soon);outline-offset:2px;border-radius:8px}
+:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
 [hidden]{display:none!important}
-.wrap{max-width:720px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 
-/* En-tête montagne */
-.top{position:relative;background:linear-gradient(var(--sky),var(--bg));padding-top:env(safe-area-inset-top,0px)}
-.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-block:18px 96px;position:relative;z-index:1}
-.brand{display:flex;align-items:center;gap:10px;font-weight:850;font-stretch:125%;font-size:19px;letter-spacing:-.01em;margin:0}
-.brand svg{width:26px;height:26px;flex:none}
-.place{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px 8px 10px;cursor:pointer;box-shadow:var(--shadow);max-width:100%}
-.place svg{width:18px;height:18px;flex:none;color:var(--accent)}
-.place .pn{font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
-.place .chg{color:var(--muted);font-size:13px}
-.ridges{position:absolute;left:0;right:0;bottom:0;width:100%;height:110px;display:block}
-
-main{padding-bottom:calc(40px + env(safe-area-inset-bottom,0px))}
-.stack{display:flex;flex-direction:column;gap:28px;margin-top:-78px;position:relative;z-index:2}
-
-/* Accueil */
-.welcome{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:28px 22px;display:flex;flex-direction:column;gap:16px}
-.welcome h1{font-stretch:125%;font-weight:850;font-size:clamp(28px,7vw,40px);line-height:1.05;margin:0;text-wrap:balance;letter-spacing:-.02em}
-.welcome p{margin:0;color:var(--muted);max-width:52ch}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:16px;padding:15px 20px;font-weight:750;cursor:pointer;text-decoration:none;font-size:16px}
-.btn svg{width:20px;height:20px;flex:none}
-.btn-main{background:var(--accent);color:var(--accent-ink)}
-.btn-soft{background:var(--frost);color:var(--frost-ink)}
-.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px}
-.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
-.field{display:flex;gap:8px}
-.field input{flex:1;min-width:0;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:13px 14px;font-size:16px}
-.results{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
-.results button{width:100%;text-align:left;border:1px solid var(--line);background:var(--card);border-radius:12px;padding:11px 14px;cursor:pointer}
-.results button span{color:var(--muted);font-size:13px;display:block}
-.msg{color:var(--muted);font-size:14px;margin:0}
-
-/* Chargement */
-.loading{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:44px 22px;display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center}
-.loading svg{width:44px;height:44px;color:var(--frost-ink);animation:spin 2.4s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion:reduce){.loading svg{animation:none}}
+/* Barre */
+.bar{position:sticky;top:0;z-index:20;padding-top:calc(env(safe-area-inset-top,0px) + 10px)}
+.bar-in{display:flex;align-items:center;justify-content:space-between;gap:12px;height:46px;padding:0 14px;background:var(--glass);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);border:1px solid rgba(255,255,255,.6)}
+.logo{display:flex;align-items:center;gap:8px;font-weight:900;font-size:13px;letter-spacing:.32em;text-decoration:none;text-transform:uppercase}
+.logo svg{width:18px;height:18px}
+.loc{display:flex;align-items:center;gap:7px;border:0;background:none;padding:6px 0;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;min-width:0}
+.loc span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:42vw}
+.loc svg{width:10px;height:10px;flex:none}
 
 /* Verdict */
-.hero{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:22px 22px 20px;display:flex;flex-direction:column;overflow:hidden}
-.home-banner{display:flex;align-items:center;gap:10px;background:var(--snow-bg);color:var(--snow-ink);border-radius:14px;padding:10px 14px;font-weight:650;font-size:15px;margin-bottom:16px}
-.home-banner svg{width:20px;height:20px;flex:none}
-.eyebrow{margin:0;font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
-.hero-top{display:flex;align-items:flex-end;justify-content:space-between;gap:12px}
-.hero h2{margin:0;font-stretch:118%;font-weight:850;font-size:clamp(28px,7.4vw,42px);line-height:1.02;letter-spacing:-.02em;text-wrap:balance;min-width:0;overflow-wrap:anywhere}
-.hero-sub{margin:2px 0 0;color:var(--muted);font-size:14px}
-.hero-art{width:88px;height:72px;flex:none}
-.hero-main{display:flex;flex-direction:column;gap:4px;min-width:0}
-.figs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
-.fig{background:var(--bg);border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;min-width:0}
-.fig b{font-stretch:112%;font-weight:850;font-size:clamp(26px,7vw,36px);line-height:1;letter-spacing:-.02em}
-.fig b small{font-size:.5em;font-weight:700;margin-left:3px;letter-spacing:0}
-.fig span{color:var(--muted);font-size:13px;margin-top:4px}
-.fig.big{background:var(--snow-bg);color:var(--snow-ink)}
-.fig.big span{color:inherit;opacity:.75}
-.hero-note{grid-column:1/-1;margin:10px 0 0;font-size:15px}
-.hero-note:empty{display:none}
-.actions{grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-.actions .btn{flex:1 1 160px}
+.hero{display:grid;grid-template-columns:1fr;gap:0;padding-block:34px 18px;position:relative}
+.kicker{margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-2);display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:22px;height:1px;background:var(--ink)}
+.big{margin:0;font-weight:900;text-transform:uppercase;line-height:.88;letter-spacing:-.045em;font-size:min(13.5vw,118px);
+  background:linear-gradient(90deg,var(--ink) 0%,var(--ink) 50%,var(--fade) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content;max-width:100%}
+.big span{display:block;padding-bottom:.04em}
+.art{position:relative;margin:6px -8px 0;height:clamp(220px,62vw,300px)}
+.art svg{width:100%;height:100%;display:block;overflow:visible}
+.intro .art .peak{animation:rise 1.1s cubic-bezier(.2,.7,.2,1) both}
+@keyframes rise{from{transform:translateY(14px);opacity:.001}to{transform:none;opacity:1}}
+.lede{margin:4px 0 0;font-size:16px;line-height:1.5;color:var(--ink-2);max-width:44ch}
+.lede b{color:var(--ink);font-weight:700}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+.cta .b{flex:1 1 200px}
+.b{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:0 22px;font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;border:1px solid var(--ink);cursor:pointer;background:none}
+.b svg{width:14px;height:14px}
+.b-black{background:var(--ink);color:#fff}
+.b-line{background:rgba(255,255,255,.35)}
+.specs{list-style:none;margin:30px 0 0;padding:16px 0 0;border-top:1px solid var(--line-2);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.specs li{display:flex;flex-direction:column;gap:2px;min-width:0}
+.specs b{font-size:clamp(17px,4.8vw,24px);font-weight:800;letter-spacing:-.02em;white-space:nowrap}
+.specs span{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
+@media (min-width:880px){
+  .hero{grid-template-columns:1.05fr 1fr;column-gap:40px;padding-top:70px;align-items:end}
+  .hero > *{grid-column:1}
+  .art{grid-column:2;grid-row:1/7;height:auto;min-height:440px;margin:0}
+  .big{font-size:min(9vw,118px)}
+}
+@media (prefers-reduced-motion:reduce){.intro .art .peak{animation:none}}
 
 /* Sections */
-.block{display:flex;flex-direction:column;gap:12px}
-.block h3{margin:0;font-stretch:118%;font-weight:850;font-size:22px;letter-spacing:-.01em}
-.block .hint{margin:-6px 0 0;color:var(--muted);font-size:14px}
+.sec{padding-block:44px 8px}
+.sec-h{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.sec-h h2{margin:0;font-size:clamp(26px,7vw,44px);font-weight:900;text-transform:uppercase;letter-spacing:-.035em;line-height:.95}
+.sec-h p{margin:0;font-size:13px;color:var(--ink-2);max-width:34ch}
+.idx{font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--ink-2);display:block;margin-bottom:8px}
 
 /* Jours */
-.days{display:grid;grid-auto-flow:column;grid-auto-columns:138px;gap:10px;overflow-x:auto;padding:2px 2px 10px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
-.day{scroll-snap-align:start;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px;display:flex;flex-direction:column;gap:2px;min-height:190px}
-.day .dn{font-weight:750}
-.day .dd{color:var(--muted);font-size:12px}
-.day .fl{display:flex;gap:3px;height:28px;align-items:center;margin:8px 0 4px;color:var(--frost-ink)}
-.day .fl svg{width:20px;height:20px}
-.day .amt{font-stretch:112%;font-weight:850;font-size:24px;line-height:1.05}
-.day .wh{font-size:13px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
-.day .ds{color:var(--muted);font-size:12px}
-.day .ln{margin-top:auto;padding-top:8px;border-top:1px dashed var(--line);color:var(--muted);font-size:12px;display:flex;align-items:center;gap:5px}
-.day .ln svg{width:14px;height:14px;flex:none}
-.day.has{background:var(--frost);border-color:transparent}
-.day.has .wh,.day.has .amt{color:var(--frost-ink)}
-.day.none .fl{opacity:.25}
-.day.none .nothing{color:var(--muted);font-size:13px}
+.days{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(118px,1fr);overflow-x:auto;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.days::-webkit-scrollbar{display:none}
+.day{scroll-snap-align:start;padding:14px 12px 12px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:3px;min-height:178px}
+.day:first-child{border-left:0;padding-left:0}
+.day .dl{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.day .dd{font-size:11px;color:var(--ink-2)}
+.day .num{font-size:44px;font-weight:900;letter-spacing:-.05em;line-height:1;margin-top:14px}
+.day .num small{font-size:12px;font-weight:800;letter-spacing:.08em;margin-left:3px}
+.day .wh{font-size:12px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.day .ds{font-size:11px;color:var(--ink-2)}
+.day .ln{margin-top:auto;padding-top:10px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.day .ln b{display:block;font-size:13px;letter-spacing:.02em;color:var(--ink);white-space:nowrap;margin-top:1px}
+.day.no .num{color:var(--fade)}
+.day.no .wh{color:var(--ink-2);font-weight:500}
 
 /* Radar */
-.radar-card{background:var(--radar);border-radius:24px;padding:14px;display:flex;flex-direction:column;gap:10px;color:#E6EFFA}
-.radar-card svg{width:100%;max-width:440px;height:auto;margin:0 auto;display:block}
-.radar-cap{min-height:44px;text-align:center;font-size:15px;color:#E6EFFA;margin:0;display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap}
-.radar-cap span{color:var(--radar-text)}
-.legend{display:flex;justify-content:center;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--radar-text);margin:0;padding:0;list-style:none}
-.legend li{display:flex;align-items:center;gap:6px}
-.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.radar-box{display:grid;grid-template-columns:1fr;gap:18px;align-items:center}
+.radar-box svg{width:100%;max-width:520px;height:auto;margin:0 auto;display:block}
+.cap{margin:0;min-height:48px;border-top:1px solid var(--line-2);padding-top:12px;display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
+.cap b{font-size:18px;font-weight:800;letter-spacing:-.01em}
+.cap span{font-size:12px;color:var(--ink-2)}
+.legend{list-style:none;display:flex;gap:18px;flex-wrap:wrap;margin:10px 0 0;padding:0;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.legend li{display:flex;align-items:center;gap:7px}
+.legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
 .dot{cursor:pointer}
+@media (min-width:880px){.radar-box{grid-template-columns:1.2fr 1fr}}
 
 /* Liste */
-.chips{display:flex;gap:8px;flex-wrap:wrap}
-.chip{border:1px solid var(--line);background:var(--card);border-radius:999px;padding:8px 14px;cursor:pointer;font-weight:600;font-size:14px}
-.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
-.list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-.row{background:var(--card);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;box-shadow:0 1px 2px rgba(15,34,64,.05)}
-.r-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
-.r-name{min-width:0}
-.r-name b{display:block;font-weight:750;font-size:17px;line-height:1.2;overflow-wrap:anywhere}
-.r-name span{color:var(--muted);font-size:13px}
-.pill{flex:none;border-radius:999px;padding:5px 11px;font-size:13px;font-weight:700;white-space:nowrap}
-.pill.now{background:var(--snow-bg);color:var(--snow-ink)}
-.pill.soon{background:var(--frost);color:var(--frost-ink)}
-.pill.none{background:transparent;color:var(--muted);border:1px solid var(--line)}
-.bars{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;align-items:end}
-.bar{display:flex;flex-direction:column;align-items:center;gap:3px}
-.bar i{display:block;width:100%;max-width:22px;border-radius:5px 5px 2px 2px;background:var(--frost);min-height:3px}
-.bar i.on{background:var(--dot-soon)}
-.bar em{font-style:normal;font-size:10px;color:var(--muted)}
-.bars-wrap{height:46px;display:flex;align-items:flex-end}
-.bars-wrap .bars{width:100%;height:100%}
-.bar{height:100%;justify-content:flex-end}
-.r-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:14px}
-.r-foot span{display:inline-flex;align-items:center;gap:6px}
-.r-foot svg{width:16px;height:16px}
-.r-foot a{color:var(--accent);font-weight:700;text-decoration:none}
-.more{align-self:center}
-.empty{background:var(--card);border-radius:18px;padding:18px;color:var(--muted);text-align:center;margin:0}
+.list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-2)}
+.it{display:grid;grid-template-columns:30px 1fr auto 28px;gap:12px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.it .n{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--ink-2)}
+.it .t{min-width:0}
+.it .t b{display:block;font-size:16px;font-weight:750;line-height:1.25;overflow-wrap:anywhere}
+.it .t span{font-size:12px;color:var(--ink-2)}
+.it .v{text-align:right}
+.it .v b{display:block;font-size:24px;font-weight:900;letter-spacing:-.04em;line-height:1}
+.it .v b small{font-size:10px;font-weight:800;letter-spacing:.08em;margin-left:2px}
+.it .v span{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.it.soon .v b{color:var(--ink-2)}
+.it .go{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--line-2);text-decoration:none}
+.it .go svg{width:12px;height:12px}
+.more{margin-top:18px}
+.empty{padding:22px 0;color:var(--ink-2);border-bottom:1px solid var(--line);margin:0}
 
-.foot{color:var(--muted);font-size:13px;line-height:1.5;display:flex;flex-direction:column;gap:6px}
-.foot p{margin:0;max-width:62ch}
-.foot button{background:none;border:0;padding:0;color:var(--accent);font-weight:700;cursor:pointer}
+.foot{padding-block:48px calc(36px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--ink-2)}
+.foot p{margin:0;max-width:70ch}
+.foot button{border:0;background:none;padding:0;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;color:var(--ink);text-decoration:underline;text-underline-offset:4px}
 
-/* Fenêtre « changer de lieu » */
-dialog{border:0;border-radius:24px;padding:22px;width:min(520px,calc(100vw - 24px));background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
-dialog::backdrop{background:rgba(8,18,34,.55)}
-dialog form{display:flex;flex-direction:column;gap:14px}
-dialog h3{margin:0;font-stretch:118%;font-weight:850;font-size:22px}
-.x{position:absolute;top:14px;right:14px;border:0;background:var(--bg);border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:20px;line-height:1}
+/* Accueil / chargement */
+.screen{padding-block:40px 30px;display:flex;flex-direction:column;gap:0}
+.field{display:flex;margin-top:10px;border-bottom:1px solid var(--ink)}
+.field input{flex:1;min-width:0;border:0;background:none;padding:14px 0;font-size:17px;outline:none}
+.field button{border:0;background:none;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;padding:0 0 0 12px}
+.results{list-style:none;margin:6px 0 0;padding:0}
+.results button{width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:13px 0;cursor:pointer;font-size:16px;font-weight:650}
+.results button span{display:block;font-size:12px;font-weight:400;color:var(--ink-2)}
+.msg{margin:10px 0 0;font-size:13px;color:var(--ink-2)}
+.or{margin:26px 0 0;font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2)}
+.pulse{animation:pulse 1.6s ease-in-out infinite}
+@keyframes pulse{50%{opacity:.35}}
+@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+
+dialog{border:0;padding:24px 20px 20px;width:min(520px,calc(100vw - 24px));background:#F7F7F5;color:var(--ink);box-shadow:0 30px 80px rgba(20,28,45,.25)}
+dialog::backdrop{background:rgba(160,172,194,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+dialog h3{margin:0 0 16px;font-size:30px;font-weight:900;text-transform:uppercase;letter-spacing:-.04em;line-height:.95}
+.x{position:absolute;top:12px;right:12px;width:36px;height:36px;border:1px solid var(--line-2);background:none;cursor:pointer;font-size:18px;line-height:1}
 </style>
 </head>
 <body>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <symbol id="i-flake" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M12 2v20M3.3 7l17.4 10M3.3 17L20.7 7"/><path d="M9.5 3.5 12 6l2.5-2.5M9.5 20.5 12 18l2.5 2.5M3.6 10.4l3.3-.9-.9-3.3M20.4 13.6l-3.3.9.9 3.3M3.6 13.6l3.3.9-.9 3.3M20.4 10.4l-3.3-.9.9-3.3"/></g></symbol>
-    <symbol id="i-pin" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7Zm0 9.6A2.6 2.6 0 1 1 12 6.4a2.6 2.6 0 0 1 0 5.2Z"/></symbol>
-    <symbol id="i-car" viewBox="0 0 24 24"><path fill="currentColor" d="M5 11l1.6-4.4A2 2 0 0 1 8.5 5.3h7a2 2 0 0 1 1.9 1.3L19 11a2 2 0 0 1 2 2v4a1 1 0 0 1-1 1h-1v1.5a1.5 1.5 0 0 1-3 0V18H8v1.5a1.5 1.5 0 0 1-3 0V18H4a1 1 0 0 1-1-1v-4a2 2 0 0 1 2-2Zm2.2 0h9.6l-1.2-3.4a.6.6 0 0 0-.6-.4H9a.6.6 0 0 0-.6.4L7.2 11ZM6.5 15.6a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6Zm11 0a1.3 1.3 0 1 0 0-2.6 1.3 1.3 0 0 0 0 2.6Z"/></symbol>
-    <symbol id="i-peak" viewBox="0 0 24 24"><path fill="currentColor" d="M2 20 9.5 6.5l3.4 5.6 2.1-3.1L22 20H2Zm7.5-9.6L7.6 14l1.9-1 1.6 1-1.6-3.6Z"/></symbol>
-    <symbol id="i-cam" viewBox="0 0 24 24"><path fill="currentColor" d="M4 6h10a2 2 0 0 1 2 2v1.6l4.2-2.4A.6.6 0 0 1 21 7.7v8.6a.6.6 0 0 1-.8.5L16 14.4V16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z"/></symbol>
-    <symbol id="i-target" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.2" fill="currentColor"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></g></symbol>
+    <symbol id="i-mark" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3 2 21h20L12 3Zm0 4.6 2.6 4.7-1.4-.8-1.2 1.3-1.2-1.3-1.4.8L12 7.6Z"/></symbol>
+    <symbol id="i-down" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 12 12"><path d="M2 10 10 2M4 2h6v6" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
+    <symbol id="i-target" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5"/><path d="M8 0v3M8 13v3M0 8h3M13 8h3"/></g><circle cx="8" cy="8" r="1.6" fill="currentColor"/></symbol>
   </defs>
 </svg>
 
-<header class="top">
-  <div class="wrap">
-    <p class="brand"><svg aria-hidden="true"><use href="#i-flake"/></svg>Où est la neige ?</p>
-    <button class="place" id="placeBtn" type="button" hidden>
-      <svg aria-hidden="true"><use href="#i-pin"/></svg><span class="pn" id="placeName">Ma position</span><span class="chg">Changer</span>
-    </button>
-  </div>
-  <svg class="ridges" viewBox="0 0 400 110" preserveAspectRatio="none" aria-hidden="true">
-    <path fill="var(--ridge1)" d="M0 70 L38 46 L66 58 L108 22 L146 50 L186 34 L226 58 L268 14 L306 46 L348 30 L400 54 V110 H0Z"/>
-    <path fill="var(--cap)" d="M98 31 L108 22 L119 32 L113 30 L108 34 L103 30Z M259 25 L268 14 L279 27 L273 25 L268 29 L264 26Z M340 36 L348 30 L357 37 L352 36 L348 39Z"/>
-    <path fill="var(--ridge2)" d="M0 84 L54 60 L94 74 L148 50 L198 76 L250 56 L300 78 L352 60 L400 72 V110 H0Z"/>
-    <path fill="var(--bg)" d="M0 110 V92 L80 84 L160 94 L240 86 L320 95 L400 88 V110Z"/>
-  </svg>
-</header>
+<div class="bar"><div class="wrap"><div class="bar-in">
+  <a class="logo" href="./" aria-label="Où est la neige, accueil"><svg aria-hidden="true"><use href="#i-mark"/></svg>Neige</a>
+  <button class="loc" id="placeBtn" type="button" hidden><span id="placeName">Ma position</span><svg aria-hidden="true"><use href="#i-down"/></svg></button>
+</div></div></div>
 
 <main class="wrap">
-  <div class="stack">
 
-    <section class="welcome" id="welcome" hidden>
-      <h1>La neige la plus proche de chez toi.</h1>
-      <p>On regarde toutes les montagnes autour de toi : où il y a de la neige maintenant, et où il va neiger ces 10 prochains jours.</p>
-      <button class="btn btn-main" id="locBtn" type="button"><svg aria-hidden="true"><use href="#i-target"/></svg>Me localiser</button>
-      <p class="msg" id="locMsg" hidden></p>
-      <div class="or">ou tape ta ville</div>
-      <form class="field" id="wForm" autocomplete="off">
-        <input id="wInput" type="search" placeholder="Toulouse, Lyon, Paris…" aria-label="Ta ville" enterkeyhint="search">
-        <button class="btn btn-soft" type="submit">Chercher</button>
-      </form>
-      <ul class="results" id="wResults"></ul>
+  <section class="screen intro" id="welcome" hidden>
+    <p class="kicker">Neige · prévisions 10 jours</p>
+    <h1 class="big"><span>Où est</span><span>la neige ?</span></h1>
+    <div class="art" id="welcomeArt"></div>
+    <p class="lede">La neige la plus proche de chez toi, et où il va neiger. Montagnes, cols, villages : partout.</p>
+    <div class="cta"><button class="b b-black" id="locBtn" type="button"><svg aria-hidden="true"><use href="#i-target"/></svg>Me localiser</button></div>
+    <p class="msg" id="locMsg" hidden></p>
+    <p class="or">ou tape ta ville</p>
+    <form class="field" id="wForm" autocomplete="off">
+      <input id="wInput" type="search" placeholder="Toulouse, Lyon, Grenoble…" aria-label="Ta ville" enterkeyhint="search">
+      <button type="submit">Chercher</button>
+    </form>
+    <ul class="results" id="wResults"></ul>
+  </section>
+
+  <section class="screen intro" id="loading" hidden>
+    <p class="kicker pulse">Recherche en cours</p>
+    <h1 class="big"><span>Je cherche</span><span>la neige…</span></h1>
+    <div class="art" id="loadingArt"></div>
+    <p class="lede">J'interroge la météo de centaines de points autour de toi.</p>
+  </section>
+
+  <section class="screen" id="error" hidden>
+    <p class="kicker">Oups</p>
+    <h1 class="big"><span>Pas de</span><span>réponse</span></h1>
+    <p class="lede" style="margin-top:20px">La météo ne répond pas. Vérifie ta connexion internet, puis réessaie.</p>
+    <div class="cta"><button class="b b-black" id="retryBtn" type="button">Réessayer</button></div>
+  </section>
+
+  <div id="results" hidden>
+    <section class="hero" id="hero" aria-live="polite"></section>
+
+    <section class="sec">
+      <div class="sec-h"><div><span class="idx">01</span><h2>Les 10<br>prochains jours</h2></div><p>Chaque jour, l'endroit le plus proche où il va tomber de la neige. En bas : l'altitude où il peut neiger près de chez toi.</p></div>
+      <div class="days" id="days"></div>
     </section>
 
-    <section class="loading" id="loading" hidden>
-      <svg aria-hidden="true"><use href="#i-flake"/></svg>
-      <strong>Je cherche la neige autour de toi…</strong>
-      <span class="msg">On interroge la météo de toutes les stations proches.</span>
-    </section>
-
-    <section class="welcome" id="error" hidden>
-      <h1>La météo ne répond pas.</h1>
-      <p id="errMsg">Vérifie ta connexion internet, puis réessaie.</p>
-      <button class="btn btn-main" id="retryBtn" type="button">Réessayer</button>
-    </section>
-
-    <div id="results" class="stack" style="margin-top:0" hidden>
-      <article class="hero" id="hero" aria-live="polite"></article>
-
-      <section class="block">
-        <h3>Où il va neiger</h3>
-        <p class="hint">Chaque jour, l'endroit le plus proche où il va tomber de la neige. En bas de chaque jour : l'altitude à partir de laquelle il peut neiger.</p>
-        <div class="days" id="days"></div>
-      </section>
-
-      <section class="block">
-        <h3>Autour de toi</h3>
-        <p class="hint">Tu es au centre. Touche un point pour voir le lieu.</p>
-        <div class="radar-card">
-          <svg id="radar" viewBox="0 0 340 340" role="img" aria-label="Radar de la neige autour de toi"></svg>
-          <p class="radar-cap" id="radarCap"><span>Touche un point</span></p>
+    <section class="sec">
+      <div class="sec-h"><div><span class="idx">02</span><h2>Autour<br>de toi</h2></div><p>Tu es au centre, le nord en haut. Touche un point.</p></div>
+      <div class="radar-box">
+        <svg id="radar" viewBox="0 0 340 340" role="img" aria-label="Radar de la neige autour de toi"></svg>
+        <div>
+          <div class="cap" id="radarCap"></div>
           <ul class="legend">
-            <li><i style="background:var(--dot-now);box-shadow:0 0 8px #fff"></i>Neige au sol</li>
-            <li><i style="background:var(--dot-soon)"></i>Neige prévue</li>
-            <li><i style="background:var(--dot-none)"></i>Pas de neige</li>
+            <li><i style="background:var(--ink)"></i>Neige au sol</li>
+            <li><i style="border:1.5px solid var(--ink)"></i>Neige prévue</li>
+            <li><i style="background:var(--ink);border-radius:0;transform:rotate(45deg);width:8px;height:8px"></i>Toi</li>
           </ul>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <section class="block">
-        <h3>Toutes les stations</h3>
-        <div class="chips" role="group" aria-label="Filtrer">
-          <button class="chip" type="button" data-f="snow" aria-pressed="true">Avec neige</button>
-          <button class="chip" type="button" data-f="now" aria-pressed="false">Neige au sol</button>
-          <button class="chip" type="button" data-f="all" aria-pressed="false">Tout</button>
-        </div>
-        <ol class="list" id="list"></ol>
-        <button class="btn btn-soft more" id="moreBtn" type="button" hidden>Voir plus</button>
-      </section>
+    <section class="sec">
+      <div class="sec-h"><div><span class="idx">03</span><h2>Partout où<br>il y a de la neige</h2></div><p>Du plus proche au plus loin.</p></div>
+      <ol class="list" id="list"></ol>
+      <button class="b b-line more" id="moreBtn" type="button" hidden>Voir plus</button>
+    </section>
 
-      <footer class="foot">
-        <p id="updated"></p>
-        <p>La neige vient des modèles météo (Météo-France, DWD…) via Open-Meteo, calculée à l'altitude indiquée pour chaque station. Les temps de route sont approximatifs. Avant de partir, vérifie le bulletin de la station.</p>
-        <p><button type="button" id="refreshBtn">Actualiser</button></p>
-      </footer>
-    </div>
-
+    <footer class="foot">
+      <p id="updated"></p>
+      <p>Neige calculée par les modèles météo (Météo-France, DWD…) via Open-Meteo, à l'altitude indiquée. Routes : OSRM. Lieux : OpenStreetMap. Avant de partir, vérifie la météo locale et l'état des routes.</p>
+      <p><button type="button" id="refreshBtn">Actualiser</button></p>
+    </footer>
   </div>
 </main>
 
 <dialog id="dlg">
-  <form method="dialog" id="dForm" autocomplete="off">
+  <form method="dialog" autocomplete="off">
     <button class="x" value="cancel" aria-label="Fermer">×</button>
-    <h3>Changer de lieu</h3>
-    <button class="btn btn-main" id="dLoc" type="button"><svg aria-hidden="true"><use href="#i-target"/></svg>Me localiser</button>
+    <h3>Changer<br>de lieu</h3>
+    <button class="b b-black" id="dLoc" type="button"><svg aria-hidden="true"><use href="#i-target"/></svg>Me localiser</button>
     <p class="msg" id="dMsg" hidden></p>
-    <div class="or">ou tape une ville</div>
-    <div class="field">
-      <input id="dInput" type="search" placeholder="Toulouse, Lyon, Paris…" aria-label="Ville" enterkeyhint="search">
-    </div>
+    <p class="or">ou tape une ville</p>
+    <div class="field"><input id="dInput" type="search" placeholder="Toulouse, Lyon, Grenoble…" aria-label="Ville" enterkeyhint="search"></div>
     <ul class="results" id="dResults"></ul>
   </form>
 </dialog>
 
 <script>
-/* ---------- Stations : nom, massif, lat, lon, altitude (m) où l'on regarde la neige ---------- */
-const SPOTS = [
+/* ---------- Lieux connus : nom, coin, lat, lon, altitude (m) ---------- */
+const PLACES = [
 ["Font-Romeu","Pyrénées",42.505,2.035,1800],["Les Angles","Pyrénées",42.565,2.070,1750],["Porté-Puymorens","Pyrénées",42.545,1.830,1650],
-["Ax 3 Domaines","Pyrénées",42.700,1.800,1500],["Guzet","Pyrénées",42.785,1.300,1450],["Le Mourtis","Pyrénées",42.935,0.800,1400],
-["Superbagnères","Pyrénées",42.760,0.580,1800],["Peyragudes","Pyrénées",42.795,0.455,1600],["Saint-Lary","Pyrénées",42.810,0.320,1700],
-["Piau-Engaly","Pyrénées",42.785,0.160,1850],["La Mongie (Tourmalet)","Pyrénées",42.910,0.180,1800],["Luz-Ardiden","Pyrénées",42.875,-0.065,1720],
-["Cauterets","Pyrénées",42.870,-0.140,1700],["Gavarnie","Pyrénées",42.750,-0.010,1850],["Hautacam","Pyrénées",43.000,-0.050,1500],
-["Gourette","Pyrénées",42.955,-0.330,1400],["Artouste","Pyrénées",42.880,-0.400,1400],["La Pierre Saint-Martin","Pyrénées",42.980,-0.750,1650],
-["Candanchú","Pyrénées espagnoles",42.785,-0.530,1550],["Formigal","Pyrénées espagnoles",42.775,-0.365,1550],["Baqueira-Beret","Pyrénées espagnoles",42.700,0.935,1500],
-["Boí Taüll","Pyrénées espagnoles",42.480,0.865,2020],["La Molina","Pyrénées espagnoles",42.340,1.940,1700],
-["Pas de la Casa","Andorre",42.540,1.735,2050],["Soldeu","Andorre",42.577,1.667,1800],["Arinsal","Andorre",42.572,1.484,1550],
-["Pic de Nore","Montagne Noire",43.425,2.465,1150],
-["Le Lioran","Cantal",45.085,2.750,1250],["Super-Besse","Massif central",45.510,2.855,1350],["Le Mont-Dore","Massif central",45.555,2.810,1350],
-["Prat-Peyrot (Aigoual)","Cévennes",44.120,3.580,1400],["Mont Lozère","Cévennes",44.435,3.735,1420],["Les Estables (Mézenc)","Haute-Loire",44.900,4.155,1350],
-["Chalmazel","Loire",45.685,3.840,1200],["Laguiole","Aubrac",44.680,2.890,1300],
-["Mont Serein (Ventoux)","Provence",44.185,5.255,1400],["Gréolières-les-Neiges","Alpes-Maritimes",43.815,6.940,1450],["Isola 2000","Alpes-Maritimes",44.188,7.157,2000],
+["Plateau de Beille","Ariège",42.725,1.700,1800],["Ax-les-Thermes, Bonascre","Ariège",42.700,1.800,1500],["Guzet","Ariège",42.785,1.300,1450],
+["Le Mourtis","Pyrénées",42.935,0.800,1400],["Superbagnères","Pyrénées",42.760,0.580,1800],["Peyragudes","Pyrénées",42.795,0.455,1600],
+["Saint-Lary","Pyrénées",42.810,0.320,1700],["Piau-Engaly","Pyrénées",42.785,0.160,1850],["Col du Tourmalet","Pyrénées",42.908,0.145,2115],
+["Pic du Midi","Pyrénées",42.936,0.142,2877],["Luz-Ardiden","Pyrénées",42.875,-0.065,1720],["Cauterets","Pyrénées",42.870,-0.140,1700],
+["Gavarnie","Pyrénées",42.750,-0.010,1850],["Hautacam","Pyrénées",43.000,-0.050,1500],["Col d'Aubisque","Pyrénées",42.976,-0.339,1709],
+["Artouste","Pyrénées",42.880,-0.400,1400],["La Pierre Saint-Martin","Pyrénées",42.980,-0.750,1650],["Col du Somport","Pyrénées",42.800,-0.530,1630],
+["Formigal","Pyrénées espagnoles",42.775,-0.365,1550],["Baqueira","Pyrénées espagnoles",42.700,0.935,1500],["Port d'Envalira","Andorre",42.540,1.720,2400],
+["Soldeu","Andorre",42.577,1.667,1800],["La Molina","Pyrénées espagnoles",42.340,1.940,1700],["Pic de Nore","Montagne Noire",43.425,2.465,1150],
+["Plomb du Cantal","Cantal",45.060,2.760,1850],["Le Lioran","Cantal",45.085,2.750,1250],["Puy de Sancy","Auvergne",45.528,2.814,1880],
+["Super-Besse","Auvergne",45.510,2.855,1350],["Mont Aigoual","Cévennes",44.121,3.582,1560],["Mont Lozère","Cévennes",44.435,3.735,1420],
+["Mont Mézenc","Haute-Loire",44.900,4.155,1350],["Aubrac","Aveyron",44.680,2.890,1300],["Pierre-sur-Haute","Forez",45.655,3.810,1600],
+["Mont Ventoux","Provence",44.174,5.279,1800],["Gréolières-les-Neiges","Alpes-Maritimes",43.815,6.940,1450],["Isola 2000","Alpes-Maritimes",44.188,7.157,2000],
 ["Auron","Alpes-Maritimes",44.228,6.930,1600],["Valberg","Alpes-Maritimes",44.095,6.930,1700],["La Foux d'Allos","Alpes du Sud",44.290,6.570,1800],
-["Pra-Loup","Alpes du Sud",44.370,6.605,1600],["Superdévoluy","Alpes du Sud",44.620,5.930,1500],["Orcières-Merlette","Alpes du Sud",44.690,6.325,1850],
-["Vars","Alpes du Sud",44.580,6.695,1850],["Risoul","Alpes du Sud",44.620,6.640,1850],["Puy-Saint-Vincent","Alpes du Sud",44.825,6.480,1600],
-["Serre Chevalier","Alpes du Sud",44.940,6.555,1400],["Montgenèvre","Alpes du Sud",44.932,6.725,1860],
+["Pra-Loup","Alpes du Sud",44.370,6.605,1600],["Superdévoluy","Alpes du Sud",44.620,5.930,1500],["Orcières","Alpes du Sud",44.690,6.325,1850],
+["Vars","Alpes du Sud",44.580,6.695,1850],["Col d'Izoard","Hautes-Alpes",44.820,6.735,2360],["Serre Chevalier","Hautes-Alpes",44.940,6.555,1400],
+["Montgenèvre","Hautes-Alpes",44.932,6.725,1860],["Col du Lautaret","Hautes-Alpes",45.035,6.405,2050],["La Grave","Hautes-Alpes",45.045,6.305,1450],
 ["Les 2 Alpes","Isère",45.010,6.125,1650],["Alpe d'Huez","Isère",45.090,6.070,1860],["Chamrousse","Isère",45.110,5.880,1650],
-["Villard-de-Lans","Vercors",45.060,5.555,1150],["Col de Porte","Chartreuse",45.290,5.770,1330],["Les 7 Laux","Isère",45.250,6.040,1350],
-["La Grave","Hautes-Alpes",45.045,6.305,1450],["Valloire","Savoie",45.165,6.430,1430],["Le Corbier","Savoie",45.240,6.270,1550],
-["Val Thorens","Savoie",45.298,6.580,2300],["Les Menuires","Savoie",45.323,6.538,1850],["Méribel","Savoie",45.395,6.565,1450],
-["Courchevel","Savoie",45.415,6.635,1850],["La Plagne","Savoie",45.505,6.680,1970],["Les Arcs","Savoie",45.570,6.800,1800],
-["Tignes","Savoie",45.468,6.907,2100],["Val d'Isère","Savoie",45.448,6.980,1850],["Bonneval-sur-Arc","Savoie",45.372,7.048,1800],
-["Val Cenis","Savoie",45.280,6.900,1400],["La Rosière","Savoie",45.627,6.850,1850],["Les Saisies","Savoie",45.760,6.535,1650],
-["Le Revard","Savoie",45.670,5.990,1550],["Le Semnoz","Haute-Savoie",45.800,6.100,1650],["La Clusaz","Haute-Savoie",45.905,6.425,1100],
-["Le Grand-Bornand","Haute-Savoie",45.965,6.465,1300],["Megève","Haute-Savoie",45.857,6.617,1100],["Chamonix","Haute-Savoie",45.923,6.870,1050],
-["Flaine","Haute-Savoie",46.005,6.690,1600],["Avoriaz","Haute-Savoie",46.190,6.775,1800],["Les Gets","Haute-Savoie",46.158,6.670,1170],
-["Monts Jura (Lélex)","Jura",46.300,5.935,1200],["Les Rousses","Jura",46.485,6.065,1120],["Métabief","Jura",46.770,6.350,1100],
-["Ballon d'Alsace","Vosges",47.822,6.840,1150],["Le Markstein","Vosges",47.925,7.030,1200],["La Bresse-Hohneck","Vosges",48.010,6.950,1100],
-["Gérardmer","Vosges",48.050,6.880,1000],["Le Lac Blanc","Vosges",48.130,7.090,1100],["Le Champ du Feu","Vosges",48.395,7.265,1050],
-["Vergio","Corse",42.290,8.880,1400],["Val d'Ese","Corse",41.980,9.130,1650],["Ghisoni","Corse",42.075,9.185,1550],
-["Sierra Nevada","Andalousie",37.095,-3.395,2100],["Navacerrada","Madrid",40.785,-4.010,1850],["Alto Campoo","Cantabrie",43.035,-4.380,1700],
-["Valdezcaray","La Rioja",42.255,-3.015,1550],["Serra da Estrela","Portugal",40.322,-7.612,1900],
-["Zermatt","Suisse",46.020,7.750,1620],["Saas-Fee","Suisse",46.108,7.928,1800],["Verbier","Suisse",46.098,7.228,1500],
-["Crans-Montana","Suisse",46.310,7.480,1500],["Villars","Suisse",46.300,7.055,1300],["Grindelwald","Suisse",46.625,8.040,1050],
-["Engelberg","Suisse",46.820,8.405,1050],["Andermatt","Suisse",46.635,8.595,1440],["Laax","Suisse",46.810,9.260,1100],
-["Davos","Suisse",46.800,9.835,1560],["Saint-Moritz","Suisse",46.497,9.838,1820],
-["Courmayeur","Italie",45.792,6.970,1220],["La Thuile","Italie",45.715,6.950,1440],["Cervinia","Italie",45.935,7.630,2050],
-["Sestrières","Italie",44.958,6.880,2035],["Bardonecchia","Italie",45.078,6.705,1310],["Limone Piemonte","Italie",44.200,7.575,1010],
-["Livigno","Italie",46.538,10.135,1820],["Bormio","Italie",46.467,10.370,1225],["Passo del Tonale","Italie",46.260,10.580,1880],
-["Madonna di Campiglio","Italie",46.230,10.827,1520],["Val Gardena","Italie",46.557,11.760,1560],["Cortina d'Ampezzo","Italie",46.540,12.137,1220],
-["Abetone","Italie",44.142,10.665,1390],["Campo Imperatore","Italie",42.442,13.558,2100],["Etna (Rifugio Sapienza)","Sicile",37.700,14.998,1900],
-["Lech","Autriche",47.210,10.142,1450],["Saint-Anton","Autriche",47.128,10.265,1300],["Ischgl","Autriche",47.012,10.292,1380],
-["Sölden","Autriche",46.968,11.007,1370],["Obergurgl","Autriche",46.870,11.027,1930],["Hintertux","Autriche",47.072,11.672,1500],
-["Kitzbühel","Autriche",47.447,12.392,800],["Saalbach","Autriche",47.390,12.637,1000],["Bad Gastein","Autriche",47.115,13.133,1000],
-["Obertauern","Autriche",47.250,13.560,1740],
-["Feldberg (Forêt-Noire)","Allemagne",47.865,8.005,1280],["Oberstdorf","Allemagne",47.410,10.280,850],["Garmisch-Partenkirchen","Allemagne",47.495,11.095,750],
-["Winterberg","Allemagne",51.193,8.533,750],["Braunlage (Harz)","Allemagne",51.725,10.610,700],["Oberwiesenthal","Allemagne",50.430,12.970,1000],
-["Signal de Botrange","Belgique",50.502,6.093,690],["Cairngorm","Écosse",57.133,-3.670,650],
-["Zakopane","Pologne",49.295,19.955,950],["Jasná","Slovaquie",48.965,19.585,1200],["Kranjska Gora","Slovénie",46.485,13.785,810],
-["Bansko","Bulgarie",41.838,23.488,1000],["Borovets","Bulgarie",42.267,23.605,1350],["Kopaonik","Serbie",43.285,20.810,1770],
-["Poiana Brașov","Roumanie",45.595,25.555,1030],["Parnasse","Grèce",38.535,22.585,1750],["Oukaïmeden","Maroc",31.205,-7.860,2600],
-["Hemsedal","Norvège",60.865,8.555,650],["Åre","Suède",63.400,13.075,400],["Levi","Finlande",67.800,24.810,200]
+["Vercors, Villard-de-Lans","Vercors",45.060,5.555,1150],["Col de Porte","Chartreuse",45.290,5.770,1330],["Les 7 Laux","Isère",45.250,6.040,1350],
+["Valloire","Savoie",45.165,6.430,1430],["Val Thorens","Savoie",45.298,6.580,2300],["Courchevel","Savoie",45.415,6.635,1850],
+["La Plagne","Savoie",45.505,6.680,1970],["Les Arcs","Savoie",45.570,6.800,1800],["Tignes","Savoie",45.468,6.907,2100],
+["Val d'Isère","Savoie",45.448,6.980,1850],["Bonneval-sur-Arc","Savoie",45.372,7.048,1800],["Col du Mont-Cenis","Savoie",45.250,6.900,2080],
+["Les Saisies","Savoie",45.760,6.535,1650],["Le Revard","Savoie",45.670,5.990,1550],["Le Semnoz","Haute-Savoie",45.800,6.100,1650],
+["Col des Aravis","Haute-Savoie",45.875,6.465,1490],["Chamonix","Haute-Savoie",45.923,6.870,1050],["Aiguille du Midi","Haute-Savoie",45.879,6.887,3770],
+["Flaine","Haute-Savoie",46.005,6.690,1600],["Avoriaz","Haute-Savoie",46.190,6.775,1800],["Crêt de la Neige","Jura",46.270,5.940,1700],
+["Les Rousses","Jura",46.485,6.065,1120],["Mont d'Or","Jura",46.735,6.355,1400],["Ballon d'Alsace","Vosges",47.822,6.840,1150],
+["Grand Ballon","Vosges",47.901,7.098,1400],["Hohneck","Vosges",48.040,7.010,1350],["Le Champ du Feu","Vosges",48.395,7.265,1050],
+["Col de Vergio","Corse",42.290,8.880,1460],["Val d'Ese","Corse",41.980,9.130,1650],["Monte d'Oro","Corse",42.120,9.120,1700],
+["Sierra Nevada","Andalousie",37.095,-3.395,2100],["Navacerrada","Madrid",40.785,-4.010,1850],["Picos de Europa","Cantabrie",43.150,-4.810,1800],
+["Serra da Estrela","Portugal",40.322,-7.612,1900],["Zermatt","Suisse",46.020,7.750,1620],["Saas-Fee","Suisse",46.108,7.928,1800],
+["Verbier","Suisse",46.098,7.228,1500],["Crans-Montana","Suisse",46.310,7.480,1500],["Grindelwald","Suisse",46.625,8.040,1050],
+["Andermatt","Suisse",46.635,8.595,1440],["Davos","Suisse",46.800,9.835,1560],["Saint-Moritz","Suisse",46.497,9.838,1820],
+["Courmayeur","Italie",45.792,6.970,1220],["Cervinia","Italie",45.935,7.630,2050],["Sestrières","Italie",44.958,6.880,2035],
+["Limone Piemonte","Italie",44.200,7.575,1010],["Livigno","Italie",46.538,10.135,1820],["Passo del Tonale","Italie",46.260,10.580,1880],
+["Val Gardena","Italie",46.557,11.760,1560],["Cortina d'Ampezzo","Italie",46.540,12.137,1220],["Abetone","Italie",44.142,10.665,1390],
+["Campo Imperatore","Italie",42.442,13.558,2100],["Etna","Sicile",37.700,14.998,1900],["Saint-Anton","Autriche",47.128,10.265,1300],
+["Sölden","Autriche",46.968,11.007,1370],["Hintertux","Autriche",47.072,11.672,1500],["Kitzbühel","Autriche",47.447,12.392,800],
+["Obertauern","Autriche",47.250,13.560,1740],["Feldberg","Forêt-Noire",47.865,8.005,1280],["Zugspitze","Allemagne",47.421,10.985,2600],
+["Winterberg","Allemagne",51.193,8.533,750],["Brocken","Harz",51.799,10.616,1100],["Signal de Botrange","Belgique",50.502,6.093,690],
+["Cairngorm","Écosse",57.133,-3.670,650],["Zakopane","Pologne",49.295,19.955,950],["Kranjska Gora","Slovénie",46.485,13.785,810],
+["Bansko","Bulgarie",41.838,23.488,1000],["Kopaonik","Serbie",43.285,20.810,1770],["Parnasse","Grèce",38.535,22.585,1750],
+["Oukaïmeden","Maroc",31.205,-7.860,2600]
 ];
 
 /* ---------- Outils ---------- */
 const OM = "https://api.open-meteo.com/v1/forecast";
 const SNOW_CODES = new Set([71,73,75,77,85,86]);
 const MONTHS = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
-const DAY_L = ["Dimanche","Lundi","Mardi","Mercredi","Jeudi","Vendredi","Samedi"];
-const DAY_S = ["Dim.","Lun.","Mar.","Mer.","Jeu.","Ven.","Sam."];
+const DAY_L = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
+const DAY_S = ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
 const DIRS = ["au nord","au nord-est","à l'est","au sud-est","au sud","au sud-ouest","à l'ouest","au nord-ouest"];
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const rad = d => d * Math.PI / 180;
 const nf = n => Math.round(n).toLocaleString("fr-FR");
-
-function dist(a, b, c, d) {
-  const h = Math.sin(rad(c - a) / 2) ** 2 + Math.cos(rad(a)) * Math.cos(rad(c)) * Math.sin(rad(d - b) / 2) ** 2;
-  return 12742 * Math.asin(Math.sqrt(h));
-}
-function bearing(a, b, c, d) {
-  const y = Math.sin(rad(d - b)) * Math.cos(rad(c));
-  const x = Math.cos(rad(a)) * Math.sin(rad(c)) - Math.sin(rad(a)) * Math.cos(rad(c)) * Math.cos(rad(d - b));
-  return Math.atan2(y, x);
-}
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function dist(a, b, c, d) { const h = Math.sin(rad(c - a) / 2) ** 2 + Math.cos(rad(a)) * Math.cos(rad(c)) * Math.sin(rad(d - b) / 2) ** 2; return 12742 * Math.asin(Math.sqrt(h)); }
+function bearing(a, b, c, d) { const y = Math.sin(rad(d - b)) * Math.cos(rad(c)); const x = Math.cos(rad(a)) * Math.sin(rad(c)) - Math.sin(rad(a)) * Math.cos(rad(c)) * Math.cos(rad(d - b)); return Math.atan2(y, x); }
 function destination(lat, lon, km, b) {
   const dr = km / 6371, la = rad(lat), lo = rad(lon);
   const la2 = Math.asin(Math.sin(la) * Math.cos(dr) + Math.cos(la) * Math.sin(dr) * Math.cos(b));
@@ -377,42 +316,65 @@ function destination(lat, lon, km, b) {
   return [la2 * 180 / Math.PI, ((lo2 * 180 / Math.PI + 540) % 360) - 180];
 }
 const dirName = b => DIRS[Math.round(((b * 180 / Math.PI + 360) % 360) / 45) % 8];
-function fmtDur(min) {
-  min = Math.max(1, Math.round(min));
-  if (min < 60) return min + " min";
-  const h = Math.floor(min / 60), m = min % 60;
-  return h + " h " + String(m).padStart(2, "0");
-}
-const fmtKm = km => km < 10 ? km.toFixed(1).replace(".", ",") + " km" : nf(km) + " km";
+function fmtDur(min) { min = Math.max(1, Math.round(min)); if (min < 60) return min + " min"; const h = Math.floor(min / 60), m = min % 60; return h + " h " + String(m).padStart(2, "0"); }
 const dateOf = iso => new Date(iso + "T12:00:00");
-function dayLong(i) { if (i === 0) return "Aujourd'hui"; if (i === 1) return "Demain"; return DAY_L[dateOf(S.dates[i]).getDay()]; }
-function dayShort(i) { if (i === 0) return "Auj."; if (i === 1) return "Demain"; return DAY_S[dateOf(S.dates[i]).getDay()]; }
-function dayIn(i) { if (i === 0) return "aujourd'hui"; if (i === 1) return "demain"; return DAY_L[dateOf(S.dates[i]).getDay()].toLowerCase(); }
+const dayWord = i => i === 0 ? "aujourd'hui" : i === 1 ? "demain" : DAY_L[dateOf(S.dates[i]).getDay()];
+const dayTag = i => i === 0 ? "Auj." : i === 1 ? "Demain" : DAY_S[dateOf(S.dates[i]).getDay()] + " " + dateOf(S.dates[i]).getDate();
 const dateShort = i => { const d = dateOf(S.dates[i]); return d.getDate() + " " + MONTHS[d.getMonth()]; };
-const mapsUrl = s => "https://www.google.com/maps/dir/?api=1&destination=" + s.lat.toFixed(4) + "," + s.lon.toFixed(4);
-const camUrl = s => "https://www.google.com/search?q=" + encodeURIComponent("webcam " + s.name + " " + s.region);
-const icon = (id, cls) => `<svg aria-hidden="true"${cls ? ` class="${cls}"` : ""}><use href="#${id}"/></svg>`;
+const mapsDir = s => "https://www.google.com/maps/dir/?api=1&destination=" + s.lat.toFixed(4) + "," + s.lon.toFixed(4);
+const mapsSee = s => "https://www.google.com/maps/search/?api=1&query=" + s.lat.toFixed(4) + "," + s.lon.toFixed(4);
+const label = s => s.name || ("À " + nf(s.dist) + " km " + dirName(s.brg));
+const driveTxt = s => (s.exact ? "" : "≈ ") + fmtDur(s.drive);
+const kmTxt = s => nf(s.exact ? s.roadKm : s.dist);
+const icon = id => `<svg aria-hidden="true"><use href="#${id}"/></svg>`;
 
 async function getJSON(url, ms = 20000) {
-  const ctl = new AbortController();
-  const t = setTimeout(() => ctl.abort(), ms);
-  try {
-    const r = await fetch(url, { signal: ctl.signal });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    return await r.json();
-  } finally { clearTimeout(t); }
+  const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms);
+  try { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error("HTTP " + r.status); return await r.json(); }
+  finally { clearTimeout(t); }
 }
 const store = {
   get() { try { return JSON.parse(localStorage.getItem("neige.place") || "null"); } catch { return null; } },
   set(p) { try { localStorage.setItem("neige.place", JSON.stringify(p)); } catch {} }
 };
 
-/* ---------- État ---------- */
-const S = { place: null, spots: [], dates: [], home: null, filter: "snow", shown: 20, sel: null };
-
-function show(id) {
-  for (const k of ["welcome", "loading", "error", "results"]) $("#" + k).hidden = k !== id;
+/* ---------- Illustration : sommet enneigé à facettes ---------- */
+let artN = 0;
+function peakArt(callout) {
+  const u = "p" + (++artN);
+  const call = callout ? `<g><circle cx="200" cy="40" r="4.5" fill="#0D0E11"/><path d="M200 40 L232 6 H372" fill="none" stroke="#0D0E11" stroke-width="1"/>
+    <text x="236" y="-2" font-family="Archivo,sans-serif" font-size="12.5" font-weight="800" letter-spacing="1.4" fill="#0D0E11">${esc(callout)}</text></g>` : "";
+  const flakes = [[48,40,2],[90,10,1.4],[130,64,1.8],[330,52,2.2],[370,120,1.5],[300,18,1.3],[60,120,1.6],[392,190,1.8],[24,210,1.3],[150,8,1.2],[262,92,1.4]]
+    .map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity=".9"/>`).join("");
+  return `<svg viewBox="0 -30 420 350" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs>
+    <radialGradient id="${u}-g-glow" cx="60%" cy="34%" r="58%"><stop offset="0" stop-color="#FFF5E3"/><stop offset=".5" stop-color="#FFE9C9" stop-opacity=".6"/><stop offset="1" stop-color="#FFE9C9" stop-opacity="0"/></radialGradient>
+    <linearGradient id="${u}-g-lit" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EDF0F5"/></linearGradient>
+    <linearGradient id="${u}-g-mid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F1F3F7"/><stop offset="1" stop-color="#D3DAE5"/></linearGradient>
+    <linearGradient id="${u}-g-sh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C7D0DF"/><stop offset="1" stop-color="#93A3BC"/></linearGradient>
+    <linearGradient id="${u}-g-sh2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B4C0D2"/><stop offset="1" stop-color="#8797B2"/></linearGradient>
+    <radialGradient id="${u}-g-ground" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#4E5D7A" stop-opacity=".32"/><stop offset="1" stop-color="#4E5D7A" stop-opacity="0"/></radialGradient>
+  </defs>
+  <circle cx="255" cy="110" r="190" fill="url(#${u}-g-glow)"/>
+  <g class="peak">
+    <ellipse cx="214" cy="292" rx="214" ry="20" fill="url(#${u}-g-ground)"/>
+    <polygon points="318,100 262,290 340,290" fill="#D9E0EA"/>
+    <polygon points="318,100 340,290 420,290" fill="url(#${u}-g-sh2)"/>
+    <polygon points="72,190 0,290 80,290" fill="#E6EAF1"/>
+    <polygon points="72,190 80,290 132,290" fill="#FAF9F6"/>
+    <polygon points="200,40 142,132 40,290 168,290 190,178" fill="url(#${u}-g-lit)"/>
+    <polygon points="200,40 190,178 168,290 256,290 236,160" fill="url(#${u}-g-mid)"/>
+    <polygon points="200,40 236,160 256,290 384,290 278,152" fill="url(#${u}-g-sh)"/>
+    <polyline points="40,290 142,132 200,40" fill="none" stroke="#FFE2B6" stroke-width="2" stroke-linejoin="round" opacity=".9"/>
+    <path d="M142 132 L166 150 L190 178 M236 160 L250 205 M278 152 L300 196" fill="none" stroke="#ffffff" stroke-width="1" opacity=".7"/>
+    ${flakes}
+  </g>
+  ${call}
+</svg>`;
 }
+
+/* ---------- État ---------- */
+const S = { place: null, pts: [], dates: [], home: null, sel: null, shown: 8, run: 0, updated: null };
+function show(id) { for (const k of ["welcome", "loading", "error", "results"]) $("#" + k).hidden = k !== id; window.scrollTo(0, 0); }
 
 /* ---------- Localisation ---------- */
 function locate(msgEl, btn) {
@@ -427,9 +389,8 @@ function locate(msgEl, btn) {
     msgEl.textContent = e.code === 1 ? "Position refusée. Autorise la localisation pour ce site, ou tape ta ville." : "Position introuvable pour l'instant. Tape ta ville.";
   }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
 }
-
-let searchT = 0;
 function bindSearch(input, list, onPick) {
+  let t = 0;
   const go = async () => {
     const q = input.value.trim();
     if (q.length < 2) { list.innerHTML = ""; return; }
@@ -440,130 +401,128 @@ function bindSearch(input, list, onPick) {
       list.querySelectorAll("button").forEach(b => b.onclick = () => { const c = res[+b.dataset.i]; onPick({ lat: c.latitude, lon: c.longitude, label: c.name, gps: false }); });
     } catch { list.innerHTML = `<li class="msg">Recherche impossible. Vérifie ta connexion.</li>`; }
   };
-  input.addEventListener("input", () => { clearTimeout(searchT); searchT = setTimeout(go, 300); });
+  input.addEventListener("input", () => { clearTimeout(t); t = setTimeout(go, 300); });
   return go;
 }
-
-async function placeName(p) {
+async function placeName(p, zoom) {
   try {
-    const r = await getJSON(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=fr&lat=${p.lat}&lon=${p.lon}`, 8000);
+    const r = await getJSON(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=${zoom}&accept-language=fr&lat=${p.lat.toFixed(4)}&lon=${p.lon.toFixed(4)}`, 8000);
     const a = r.address || {};
-    return a.city || a.town || a.village || a.municipality || a.county || a.state || "";
+    return a.village || a.town || a.city || a.hamlet || a.municipality || a.county || a.state || "";
   } catch { return ""; }
 }
 
 /* ---------- Données ---------- */
+function gridPoint(me, lat, lon) { return { name: "", region: "", lat, lon, alt: null, grid: true, dist: dist(me.lat, me.lon, lat, lon), brg: bearing(me.lat, me.lon, lat, lon) }; }
 function gridAround(me) {
   const out = [];
-  for (const [km, n] of [[60, 8], [120, 12], [200, 16], [300, 20], [420, 24], [560, 28]]) {
-    for (let i = 0; i < n; i++) {
-      const b = 2 * Math.PI * i / n;
-      const [lat, lon] = destination(me.lat, me.lon, km, b);
-      out.push({ name: "Zone " + dirName(b), region: "à environ " + km + " km", lat, lon, alt: null, grid: true, dist: km, brg: b });
-    }
-  }
+  for (const [km, n] of [[30, 6], [60, 8], [100, 12], [150, 16], [210, 20], [280, 24], [360, 28], [450, 32]])
+    for (let i = 0; i < n; i++) { const [la, lo] = destination(me.lat, me.lon, km, 2 * Math.PI * (i + (km / 30 % 2) * .5) / n); out.push(gridPoint(me, la, lo)); }
   return out;
 }
-
-async function fetchSpots(list) {
-  const groups = [list.filter(s => s.alt != null), list.filter(s => s.alt == null)];
+async function fetchWeather(list) {
   const chunks = [];
-  for (const g of groups) for (let i = 0; i < g.length; i += 50) chunks.push(g.slice(i, i + 50));
+  for (const g of [list.filter(s => s.alt != null), list.filter(s => s.alt == null)])
+    for (let i = 0; i < g.length; i += 50) chunks.push(g.slice(i, i + 50));
   const res = await Promise.allSettled(chunks.map(async ch => {
     let u = OM + "?latitude=" + ch.map(s => s.lat.toFixed(3)).join(",") + "&longitude=" + ch.map(s => s.lon.toFixed(3)).join(",");
     if (ch[0].alt != null) u += "&elevation=" + ch.map(s => s.alt).join(",");
     u += "&current=snow_depth,weather_code,temperature_2m&daily=snowfall_sum&forecast_days=10&timezone=auto";
-    let r = await getJSON(u);
-    if (!Array.isArray(r)) r = [r];
+    let r = await getJSON(u); if (!Array.isArray(r)) r = [r];
     r.forEach((d, i) => {
       const s = ch[i]; if (!s || !d || !d.daily) return;
       const c = d.current || {};
       s.depth = Math.round((c.snow_depth || 0) * 100);
-      s.code = c.weather_code;
-      s.temp = c.temperature_2m;
       s.snowing = SNOW_CODES.has(c.weather_code);
+      s.temp = c.temperature_2m;
       s.fall = (d.daily.snowfall_sum || []).map(v => v || 0);
       s.dates = d.daily.time;
       if (s.alt == null) s.alt = Math.round(d.elevation || 0);
       s.ok = true;
     });
   }));
-  if (res.every(r => r.status === "rejected")) throw res[0].reason;
+  if (chunks.length && res.every(r => r.status === "rejected")) throw res[0].reason;
   return list.filter(s => s.ok);
 }
-
 async function fetchHome(me) {
-  const u = `${OM}?latitude=${me.lat.toFixed(3)}&longitude=${me.lon.toFixed(3)}&current=snow_depth,weather_code,temperature_2m&daily=snowfall_sum&hourly=freezing_level_height&forecast_days=10&timezone=auto`;
-  const d = await getJSON(u);
+  const d = await getJSON(`${OM}?latitude=${me.lat.toFixed(3)}&longitude=${me.lon.toFixed(3)}&current=snow_depth,weather_code&daily=snowfall_sum&hourly=freezing_level_height&forecast_days=10&timezone=auto`);
   const fz = d.hourly?.freezing_level_height || [];
-  const line = d.daily.time.map((_, i) => {
-    const day = fz.slice(i * 24, i * 24 + 24).filter(v => v != null);
-    if (!day.length) return null;
-    return Math.max(0, Math.round((Math.min(...day) - 300) / 100) * 100);
-  });
-  return {
-    dates: d.daily.time, fall: (d.daily.snowfall_sum || []).map(v => v || 0), line,
-    depth: Math.round((d.current?.snow_depth || 0) * 100), snowing: SNOW_CODES.has(d.current?.weather_code)
-  };
+  const line = d.daily.time.map((_, i) => { const day = fz.slice(i * 24, i * 24 + 24).filter(v => v != null); return day.length ? Math.max(0, Math.round((Math.min(...day) - 300) / 100) * 100) : null; });
+  return { dates: d.daily.time, fall: (d.daily.snowfall_sum || []).map(v => v || 0), line, depth: Math.round((d.current?.snow_depth || 0) * 100), snowing: SNOW_CODES.has(d.current?.weather_code) };
 }
-
-async function fetchRoutes(me, spots) {
-  const snowy = spots.filter(s => s.kind !== "none");
-  const pick = [...new Set([...snowy.slice(0, 40), ...spots.slice(0, 50)])].slice(0, 90);
+async function fetchRoutes(me, pts, runId) {
+  const pick = pts.slice(0, 90);
   if (!pick.length) return;
   const u = "https://router.project-osrm.org/table/v1/driving/" + [me.lon.toFixed(5) + "," + me.lat.toFixed(5), ...pick.map(s => s.lon.toFixed(5) + "," + s.lat.toFixed(5))].join(";") + "?sources=0&annotations=duration,distance";
   try {
     const r = await getJSON(u, 12000);
+    if (runId !== S.run) return;
     const du = r.durations?.[0] || [], di = r.distances?.[0] || [];
-    pick.forEach((s, i) => {
-      const t = du[i + 1], k = di[i + 1];
-      if (t != null && t > 0 && k != null && k / 1000 < s.dist * 3 + 50) { s.drive = t / 60; s.roadKm = k / 1000; s.exact = true; }
-    });
+    pick.forEach((s, i) => { const t = du[i + 1], k = di[i + 1]; if (t > 0 && k > 0 && k / 1000 < s.dist * 3 + 50) { s.drive = t / 60; s.roadKm = k / 1000; s.exact = true; } });
     render();
-  } catch { /* on garde l'estimation */ }
+  } catch {}
 }
-
-const kind = s => (s.depth >= 2 || s.snowing) ? "now" : (s.firstDay >= 0 ? "soon" : "none");
+function cluster(list, km) { const out = []; for (const s of list) if (!out.some(o => dist(o.lat, o.lon, s.lat, s.lon) < km)) out.push(s); return out; }
 
 async function run(place) {
-  S.place = place; S.sel = null; S.shown = 20;
+  const runId = ++S.run;
+  S.place = place; S.sel = null; S.shown = 8;
   store.set(place);
   $("#placeBtn").hidden = false;
   $("#placeName").textContent = place.label || "Ma position";
   show("loading");
   const me = { lat: place.lat, lon: place.lon };
   try {
-    let cands = SPOTS.map(([name, region, lat, lon, alt]) => ({ name, region, lat, lon, alt, dist: dist(me.lat, me.lon, lat, lon), brg: bearing(me.lat, me.lon, lat, lon) }))
-      .sort((a, b) => a.dist - b.dist);
-    let pick = cands.filter(s => s.dist <= 900).slice(0, 70);
-    if (pick.length < 8) pick = pick.concat(gridAround(me));
-    const [home, spots] = await Promise.all([fetchHome(me).catch(() => null), fetchSpots(pick)]);
-    S.home = home;
-    S.dates = home?.dates || spots[0]?.dates || [];
-    for (const s of spots) {
+    const known = PLACES.map(([name, region, lat, lon, alt]) => ({ name, region, lat, lon, alt, dist: dist(me.lat, me.lon, lat, lon), brg: bearing(me.lat, me.lon, lat, lon) }))
+      .filter(s => s.dist <= 900).sort((a, b) => a.dist - b.dist).slice(0, 80);
+    const [home, first] = await Promise.all([fetchHome(me).catch(() => null), fetchWeather([...known, ...gridAround(me)])]);
+    if (runId !== S.run) return;
+    // 2e passe : on resserre la recherche sur les reliefs plus proches que la neige trouvée
+    const isNow = s => s.depth >= 2 || s.snowing;
+    const nearest = first.filter(isNow).sort((a, b) => a.dist - b.dist)[0];
+    const limit = nearest ? nearest.dist : 450;
+    const hills = first.filter(s => s.grid && s.alt >= 650 && s.dist < limit).sort((a, b) => a.dist - b.dist).slice(0, 12);
+    const extra = [];
+    for (const h of hills) for (let k = 0; k < 6; k++) { const [la, lo] = destination(h.lat, h.lon, 16, k * Math.PI / 3); extra.push(gridPoint(me, la, lo)); }
+    const second = extra.length ? await fetchWeather(extra).catch(() => []) : [];
+    if (runId !== S.run) return;
+    const all = first.concat(second);
+    for (const s of all) {
       s.firstDay = s.fall.findIndex(v => v >= 1);
-      s.kind = kind(s);
+      s.kind = isNow(s) ? "now" : s.firstDay >= 0 ? "soon" : "none";
       s.roadKm = s.dist * 1.3; s.drive = s.roadKm / (s.dist < 80 ? 55 : 82) * 60; s.exact = false;
     }
-    S.spots = spots.filter(s => !s.grid || s.kind !== "none").sort((a, b) => a.dist - b.dist);
+    const byDist = (a, b) => a.dist - b.dist;
+    const nows = cluster(all.filter(s => s.kind === "now").sort(byDist), 14);
+    const soons = cluster(all.filter(s => s.kind === "soon").sort(byDist), 14).filter(s => !nows.some(n => dist(n.lat, n.lon, s.lat, s.lon) < 14));
+    S.pts = nows.concat(soons).sort(byDist);
+    S.home = home;
+    S.dates = home?.dates || all[0]?.dates || [];
     S.updated = new Date();
     show("results");
     render();
-    fetchRoutes(me, S.spots);
-    if (!place.label) placeName(me).then(n => { if (n && S.place === place) { place.label = n; store.set(place); $("#placeName").textContent = n; } });
-    nameZones();
+    fetchRoutes(me, S.pts, runId);
+    if (!place.label) placeName(me, 10).then(n => { if (n && runId === S.run) { place.label = n; store.set(place); $("#placeName").textContent = n; } });
+    nameGrid(runId);
   } catch (e) {
-    $("#errMsg").textContent = "Vérifie ta connexion internet, puis réessaie.";
-    show("error");
+    if (runId === S.run) show("error");
   }
 }
 
-async function nameZones() {
-  const zones = S.spots.filter(s => s.grid && s.kind !== "none").slice(0, 4);
-  for (const z of zones) {
-    const n = await placeName(z);
-    if (n) { z.name = n; z.region = "à " + nf(z.dist) + " km " + dirName(z.brg); render(); }
-    await new Promise(r => setTimeout(r, 1100));
+/* Noms des points de la grille (1 par seconde, règle d'OpenStreetMap) */
+async function nameGrid(runId) {
+  const want = [];
+  const add = s => { if (s && s.grid && !s.name && !s.tried && !want.includes(s)) want.push(s); };
+  add(S.pts.find(s => s.kind === "now")); add(S.pts[0]);
+  for (let i = 0; i < Math.min(10, S.dates.length); i++) add(S.pts.find(s => s.fall[i] >= 1));
+  S.pts.slice(0, 10).forEach(add);
+  for (const s of want) {
+    if (runId !== S.run) return;
+    s.tried = true;
+    const n = await placeName(s, 12);
+    if (runId !== S.run) return;
+    if (n) { s.name = "Près de " + n; render(); }
+    await wait(1100);
   }
 }
 
@@ -573,183 +532,129 @@ function render() {
   const u = S.updated;
   $("#updated").textContent = u ? "Mis à jour à " + u.getHours() + " h " + String(u.getMinutes()).padStart(2, "0") + "." : "";
 }
-
-const driveTxt = s => (s.exact ? "" : "≈ ") + fmtDur(s.drive);
-
-function mountainArt(depth) {
-  const peakY = 10, baseY = 84;
-  let cap = "";
-  if (depth > 0) {
-    const Y = peakY + 12 + Math.min(depth, 150) / 150 * 34;
-    const w = (Y - peakY) / (baseY - peakY) * 52;
-    cap = `<path fill="var(--cap)" stroke="var(--ridge2)" stroke-width=".8" d="M52 ${peakY} L${52 - w} ${Y} L${52 - w * .55} ${Y - 5} L${52 - w * .15} ${Y + 1} L${52 + w * .3} ${Y - 6} L${52 + w * .7} ${Y - 1} L${52 + w} ${Y} Z"/>`;
-  }
-  return `<svg class="hero-art" viewBox="0 0 104 84" aria-hidden="true"><path fill="var(--ridge2)" d="M58 84 L84 40 L104 70 V84Z"/><path fill="var(--ridge3)" d="M0 84 L52 ${peakY} L104 84Z"/>${cap}</svg>`;
+function bigTitle(lines) {
+  const longest = Math.max(...lines.map(l => l.length));
+  const k = Math.min(1, 8.5 / longest);
+  return `<h1 class="big" style="font-size:min(${(13.5 * k).toFixed(2)}vw,${Math.round(118 * k)}px)">${lines.map(l => `<span>${esc(l)}</span>`).join("")}</h1>`;
 }
-
 function renderHero() {
-  const el = $("#hero");
-  const home = S.home;
-  let banner = "";
-  if (home) {
-    if (home.depth >= 1 || home.snowing) banner = `<div class="home-banner">${icon("i-flake")}${home.snowing ? "Il neige chez toi en ce moment !" : "Il y a de la neige chez toi !"}</div>`;
-    else {
-      const i = home.fall.findIndex(v => v >= 0.5);
-      if (i >= 0) banner = `<div class="home-banner">${icon("i-flake")}Il va neiger chez toi ${dayIn(i)} (${Math.max(1, Math.round(home.fall[i]))} cm prévus)</div>`;
-    }
-  }
-  const now = S.spots.find(s => s.kind === "now");
-  const soon = S.spots.find(s => s.firstDay >= 0);
-  if (now) {
-    const next = now.fall.findIndex((v, i) => i > 0 && v >= 1);
-    let note = now.snowing ? "Il neige là-bas en ce moment." : (next >= 0 ? `Encore ${Math.round(now.fall[next])} cm attendus ${dayIn(next)}.` : "");
-    if (soon && soon !== now && soon.dist < now.dist * 0.7) note += ` Plus près : il va neiger à ${soon.name} ${dayIn(soon.firstDay)} (${Math.round(soon.fall[soon.firstDay])} cm), à ${driveTxt(soon)} de route.`;
-    el.innerHTML = `${banner}
-      <div class="hero-top"><div class="hero-main"><p class="eyebrow">La neige la plus proche</p><h2>${esc(now.name)}</h2><p class="hero-sub">${esc(now.region)} · à ${nf(now.alt)} m d'altitude</p></div>${mountainArt(now.depth)}</div>
-      <div class="figs">
-        <div class="fig big"><b>${now.depth >= 1 ? now.depth : "<1"}<small>cm</small></b><span>de neige au sol</span></div>
-        <div class="fig"><b>${driveTxt(now)}</b><span>de route · ${fmtKm(now.roadKm)}</span></div>
-      </div>
-      <p class="hero-note">${esc(note)}</p>
-      <div class="actions"><a class="btn btn-main" href="${mapsUrl(now)}" target="_blank" rel="noopener">${icon("i-car")}Y aller</a><a class="btn btn-soft" href="${camUrl(now)}" target="_blank" rel="noopener">${icon("i-cam")}Voir les webcams</a></div>`;
+  const el = $("#hero"), home = S.home;
+  const now = S.pts.find(s => s.kind === "now");
+  const soon = S.pts.find(s => s.firstDay >= 0);
+  let html = "";
+  if (home && (home.snowing || home.depth >= 2)) {
+    html = `<p class="kicker">Regarde dehors</p>${bigTitle(home.snowing ? ["Il neige", "chez toi"] : ["La neige", "est chez", "toi"])}
+      <div class="art">${peakArt(home.depth >= 1 ? home.depth + " CM AU SOL" : "")}</div>
+      <p class="lede">${home.depth >= 1 ? `<b>${home.depth} cm</b> de neige au sol chez toi.` : "Il neige en ce moment là où tu es."}</p>`;
+  } else if (now) {
+    let lede = `<b>${esc(label(now))}</b>${now.region ? ", " + esc(now.region) : ""}, à ${nf(now.alt)} m d'altitude. ${now.depth >= 1 ? now.depth + " cm au sol" + (now.snowing ? ", et il neige en ce moment" : "") : "Il neige en ce moment"}.`;
+    if (soon && soon !== now && soon.dist < now.dist * .7) lede += ` Plus près, il va neiger ${dayWord(soon.firstDay)} : ${esc(label(soon))}, ${Math.round(soon.fall[soon.firstDay])} cm, à ${driveTxt(soon)}.`;
+    const homeFall = home ? home.fall.findIndex(v => v >= .5) : -1;
+    if (homeFall >= 0) lede += ` Et chez toi, il va neiger ${dayWord(homeFall)} !`;
+    html = `<p class="kicker">La neige la plus proche</p>${bigTitle(["La neige", "est à", kmTxt(now) + " km"])}
+      <div class="art">${peakArt(nf(now.alt) + " M · " + (now.depth >= 1 ? now.depth : "<1") + " CM")}</div>
+      <p class="lede">${lede}</p>
+      <div class="cta"><a class="b b-black" href="${mapsDir(now)}" target="_blank" rel="noopener">Y aller ${icon("i-arrow")}</a><a class="b b-line" href="${mapsSee(now)}" target="_blank" rel="noopener">Voir sur la carte</a></div>
+      <ul class="specs">
+        <li><b>${now.depth >= 1 ? now.depth : "<1"} cm</b><span>au sol</span></li>
+        <li><b>${nf(now.alt)} m</b><span>altitude</span></li>
+        <li><b>${driveTxt(now)}</b><span>de route</span></li>
+        <li><b>${now.temp != null ? Math.round(now.temp) + "°" : "—"}</b><span>là-bas</span></li>
+      </ul>`;
   } else if (soon) {
-    const i = soon.firstDay;
-    el.innerHTML = `${banner}
-      <div class="hero-top"><div class="hero-main"><p class="eyebrow">Pas encore de neige au sol près de toi</p><h2>${esc(soon.name)}</h2><p class="hero-sub">Premier endroit où il va neiger · ${esc(soon.region)} · ${nf(soon.alt)} m</p></div>${mountainArt(0)}</div>
-      <div class="figs">
-        <div class="fig big"><b>${Math.round(soon.fall[i])}<small>cm</small></b><span>attendus ${dayIn(i)}</span></div>
-        <div class="fig"><b>${driveTxt(soon)}</b><span>de route · ${fmtKm(soon.roadKm)}</span></div>
-      </div>
-      <div class="actions"><a class="btn btn-main" href="${mapsUrl(soon)}" target="_blank" rel="noopener">${icon("i-car")}Itinéraire</a></div>`;
+    const i = soon.firstDay, w = dayWord(i);
+    html = `<p class="kicker">Pas encore de neige au sol autour de toi</p>${bigTitle(["La neige", "arrive", w])}
+      <div class="art">${peakArt("+" + Math.round(soon.fall[i]) + " CM " + w.toUpperCase())}</div>
+      <p class="lede"><b>${esc(label(soon))}</b>${soon.region ? ", " + esc(soon.region) : ""}, à ${nf(soon.alt)} m : ${Math.round(soon.fall[i])} cm attendus ${w}.</p>
+      <div class="cta"><a class="b b-black" href="${mapsDir(soon)}" target="_blank" rel="noopener">Itinéraire ${icon("i-arrow")}</a><a class="b b-line" href="${mapsSee(soon)}" target="_blank" rel="noopener">Voir sur la carte</a></div>
+      <ul class="specs">
+        <li><b>${Math.round(soon.fall[i])} cm</b><span>prévus</span></li>
+        <li><b>${nf(soon.alt)} m</b><span>altitude</span></li>
+        <li><b>${driveTxt(soon)}</b><span>de route</span></li>
+        <li><b>${kmTxt(soon)} km</b><span>distance</span></li>
+      </ul>`;
   } else {
-    el.innerHTML = `${banner}<div class="hero-top"><div class="hero-main"><p class="eyebrow">Rien pour l'instant</p><h2>Pas de neige autour de toi</h2><p class="hero-sub">Ni au sol, ni prévue dans les 10 prochains jours, à moins de 900 km.</p></div>${mountainArt(0)}</div>`;
+    html = `<p class="kicker">Rien pour l'instant</p>${bigTitle(["Pas de", "neige", "en vue"])}
+      <div class="art">${peakArt("")}</div>
+      <p class="lede">Ni au sol, ni prévue dans les 10 prochains jours, à moins de 450 km de toi.</p>`;
   }
+  el.innerHTML = html;
+  el.classList.toggle("intro", S.introRun !== S.run);
+  S.introRun = S.run;
 }
-
-function flakes(n) { return Array.from({ length: n }, () => icon("i-flake")).join(""); }
-
 function renderDays() {
-  const out = [];
-  const n = Math.min(10, S.dates.length);
+  const out = [], n = Math.min(10, S.dates.length);
   for (let i = 0; i < n; i++) {
-    const c = S.spots.filter(s => s.fall[i] >= 1);
-    const best = c[0];
+    const c = S.pts.filter(s => s.fall[i] >= 1), best = c[0];
     const line = S.home?.line?.[i];
-    const lineTxt = line == null ? "" : `<span class="ln" title="Altitude à partir de laquelle il peut neiger près de chez toi">${icon("i-peak")}dès ${nf(line)} m</span>`;
-    if (best) {
-      const amt = best.fall[i];
-      const more = c.length > 1 ? ` · +${c.length - 1} autre${c.length > 2 ? "s" : ""}` : "";
-      out.push(`<div class="day has"><span class="dn">${dayLong(i)}</span><span class="dd">${dateShort(i)}</span>
-        <div class="fl">${flakes(amt < 5 ? 1 : amt < 15 ? 2 : 3)}</div>
-        <b class="amt">${Math.round(amt)} cm</b><span class="wh">${esc(best.name)}</span><span class="ds">${fmtKm(best.dist)}${more}</span>${lineTxt}</div>`);
-    } else {
-      out.push(`<div class="day none"><span class="dn">${dayLong(i)}</span><span class="dd">${dateShort(i)}</span>
-        <div class="fl">${flakes(1)}</div><span class="nothing">Pas de neige prévue autour</span>${lineTxt}</div>`);
-    }
+    const ln = line == null ? "" : `<span class="ln">Neige dès<b>${nf(line)} m</b></span>`;
+    const head = `<span class="dl">${i === 0 ? "Aujourd'hui" : i === 1 ? "Demain" : DAY_L[dateOf(S.dates[i]).getDay()]}</span><span class="dd">${dateShort(i)}</span>`;
+    if (best) out.push(`<div class="day">${head}<span class="num">${Math.round(best.fall[i])}<small>cm</small></span><span class="wh">${esc(label(best))}</span><span class="ds">${kmTxt(best)} km${c.length > 1 ? " · +" + (c.length - 1) : ""}</span>${ln}</div>`);
+    else out.push(`<div class="day no">${head}<span class="num">—</span><span class="wh">Rien de prévu autour</span>${ln}</div>`);
   }
   $("#days").innerHTML = out.join("");
 }
-
 function renderRadar() {
-  const svg = $("#radar");
-  const C = 170, R = 148;
-  const near = S.spots.slice(0, 40);
-  let far = near.length ? near[near.length - 1].dist : 100;
-  const snowy = S.spots.filter(s => s.kind !== "none");
-  if (snowy.length) far = Math.max(far, Math.min(snowy[0].dist * 1.1, 900));
-  const firstNow = S.spots.find(s => s.kind === "now");
-  if (firstNow) far = Math.max(far, Math.min(firstNow.dist * 1.08, 900));
-  const step = far <= 200 ? 50 : far <= 400 ? 100 : 200;
-  const max = Math.max(step * 2, Math.ceil(far / step) * step);
-  const pts = S.spots.filter(s => s.dist <= max);
-  let g = `<circle cx="${C}" cy="${C}" r="${R}" fill="rgba(120,160,220,.06)" stroke="var(--radar-line)"/>`;
+  const svg = $("#radar"), C = 170, R = 148;
+  const pts = S.pts;
+  const now = pts.find(s => s.kind === "now");
+  let far = Math.max(60, pts.length ? pts[Math.min(3, pts.length - 1)].dist * 1.05 : 60);
+  if (now) far = Math.max(far, now.dist * 1.15);
+  far = Math.min(far, 900);
+  const step = far <= 120 ? 30 : far <= 240 ? 60 : far <= 480 ? 120 : 200;
+  const max = Math.ceil(far / step) * step;
+  let g = "";
   for (let k = 1; k <= max / step; k++) {
     const r = R * k * step / max;
-    g += `<circle cx="${C}" cy="${C}" r="${r.toFixed(1)}" fill="none" stroke="var(--radar-line)" ${k < max / step ? 'stroke-dasharray="2 4"' : ""}/>`;
-    g += `<text x="${C + 4}" y="${(C - r + 12).toFixed(1)}" fill="var(--radar-text)" font-size="10" font-family="Archivo,sans-serif">${k * step} km</text>`;
+    g += `<circle cx="${C}" cy="${C}" r="${r.toFixed(1)}" fill="none" stroke="var(--line-2)" stroke-width="${k === max / step ? 1 : .6}" ${k < max / step ? 'stroke-dasharray="1.5 4"' : ""}/>`;
+    g += `<text x="${C + 5}" y="${(C - r + 13).toFixed(1)}" fill="var(--ink-2)" font-size="9" font-weight="700" letter-spacing="1" font-family="Archivo,sans-serif">${k * step} KM</text>`;
   }
-  g += `<path d="M${C} ${C - R} V${C + R} M${C - R} ${C} H${C + R}" stroke="var(--radar-line)"/>`;
-  g += `<text x="${C}" y="${C - R - 4}" text-anchor="middle" fill="var(--radar-text)" font-size="11" font-weight="700" font-family="Archivo,sans-serif">N</text>`;
-  const order = { none: 0, soon: 1, now: 2 };
-  const dots = pts.slice().sort((a, b) => order[a.kind] - order[b.kind]);
-  const labels = [];
-  for (const s of dots) {
-    const r = R * s.dist / max;
-    const x = C + r * Math.sin(s.brg), y = C - r * Math.cos(s.brg);
+  g += `<path d="M${C} ${C - R - 6} V${C + R + 6} M${C - R - 6} ${C} H${C + R + 6}" stroke="var(--line-2)" stroke-width=".6"/>`;
+  g += `<text x="${C}" y="${C - R - 10}" text-anchor="middle" fill="var(--ink)" font-size="10" font-weight="800" letter-spacing="1.5" font-family="Archivo,sans-serif">N</text>`;
+  const shown = pts.filter(s => s.dist <= max);
+  for (const s of shown.slice().sort((a, b) => (a.kind === "now") - (b.kind === "now"))) {
+    const r = R * s.dist / max, x = C + r * Math.sin(s.brg), y = C - r * Math.cos(s.brg);
     s._x = x; s._y = y;
-    const i = S.spots.indexOf(s);
-    const sel = S.sel === s;
-    if (s.kind === "now") {
-      const rr = 4.5 + Math.min(s.depth, 120) / 120 * 5;
-      g += `<circle class="dot" data-i="${i}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(rr + 6).toFixed(1)}" fill="#fff" opacity=".14"/>`;
-      g += `<circle class="dot" data-i="${i}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${rr.toFixed(1)}" fill="var(--dot-now)" ${sel ? 'stroke="var(--accent)" stroke-width="3"' : ""}/>`;
-    } else if (s.kind === "soon") {
-      g += `<circle class="dot" data-i="${i}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="var(--dot-soon)" ${sel ? 'stroke="var(--accent)" stroke-width="3"' : ""}/>`;
-    } else {
-      g += `<circle class="dot" data-i="${i}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" fill="var(--dot-none)" ${sel ? 'stroke="var(--accent)" stroke-width="2.5"' : ""}/>`;
-    }
+    const i = S.pts.indexOf(s), sel = S.sel === s;
+    if (sel) g += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="13" fill="none" stroke="var(--ink)" stroke-width="1"/>`;
+    g += s.kind === "now"
+      ? `<circle class="dot" data-i="${i}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(3.5 + Math.min(s.depth, 100) / 100 * 4.5).toFixed(1)}" fill="var(--ink)"/>`
+      : `<circle class="dot" data-i="${i}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="rgba(255,255,255,.6)" stroke="var(--ink)" stroke-width="1.3"/>`;
+    g += `<circle class="dot" data-i="${i}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="14" fill="transparent"/>`;
   }
-  // étiquettes : les 3 lieux enneigés les plus proches
-  const lab = S.spots.filter(s => s.kind === "now" && s.dist <= max).slice(0, 3);
-  const lab2 = lab.length ? lab : S.spots.filter(s => s.kind === "soon" && s.dist <= max).slice(0, 2);
-  const placed = [];
-  for (const s of lab2) {
-    const left = s._x > C;
-    let ty = s._y + 4;
-    while (placed.some(p => Math.abs(p - ty) < 13)) ty += 13;
-    placed.push(ty);
-    const tx = left ? s._x - 11 : s._x + 11;
-    g += `<text x="${tx.toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="${left ? "end" : "start"}" fill="#fff" font-size="11.5" font-weight="700" font-family="Archivo,sans-serif" paint-order="stroke" stroke="var(--radar)" stroke-width="3">${esc(s.name)}</text>`;
+  const lab = shown.filter(s => s.kind === "now").slice(0, 2).concat(shown.filter(s => s.kind === "soon").slice(0, 1));
+  const used = [];
+  for (const s of lab) {
+    const left = s._x > C; let ty = s._y + 3.5;
+    if (used.some(p => Math.abs(p - ty) < 12)) continue;
+    used.push(ty);
+    g += `<text x="${(left ? s._x - 10 : s._x + 10).toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="${left ? "end" : "start"}" fill="var(--ink)" font-size="10.5" font-weight="700" font-family="Archivo,sans-serif" paint-order="stroke" stroke="#EEF0F4" stroke-width="3">${esc(label(s).replace(/^Près de /, ""))}</text>`;
   }
-  // toi
-  g += `<circle cx="${C}" cy="${C}" r="11" fill="var(--accent)" opacity=".25"/><circle cx="${C}" cy="${C}" r="5.5" fill="var(--accent)" stroke="#fff" stroke-width="2"/>`;
+  g += `<rect x="${C - 5}" y="${C - 5}" width="10" height="10" fill="var(--ink)" transform="rotate(45 ${C} ${C})"/>`;
   svg.innerHTML = g;
-  svg.setAttribute("aria-label", `Radar : ${S.spots.filter(s => s.kind === "now").length} lieux avec de la neige au sol, ${S.spots.filter(s => s.kind === "soon").length} avec de la neige prévue, dans un rayon de ${max} km.`);
-  svg.querySelectorAll(".dot").forEach(d => d.addEventListener("click", () => { S.sel = S.spots[+d.dataset.i]; renderRadar(); }));
-  const cap = $("#radarCap");
-  if (S.sel) {
-    const s = S.sel;
-    const st = s.kind === "now" ? `${s.depth >= 1 ? s.depth + " cm au sol" : "il neige"}` : s.kind === "soon" ? `${Math.round(s.fall[s.firstDay])} cm ${dayIn(s.firstDay)}` : "pas de neige";
-    cap.innerHTML = `<strong>${esc(s.name)}</strong><span>· ${st} · ${driveTxt(s)} de route</span>`;
-  } else cap.innerHTML = `<span>Touche un point pour voir le lieu</span>`;
+  svg.setAttribute("aria-label", `Radar : ${shown.filter(s => s.kind === "now").length} endroits avec de la neige au sol et ${shown.filter(s => s.kind === "soon").length} avec de la neige prévue, dans un rayon de ${max} km.`);
+  svg.querySelectorAll(".dot").forEach(d => d.addEventListener("click", () => { S.sel = S.pts[+d.dataset.i]; renderRadar(); }));
+  const s = S.sel || now || pts[0];
+  $("#radarCap").innerHTML = s ? `<b>${esc(label(s))}</b><span>${s.kind === "now" ? (s.depth >= 1 ? s.depth + " cm au sol" : "il neige") : Math.round(s.fall[s.firstDay]) + " cm " + dayWord(s.firstDay)} · ${nf(s.alt)} m · ${driveTxt(s)}</span>` : `<span>Aucune neige dans le rayon.</span>`;
 }
-
 function renderList() {
-  const f = S.filter;
-  const all = S.spots.filter(s => f === "all" || (f === "snow" ? s.kind !== "none" : s.kind === f));
-  const items = all.slice(0, S.shown);
-  const counts = { now: S.spots.filter(s => s.kind === "now").length, snow: S.spots.filter(s => s.kind !== "none").length, all: S.spots.length };
-  document.querySelectorAll(".chip").forEach(c => {
-    const k = c.dataset.f;
-    c.textContent = (k === "now" ? "Neige au sol" : k === "snow" ? "Avec neige" : "Tout") + " · " + counts[k];
-    c.setAttribute("aria-pressed", String(k === f));
-  });
-  if (!items.length) {
-    $("#list").innerHTML = `<li class="empty">${f === "now" ? "Aucune station avec de la neige au sol pour l'instant." : "Aucune neige prévue dans les 10 jours."}</li>`;
-    $("#moreBtn").hidden = true; return;
-  }
-  const maxFall = 25;
-  $("#list").innerHTML = items.map(s => {
-    let pill;
-    if (s.kind === "now") pill = `<span class="pill now">${s.snowing ? "Il neige" + (s.depth >= 2 ? " · " + s.depth + " cm" : "") : s.depth + " cm au sol"}</span>`;
-    else if (s.kind === "soon") pill = `<span class="pill soon">${dayShort(s.firstDay)} · ${Math.round(s.fall[s.firstDay])} cm</span>`;
-    else pill = `<span class="pill none">Pas de neige</span>`;
-    const bars = s.fall.slice(0, 10).map((v, i) => {
-      const h = v < 0.5 ? 3 : Math.max(6, Math.min(v, maxFall) / maxFall * 34);
-      return `<div class="bar" title="${dayLong(i)} : ${v < 0.5 ? "pas de neige" : Math.round(v) + " cm"}"><i class="${v >= 1 ? "on" : ""}" style="height:${h.toFixed(0)}px"></i><em>${S.dates[i] ? DAY_S[dateOf(S.dates[i]).getDay()][0] : ""}</em></div>`;
-    }).join("");
-    return `<li class="row">
-      <div class="r-head"><div class="r-name"><b>${esc(s.name)}</b><span>${esc(s.region)} · ${nf(s.alt)} m</span></div>${pill}</div>
-      <div class="bars-wrap" aria-label="Neige qui va tomber sur 10 jours"><div class="bars">${bars}</div></div>
-      <div class="r-foot"><span>${icon("i-car")}${driveTxt(s)} · ${fmtKm(s.roadKm)}</span><a href="${mapsUrl(s)}" target="_blank" rel="noopener">Itinéraire</a></div>
-    </li>`;
+  const items = S.pts.slice(0, S.shown);
+  if (!items.length) { $("#list").innerHTML = `<li class="empty">Aucune neige au sol ni prévue autour de toi pour l'instant.</li>`; $("#moreBtn").hidden = true; return; }
+  $("#list").innerHTML = items.map((s, k) => {
+    const v = s.kind === "now"
+      ? `<b>${s.depth >= 1 ? s.depth : "<1"}<small>cm</small></b><span>${s.snowing ? "il neige" : "au sol"}</span>`
+      : `<b>+${Math.round(s.fall[s.firstDay])}<small>cm</small></b><span>${dayTag(s.firstDay)}</span>`;
+    return `<li class="it ${s.kind}"><span class="n">${String(k + 1).padStart(2, "0")}</span>
+      <div class="t"><b>${esc(label(s))}</b><span>${nf(s.alt)} m · ${kmTxt(s)} km · ${driveTxt(s)}</span></div>
+      <div class="v">${v}</div><a class="go" href="${mapsDir(s)}" target="_blank" rel="noopener" aria-label="Itinéraire vers ${esc(label(s))}">${icon("i-arrow")}</a></li>`;
   }).join("");
-  $("#moreBtn").hidden = all.length <= S.shown;
+  $("#moreBtn").hidden = S.pts.length <= S.shown;
 }
 
 /* ---------- Démarrage ---------- */
-document.querySelectorAll(".chip").forEach(c => c.addEventListener("click", () => { S.filter = c.dataset.f; S.shown = 20; renderList(); }));
-$("#moreBtn").addEventListener("click", () => { S.shown += 20; renderList(); });
+$("#welcomeArt").innerHTML = peakArt("");
+$("#loadingArt").innerHTML = peakArt("");
+$("#moreBtn").addEventListener("click", () => { S.shown += 10; renderList(); });
 $("#refreshBtn").addEventListener("click", () => S.place && run(S.place));
 $("#retryBtn").addEventListener("click", () => S.place ? run(S.place) : show("welcome"));
 $("#locBtn").addEventListener("click", () => locate($("#locMsg"), $("#locBtn")));
