@@ -5,249 +5,281 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Où est la neige ?</title>
 <meta name="description" content="La neige la plus proche de chez toi, et où il va neiger ces 10 prochains jours.">
-<meta name="theme-color" content="#CBD3E0">
+<meta name="theme-color" content="#EEF2F8">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100,400..900&display=swap">
+<link rel="preconnect" href="https://tiles.openfreemap.org">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.6.0/maplibre-gl.css" crossorigin="">
 <style>
-/* Mise en page : brume froide + lueur de soleil en fond fixe ; une barre de verre ; une énorme phrase-verdict ;
-   puis des sections à filets fins (jours, radar, liste). Une seule couleur d'encre, aucun arrondi. */
+/* Mise en page : fond « aurore » fixe (bleu pâle, lavande, pêche), barre flottante en verre, une colonne de cartes
+   en verre dépoli (verdict, carte géographique, 10 jours, liste). Une seule couleur : le bleu système. */
 :root{
-  --ink:#0D0E11; --ink-2:#4B5263; --fade:#A2AAB8; --line:rgba(13,14,17,.11); --line-2:rgba(13,14,17,.24);
-  --paper:#E8EBF1; --glass:rgba(255,255,255,.52); --white:#FFFFFF;
-  --cold:#A3B0C7; --warm:#FFE6C2;
-  --font:"Archivo",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --ink:#1D1D1F; --ink-2:#6E6E73; --ink-3:#AEAEB2; --hair:rgba(60,60,67,.12);
+  --bg:#EEF2F8; --blue:#0A7AFF; --blue-ink:#FFFFFF;
+  --glass:rgba(255,255,255,.58); --glass-2:rgba(255,255,255,.78); --glass-edge:rgba(255,255,255,.85);
+  --shadow:0 24px 60px -24px rgba(30,45,80,.22),0 2px 6px rgba(30,45,80,.05);
+  --r:28px; --r-s:18px;
+  --font:"Inter",-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
   color-scheme:light;
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);font-size:15px;line-height:1.5;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.45;font-optical-sizing:auto;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
-  radial-gradient(48% 36% at 80% 20%,rgba(255,236,207,.95) 0%,rgba(255,236,207,0) 72%),
-  radial-gradient(60% 45% at 0% 0%,rgba(140,157,188,.85) 0%,rgba(140,157,188,0) 75%),
-  radial-gradient(70% 40% at 100% 100%,rgba(176,190,214,.6) 0%,rgba(176,190,214,0) 70%),
-  linear-gradient(180deg,#C8D1DF 0%,#E4E8EF 38%,#F2F0EC 66%,#E3E8F0 100%)}
+  radial-gradient(42% 34% at 12% 8%,#CFE3FF 0%,rgba(207,227,255,0) 70%),
+  radial-gradient(38% 30% at 90% 14%,#E9E2FF 0%,rgba(233,226,255,0) 70%),
+  radial-gradient(44% 34% at 14% 92%,#FFE9D9 0%,rgba(255,233,217,0) 70%),
+  radial-gradient(40% 32% at 92% 86%,#D6F0F5 0%,rgba(214,240,245,0) 70%),
+  linear-gradient(180deg,#F3F6FB,#EEF2F8)}
 button,input{font:inherit;color:inherit}
 a{color:inherit}
-:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+:focus-visible{outline:3px solid rgba(10,122,255,.45);outline-offset:2px;border-radius:12px}
 [hidden]{display:none!important}
-.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:620px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 
-/* Barre */
-.bar{position:sticky;top:0;z-index:20;padding-top:calc(env(safe-area-inset-top,0px) + 10px)}
-.bar-in{display:flex;align-items:center;justify-content:space-between;gap:12px;height:46px;padding:0 14px;background:var(--glass);backdrop-filter:blur(18px) saturate(1.2);-webkit-backdrop-filter:blur(18px) saturate(1.2);border:1px solid rgba(255,255,255,.6)}
-.logo{display:flex;align-items:center;gap:8px;font-weight:900;font-size:13px;letter-spacing:.32em;text-decoration:none;text-transform:uppercase}
-.logo svg{width:18px;height:18px}
-.loc{display:flex;align-items:center;gap:7px;border:0;background:none;padding:6px 0;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;min-width:0}
-.loc span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:42vw}
-.loc svg{width:10px;height:10px;flex:none}
+/* Verre */
+.glass{background:var(--glass);-webkit-backdrop-filter:blur(26px) saturate(1.5);backdrop-filter:blur(26px) saturate(1.5);border:1px solid var(--glass-edge);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.95);border-radius:var(--r)}
+@media (prefers-reduced-transparency:reduce){.glass,.bar-in{background:#fff;-webkit-backdrop-filter:none;backdrop-filter:none}}
+
+/* Barre flottante */
+.bar{position:sticky;top:0;z-index:30;padding-top:calc(env(safe-area-inset-top,0px) + 10px);pointer-events:none}
+.bar-in{pointer-events:auto;display:flex;align-items:center;justify-content:space-between;gap:10px;height:50px;padding:0 8px 0 16px;border-radius:999px;background:rgba(255,255,255,.62);-webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6);border:1px solid var(--glass-edge);box-shadow:0 10px 30px -12px rgba(30,45,80,.25),inset 0 1px 0 rgba(255,255,255,.95)}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px;letter-spacing:-.01em;text-decoration:none}
+.logo svg{width:20px;height:20px;color:var(--blue)}
+.loc{display:flex;align-items:center;gap:6px;border:0;background:rgba(10,122,255,.1);color:var(--blue);border-radius:999px;padding:0 12px 0 10px;height:34px;cursor:pointer;font-size:13px;font-weight:600;min-width:0;transition:transform .1s ease-out}
+.loc:active{transform:scale(.96)}
+.loc span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40vw}
+.loc svg{width:14px;height:14px;flex:none}
+
+main{padding-top:16px;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))}
+.stack{display:flex;flex-direction:column;gap:14px}
+.card{padding:22px 22px 20px}
+.eyebrow{margin:0;font-size:13px;font-weight:600;letter-spacing:.01em;color:var(--ink-2)}
+.enter{animation:enter .55s cubic-bezier(.2,.8,.2,1) both}
+.enter:nth-child(2){animation-delay:.06s}.enter:nth-child(3){animation-delay:.12s}.enter:nth-child(4){animation-delay:.18s}
+@keyframes enter{from{opacity:0;transform:translateY(10px) scale(.985)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.enter{animation:enter .25s ease both}@keyframes enter{from{opacity:0}to{opacity:1}}}
 
 /* Verdict */
-.hero{display:grid;grid-template-columns:1fr;gap:0;padding-block:34px 18px;position:relative}
-.kicker{margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-2);display:flex;align-items:center;gap:10px}
-.kicker::before{content:"";width:22px;height:1px;background:var(--ink)}
-.big{margin:0;font-weight:900;text-transform:uppercase;line-height:.88;letter-spacing:-.045em;font-size:min(13.5vw,118px);
-  background:linear-gradient(90deg,var(--ink) 0%,var(--ink) 50%,var(--fade) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;width:fit-content;max-width:100%}
-.big span{display:block;padding-bottom:.04em}
-.art{position:relative;margin:6px -8px 0;height:clamp(220px,62vw,300px)}
-.art svg{width:100%;height:100%;display:block;overflow:visible}
-.intro .art .peak{animation:rise 1.1s cubic-bezier(.2,.7,.2,1) both}
-@keyframes rise{from{transform:translateY(14px);opacity:.001}to{transform:none;opacity:1}}
-.lede{margin:4px 0 0;font-size:16px;line-height:1.5;color:var(--ink-2);max-width:44ch}
-.lede b{color:var(--ink);font-weight:700}
-.cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
-.cta .b{flex:1 1 200px}
-.b{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;padding:0 22px;font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;text-decoration:none;border:1px solid var(--ink);cursor:pointer;background:none}
-.b svg{width:14px;height:14px}
-.b-black{background:var(--ink);color:#fff}
-.b-line{background:rgba(255,255,255,.35)}
-.specs{list-style:none;margin:30px 0 0;padding:16px 0 0;border-top:1px solid var(--line-2);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.specs li{display:flex;flex-direction:column;gap:2px;min-width:0}
-.specs b{font-size:clamp(17px,4.8vw,24px);font-weight:800;letter-spacing:-.02em;white-space:nowrap}
-.specs span{font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-2)}
-@media (min-width:880px){
-  .hero{grid-template-columns:1.05fr 1fr;column-gap:40px;padding-top:70px;align-items:end}
-  .hero > *{grid-column:1}
-  .art{grid-column:2;grid-row:1/7;height:auto;min-height:440px;margin:0}
-  .big{font-size:min(9vw,118px)}
-}
-@media (prefers-reduced-motion:reduce){.intro .art .peak{animation:none}}
+.big{margin:6px 0 0;font-weight:800;font-size:clamp(60px,19vw,104px);line-height:.95;letter-spacing:-.045em;font-optical-sizing:auto}
+.big small{font-size:.38em;font-weight:700;letter-spacing:-.02em;margin-left:.1em;color:var(--ink-2)}
+.where{margin:10px 0 0;font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.2;overflow-wrap:anywhere}
+.sub{margin:3px 0 0;font-size:15px;color:var(--ink-2)}
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.pill{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 13px 0 10px;border-radius:999px;background:var(--glass-2);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 #fff,0 1px 3px rgba(30,45,80,.06);font-size:14px;font-weight:600;white-space:nowrap}
+.pill svg{width:16px;height:16px;color:var(--ink-2);flex:none}
+.pill em{font-style:normal;font-weight:500;color:var(--ink-2)}
+.cta{display:flex;gap:10px;margin-top:20px}
+.b{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;padding:0 18px;border-radius:999px;border:0;font-size:16px;font-weight:600;letter-spacing:-.01em;text-decoration:none;cursor:pointer;transition:transform .1s ease-out;-webkit-tap-highlight-color:transparent}
+.b:active{transform:scale(.97)}
+.b svg{width:18px;height:18px}
+.b-blue{background:var(--blue);color:var(--blue-ink);box-shadow:0 8px 20px -8px rgba(10,122,255,.6),inset 0 1px 0 rgba(255,255,255,.35)}
+.b-glass{background:var(--glass-2);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 #fff,0 1px 3px rgba(30,45,80,.06)}
+.note{margin:16px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2)}
+.note b{color:var(--ink);font-weight:600}
+.note:empty{display:none}
 
-/* Sections */
-.sec{padding-block:44px 8px}
-.sec-h{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
-.sec-h h2{margin:0;font-size:clamp(26px,7vw,44px);font-weight:900;text-transform:uppercase;letter-spacing:-.035em;line-height:.95}
-.sec-h p{margin:0;font-size:13px;color:var(--ink-2);max-width:34ch}
-.idx{font-size:11px;font-weight:700;letter-spacing:.2em;color:var(--ink-2);display:block;margin-bottom:8px}
+/* Titres de section */
+.sec-h{display:flex;flex-direction:column;gap:2px;padding:0 4px;margin:14px 0 2px}
+.sec-h h2{margin:0;font-size:22px;font-weight:700;letter-spacing:-.02em}
+.sec-h p{margin:0;font-size:14px;color:var(--ink-2)}
+
+/* Carte géographique */
+.map-card{padding:8px;overflow:hidden}
+#map{height:min(72vw,440px);min-height:300px;border-radius:calc(var(--r) - 8px);background:#E9EEF5;position:relative;z-index:0;overflow:hidden}
+.maplibregl-map{font-family:var(--font)}
+.maplibregl-ctrl-group{border-radius:14px!important;overflow:hidden;background:rgba(255,255,255,.85)!important;-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);box-shadow:0 6px 18px -6px rgba(30,45,80,.35)!important}
+.maplibregl-ctrl-group button{width:34px!important;height:34px!important}
+.maplibregl-ctrl-group button+button{border-top:1px solid var(--hair)!important}
+.maplibregl-ctrl-attrib{background:rgba(255,255,255,.7)!important;font-size:9px!important;color:var(--ink-3)!important;border-radius:8px 0 0 0}
+.maplibregl-ctrl-attrib a{color:var(--ink-3)!important}
+.maplibregl-cooperative-gesture-screen{font-size:14px;font-weight:500;border-radius:calc(var(--r) - 8px);background:rgba(30,45,80,.45)!important;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.me{width:16px;height:16px;border-radius:50%;background:var(--blue);border:3px solid #fff;box-shadow:0 0 0 1px rgba(10,122,255,.25),0 3px 8px rgba(0,0,0,.25);position:relative;cursor:default}
+.me::after{content:"";position:absolute;inset:-14px;border-radius:50%;background:rgba(10,122,255,.22);animation:halo 2.4s ease-out infinite}
+@keyframes halo{0%{transform:scale(.4);opacity:.9}100%{transform:scale(1.25);opacity:0}}
+@media (prefers-reduced-motion:reduce){.me::after{animation:none;transform:scale(.8);opacity:.5}}
+.pt{width:0;height:0;position:relative;cursor:pointer}
+.pt::before{content:"";position:absolute;left:0;top:0;width:var(--d);height:var(--d);transform:translate(-50%,-50%);border-radius:50%;background:#1D1D1F;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:box-shadow .15s}
+.pt.soon::before{background:#fff;border:2px solid #1D1D1F}
+.pt.sel::before{box-shadow:0 0 0 3px var(--blue),0 2px 6px rgba(0,0,0,.25)}
+.pt-lbl{position:absolute;left:calc(var(--d) / 2 + 6px);top:0;transform:translateY(-50%);background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.95);border-radius:999px;box-shadow:0 4px 12px -4px rgba(30,45,80,.3);padding:3px 9px;font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none}
+.sel{margin:8px 4px 4px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:12px 6px 10px 14px;border-radius:var(--r-s);background:var(--glass-2);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 #fff}
+.sel b{font-size:16px;font-weight:700;letter-spacing:-.01em;overflow-wrap:anywhere}
+.sel span{font-size:13px;color:var(--ink-2)}
+.sel a{grid-row:1/3;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:rgba(10,122,255,.12);color:var(--blue);text-decoration:none}
+.sel a svg{width:18px;height:18px}
+.legend{display:flex;gap:16px;margin:10px 14px 4px;font-size:12px;font-weight:500;color:var(--ink-2)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block;background:var(--ink)}
+.legend i.o{background:#fff;border:2px solid var(--ink);width:8px;height:8px}
+.legend i.u{background:var(--blue);border:2px solid #fff;box-shadow:0 0 0 1px rgba(10,122,255,.3)}
 
 /* Jours */
-.days{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(118px,1fr);overflow-x:auto;border-top:1px solid var(--line-2);border-bottom:1px solid var(--line-2);scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.days-card{padding:6px 0 8px}
+.days{display:grid;grid-auto-flow:column;grid-auto-columns:124px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:8px 10px}
 .days::-webkit-scrollbar{display:none}
-.day{scroll-snap-align:start;padding:14px 12px 12px;border-left:1px solid var(--line);display:flex;flex-direction:column;gap:3px;min-height:178px}
-.day:first-child{border-left:0;padding-left:0}
-.day .dl{font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
-.day .dd{font-size:11px;color:var(--ink-2)}
-.day .num{font-size:44px;font-weight:900;letter-spacing:-.05em;line-height:1;margin-top:14px}
-.day .num small{font-size:12px;font-weight:800;letter-spacing:.08em;margin-left:3px}
-.day .wh{font-size:12px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
-.day .ds{font-size:11px;color:var(--ink-2)}
-.day .ln{margin-top:auto;padding-top:10px;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
-.day .ln b{display:block;font-size:13px;letter-spacing:.02em;color:var(--ink);white-space:nowrap;margin-top:1px}
-.day.no .num{color:var(--fade)}
-.day.no .wh{color:var(--ink-2);font-weight:500}
-
-/* Radar */
-.radar-box{display:grid;grid-template-columns:1fr;gap:18px;align-items:center}
-.radar-box svg{width:100%;max-width:520px;height:auto;margin:0 auto;display:block}
-.cap{margin:0;min-height:48px;border-top:1px solid var(--line-2);padding-top:12px;display:flex;justify-content:space-between;gap:10px;align-items:baseline;flex-wrap:wrap}
-.cap b{font-size:18px;font-weight:800;letter-spacing:-.01em}
-.cap span{font-size:12px;color:var(--ink-2)}
-.legend{list-style:none;display:flex;gap:18px;flex-wrap:wrap;margin:10px 0 0;padding:0;font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
-.legend li{display:flex;align-items:center;gap:7px}
-.legend i{width:9px;height:9px;border-radius:50%;display:inline-block}
-.dot{cursor:pointer}
-@media (min-width:880px){.radar-box{grid-template-columns:1.2fr 1fr}}
+.day{scroll-snap-align:start;padding:10px 12px;border-left:1px solid var(--hair);display:flex;flex-direction:column;gap:2px;min-height:150px}
+.day:first-child{border-left:0}
+.day .dl{font-size:13px;font-weight:600}
+.day .dd{font-size:12px;color:var(--ink-2)}
+.day .num{font-size:36px;font-weight:800;letter-spacing:-.04em;line-height:1;margin-top:12px}
+.day .num small{font-size:13px;font-weight:600;letter-spacing:0;margin-left:2px;color:var(--ink-2)}
+.day .wh{font-size:13px;font-weight:500;line-height:1.3;overflow-wrap:anywhere;margin-top:2px}
+.day .ds{font-size:12px;color:var(--ink-2)}
+.day .ln{margin-top:auto;padding-top:8px;font-size:12px;color:var(--ink-2)}
+.day .ln b{font-weight:600;color:var(--ink)}
+.day.no .num{color:var(--ink-3)}
+.day.no .wh{color:var(--ink-2)}
 
 /* Liste */
-.list{list-style:none;margin:0;padding:0;border-top:1px solid var(--line-2)}
-.it{display:grid;grid-template-columns:30px 1fr auto 28px;gap:12px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
-.it .n{font-size:11px;font-weight:700;letter-spacing:.1em;color:var(--ink-2)}
+.list{list-style:none;margin:0;padding:4px 0}
+.it{display:grid;grid-template-columns:1fr auto 22px;gap:4px 12px;align-items:center;padding:13px 16px 13px 20px;text-decoration:none;position:relative}
+.it + .it::before{content:"";position:absolute;left:20px;right:0;top:0;height:1px;background:var(--hair)}
+.it:active{background:rgba(0,0,0,.03)}
 .it .t{min-width:0}
-.it .t b{display:block;font-size:16px;font-weight:750;line-height:1.25;overflow-wrap:anywhere}
-.it .t span{font-size:12px;color:var(--ink-2)}
+.it .t b{display:block;font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.25;overflow-wrap:anywhere}
+.it .t span{font-size:13px;color:var(--ink-2)}
 .it .v{text-align:right}
-.it .v b{display:block;font-size:24px;font-weight:900;letter-spacing:-.04em;line-height:1}
-.it .v b small{font-size:10px;font-weight:800;letter-spacing:.08em;margin-left:2px}
-.it .v span{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-2)}
+.it .v b{display:block;font-size:20px;font-weight:700;letter-spacing:-.03em;line-height:1.05}
+.it .v b small{font-size:12px;font-weight:600;letter-spacing:0;margin-left:1px;color:var(--ink-2)}
+.it .v span{font-size:12px;color:var(--ink-2)}
 .it.soon .v b{color:var(--ink-2)}
-.it .go{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid var(--line-2);text-decoration:none}
-.it .go svg{width:12px;height:12px}
-.more{margin-top:18px}
-.empty{padding:22px 0;color:var(--ink-2);border-bottom:1px solid var(--line);margin:0}
+.it .chev{width:22px;height:22px;color:var(--ink-3)}
+.more{margin:4px 12px 10px;width:calc(100% - 24px);height:44px}
+.empty{padding:20px;color:var(--ink-2);margin:0;text-align:center}
 
-.foot{padding-block:48px calc(36px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--ink-2)}
-.foot p{margin:0;max-width:70ch}
-.foot button{border:0;background:none;padding:0;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;color:var(--ink);text-decoration:underline;text-underline-offset:4px}
+/* Accueil / chargement / erreur */
+.screen h1{margin:8px 0 0;font-size:clamp(40px,11vw,56px);font-weight:800;letter-spacing:-.04em;line-height:1}
+.screen p.lead{margin:12px 0 0;font-size:17px;line-height:1.45;color:var(--ink-2);max-width:40ch}
+.screen .cta{margin-top:22px}
+.or{margin:22px 0 8px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.field{display:flex;align-items:center;gap:8px;height:50px;padding:0 6px 0 16px;border-radius:999px;background:var(--glass-2);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 #fff}
+.field svg{width:18px;height:18px;color:var(--ink-3);flex:none}
+.field input{flex:1;min-width:0;border:0;background:none;outline:none;font-size:16px;height:100%}
+.field input::placeholder{color:var(--ink-3)}
+.field button{border:0;background:var(--ink);color:#fff;border-radius:999px;height:38px;padding:0 16px;font-weight:600;font-size:14px;cursor:pointer}
+.results{list-style:none;margin:8px 0 0;padding:0}
+.results button{width:100%;text-align:left;border:0;border-radius:14px;background:none;padding:12px 14px;cursor:pointer;font-size:16px;font-weight:600}
+.results button:active{background:rgba(0,0,0,.04)}
+.results button span{display:block;font-size:13px;font-weight:400;color:var(--ink-2)}
+.msg{margin:10px 4px 0;font-size:14px;color:var(--ink-2)}
+.loading .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--blue);animation:pulse 1.2s ease-in-out infinite;margin-right:10px;vertical-align:middle}
+@keyframes pulse{50%{opacity:.25;transform:scale(.7)}}
 
-/* Accueil / chargement */
-.screen{padding-block:40px 30px;display:flex;flex-direction:column;gap:0}
-.field{display:flex;margin-top:10px;border-bottom:1px solid var(--ink)}
-.field input{flex:1;min-width:0;border:0;background:none;padding:14px 0;font-size:17px;outline:none}
-.field button{border:0;background:none;font-size:11px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;padding:0 0 0 12px}
-.results{list-style:none;margin:6px 0 0;padding:0}
-.results button{width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:none;padding:13px 0;cursor:pointer;font-size:16px;font-weight:650}
-.results button span{display:block;font-size:12px;font-weight:400;color:var(--ink-2)}
-.msg{margin:10px 0 0;font-size:13px;color:var(--ink-2)}
-.or{margin:26px 0 0;font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-2)}
-.pulse{animation:pulse 1.6s ease-in-out infinite}
-@keyframes pulse{50%{opacity:.35}}
-@media (prefers-reduced-motion:reduce){.pulse{animation:none}}
+.foot{padding:12px 8px 0;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink-3);text-align:center}
+.foot p{margin:0}
+.foot button{border:0;background:none;padding:0;font-size:13px;font-weight:600;color:var(--blue);cursor:pointer}
 
-dialog{border:0;padding:24px 20px 20px;width:min(520px,calc(100vw - 24px));background:#F7F7F5;color:var(--ink);box-shadow:0 30px 80px rgba(20,28,45,.25)}
-dialog::backdrop{background:rgba(160,172,194,.45);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-dialog h3{margin:0 0 16px;font-size:30px;font-weight:900;text-transform:uppercase;letter-spacing:-.04em;line-height:.95}
-.x{position:absolute;top:12px;right:12px;width:36px;height:36px;border:1px solid var(--line-2);background:none;cursor:pointer;font-size:18px;line-height:1}
+/* Fenêtre « changer de lieu » */
+dialog{border:0;padding:0;width:min(520px,calc(100vw - 20px));background:transparent;overflow:visible}
+dialog::backdrop{background:rgba(40,50,70,.25);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+dialog form{padding:22px 20px 20px;background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(30px) saturate(1.5);backdrop-filter:blur(30px) saturate(1.5);border:1px solid var(--glass-edge);border-radius:var(--r);box-shadow:var(--shadow);position:relative}
+dialog h3{margin:0 0 16px;font-size:24px;font-weight:700;letter-spacing:-.02em}
+.x{position:absolute;top:14px;right:14px;width:32px;height:32px;border:0;border-radius:50%;background:rgba(0,0,0,.06);color:var(--ink-2);cursor:pointer;font-size:17px;line-height:1}
 </style>
 </head>
 <body>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
-    <symbol id="i-mark" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3 2 21h20L12 3Zm0 4.6 2.6 4.7-1.4-.8-1.2 1.3-1.2-1.3-1.4.8L12 7.6Z"/></symbol>
-    <symbol id="i-down" viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
-    <symbol id="i-arrow" viewBox="0 0 12 12"><path d="M2 10 10 2M4 2h6v6" fill="none" stroke="currentColor" stroke-width="1.5"/></symbol>
-    <symbol id="i-target" viewBox="0 0 16 16"><g fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="5"/><path d="M8 0v3M8 13v3M0 8h3M13 8h3"/></g><circle cx="8" cy="8" r="1.6" fill="currentColor"/></symbol>
+    <symbol id="i-flake" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/><path d="M9.6 4.6 12 7l2.4-2.4M9.6 19.4 12 17l2.4 2.4M4.3 10.4l3.3-.9-.9-3.3M19.7 13.6l-3.3.9.9 3.3M4.3 13.6l3.3.9-.9 3.3M19.7 10.4l-3.3-.9.9-3.3"/></g></symbol>
+    <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-go" viewBox="0 0 24 24"><path d="M5 12h13M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="7"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></g><circle cx="12" cy="12" r="2.4" fill="currentColor"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></g></symbol>
+    <symbol id="i-peak" viewBox="0 0 24 24"><path d="M3 19 9.5 7l3.2 5.4 1.8-2.6L21 19H3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-car" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 6.6 7.6A2 2 0 0 1 8.5 6.3h7a2 2 0 0 1 1.9 1.3L19 12M4 12h16v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5ZM6 18v2M18 18v2"/><circle cx="7.5" cy="15" r=".8" fill="currentColor"/><circle cx="16.5" cy="15" r=".8" fill="currentColor"/></g></symbol>
+    <symbol id="i-temp" viewBox="0 0 24 24"><path d="M10 4a2 2 0 0 1 4 0v9.3a4 4 0 1 1-4 0V4Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="17" r="1.6" fill="currentColor"/></symbol>
+    <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 7h9a2 2 0 0 1 2 2v1.5l4.3-2.5a.5.5 0 0 1 .7.4v7.2a.5.5 0 0 1-.7.4L15 13.5V15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
   </defs>
 </svg>
 
 <div class="bar"><div class="wrap"><div class="bar-in">
-  <a class="logo" href="./" aria-label="Où est la neige, accueil"><svg aria-hidden="true"><use href="#i-mark"/></svg>Neige</a>
-  <button class="loc" id="placeBtn" type="button" hidden><span id="placeName">Ma position</span><svg aria-hidden="true"><use href="#i-down"/></svg></button>
+  <a class="logo" href="./"><svg aria-hidden="true"><use href="#i-flake"/></svg>Neige</a>
+  <button class="loc" id="placeBtn" type="button" hidden><svg aria-hidden="true"><use href="#i-target"/></svg><span id="placeName">Ma position</span><svg aria-hidden="true"><use href="#i-down"/></svg></button>
 </div></div></div>
 
 <main class="wrap">
+  <div class="stack">
 
-  <section class="screen intro" id="welcome" hidden>
-    <p class="kicker">Neige · prévisions 10 jours</p>
-    <h1 class="big"><span>Où est</span><span>la neige ?</span></h1>
-    <div class="art" id="welcomeArt"></div>
-    <p class="lede">La neige la plus proche de chez toi, et où il va neiger. Montagnes, cols, villages : partout.</p>
-    <div class="cta"><button class="b b-black" id="locBtn" type="button"><svg aria-hidden="true"><use href="#i-target"/></svg>Me localiser</button></div>
-    <p class="msg" id="locMsg" hidden></p>
-    <p class="or">ou tape ta ville</p>
-    <form class="field" id="wForm" autocomplete="off">
-      <input id="wInput" type="search" placeholder="Toulouse, Lyon, Grenoble…" aria-label="Ta ville" enterkeyhint="search">
-      <button type="submit">Chercher</button>
-    </form>
-    <ul class="results" id="wResults"></ul>
-  </section>
-
-  <section class="screen intro" id="loading" hidden>
-    <p class="kicker pulse">Recherche en cours</p>
-    <h1 class="big"><span>Je cherche</span><span>la neige…</span></h1>
-    <div class="art" id="loadingArt"></div>
-    <p class="lede">J'interroge la météo de centaines de points autour de toi.</p>
-  </section>
-
-  <section class="screen" id="error" hidden>
-    <p class="kicker">Oups</p>
-    <h1 class="big"><span>Pas de</span><span>réponse</span></h1>
-    <p class="lede" style="margin-top:20px">La météo ne répond pas. Vérifie ta connexion internet, puis réessaie.</p>
-    <div class="cta"><button class="b b-black" id="retryBtn" type="button">Réessayer</button></div>
-  </section>
-
-  <div id="results" hidden>
-    <section class="hero" id="hero" aria-live="polite"></section>
-
-    <section class="sec">
-      <div class="sec-h"><div><span class="idx">01</span><h2>Les 10<br>prochains jours</h2></div><p>Chaque jour, l'endroit le plus proche où il va tomber de la neige. En bas : l'altitude où il peut neiger près de chez toi.</p></div>
-      <div class="days" id="days"></div>
+    <section class="glass card screen enter" id="welcome" hidden>
+      <p class="eyebrow">Neige au sol et prévisions 10 jours</p>
+      <h1>Où est<br>la neige ?</h1>
+      <p class="lead">On regarde partout autour de toi : montagnes, cols, villages. Et on te dit où aller.</p>
+      <div class="cta"><button class="b b-blue" id="locBtn" type="button"><svg aria-hidden="true"><use href="#i-target"/></svg>Me localiser</button></div>
+      <p class="msg" id="locMsg" hidden></p>
+      <p class="or">ou tape ta ville</p>
+      <form class="field" id="wForm" autocomplete="off">
+        <svg aria-hidden="true"><use href="#i-search"/></svg>
+        <input id="wInput" type="search" placeholder="Toulouse, Lyon, Grenoble…" aria-label="Ta ville" enterkeyhint="search">
+        <button type="submit">OK</button>
+      </form>
+      <ul class="results" id="wResults"></ul>
     </section>
 
-    <section class="sec">
-      <div class="sec-h"><div><span class="idx">02</span><h2>Autour<br>de toi</h2></div><p>Tu es au centre, le nord en haut. Touche un point.</p></div>
-      <div class="radar-box">
-        <svg id="radar" viewBox="0 0 340 340" role="img" aria-label="Radar de la neige autour de toi"></svg>
-        <div>
-          <div class="cap" id="radarCap"></div>
-          <ul class="legend">
-            <li><i style="background:var(--ink)"></i>Neige au sol</li>
-            <li><i style="border:1.5px solid var(--ink)"></i>Neige prévue</li>
-            <li><i style="background:var(--ink);border-radius:0;transform:rotate(45deg);width:8px;height:8px"></i>Toi</li>
-          </ul>
-        </div>
+    <section class="glass card screen loading enter" id="loading" hidden>
+      <p class="eyebrow"><span class="dot"></span>Recherche en cours</p>
+      <h1>Je cherche<br>la neige…</h1>
+      <p class="lead" id="loadMsg">J'interroge la météo de centaines de points autour de toi.</p>
+    </section>
+
+    <section class="glass card screen enter" id="error" hidden>
+      <p class="eyebrow">Oups</p>
+      <h1>Pas de<br>réponse</h1>
+      <p class="lead">La météo ne répond pas. Vérifie ta connexion, puis réessaie.</p>
+      <div class="cta"><button class="b b-blue" id="retryBtn" type="button">Réessayer</button></div>
+    </section>
+
+    <div id="results" class="stack" hidden>
+      <section class="glass card enter" id="hero" aria-live="polite"></section>
+
+      <div class="enter">
+        <div class="sec-h"><h2>Autour de toi</h2><p id="mapHint">Touche un point pour voir le lieu.</p></div>
+        <section class="glass map-card">
+          <div id="map" role="img" aria-label="Carte de la neige autour de toi"></div>
+          <div class="legend"><span><i class="u"></i>Toi</span><span><i></i>Neige au sol</span><span><i class="o"></i>Neige prévue</span></div>
+          <div class="sel" id="sel" hidden></div>
+        </section>
       </div>
-    </section>
 
-    <section class="sec">
-      <div class="sec-h"><div><span class="idx">03</span><h2>Partout où<br>il y a de la neige</h2></div><p>Du plus proche au plus loin.</p></div>
-      <ol class="list" id="list"></ol>
-      <button class="b b-line more" id="moreBtn" type="button" hidden>Voir plus</button>
-    </section>
+      <div class="enter">
+        <div class="sec-h"><h2>Les 10 prochains jours</h2><p>Où il va neiger au plus près. « Dès 1 500 m » : l'altitude où il peut neiger chez toi.</p></div>
+        <section class="glass days-card"><div class="days" id="days"></div></section>
+      </div>
 
-    <footer class="foot">
-      <p id="updated"></p>
-      <p>Neige calculée par les modèles météo (Météo-France, DWD…) via Open-Meteo, à l'altitude indiquée. Routes : OSRM. Lieux : OpenStreetMap. Avant de partir, vérifie la météo locale et l'état des routes.</p>
-      <p><button type="button" id="refreshBtn">Actualiser</button></p>
-    </footer>
+      <div class="enter">
+        <div class="sec-h"><h2>Partout où il y a de la neige</h2><p>Du plus proche au plus loin. Touche pour l'itinéraire.</p></div>
+        <section class="glass"><ol class="list" id="list"></ol><button class="b b-glass more" id="moreBtn" type="button" hidden>Voir plus</button></section>
+      </div>
+
+      <footer class="foot">
+        <p id="updated"></p>
+        <p>Neige : modèles météo via Open-Meteo. Routes : OSRM. Lieux : OpenStreetMap. Avant de partir, vérifie la météo locale et l'état des routes.</p>
+        <p><button type="button" id="refreshBtn">Actualiser</button></p>
+      </footer>
+    </div>
+
   </div>
 </main>
 
 <dialog id="dlg">
   <form method="dialog" autocomplete="off">
     <button class="x" value="cancel" aria-label="Fermer">×</button>
-    <h3>Changer<br>de lieu</h3>
-    <button class="b b-black" id="dLoc" type="button"><svg aria-hidden="true"><use href="#i-target"/></svg>Me localiser</button>
+    <h3>Changer de lieu</h3>
+    <button class="b b-blue" id="dLoc" type="button" style="width:100%"><svg aria-hidden="true"><use href="#i-target"/></svg>Me localiser</button>
     <p class="msg" id="dMsg" hidden></p>
     <p class="or">ou tape une ville</p>
-    <div class="field"><input id="dInput" type="search" placeholder="Toulouse, Lyon, Grenoble…" aria-label="Ville" enterkeyhint="search"></div>
+    <div class="field"><svg aria-hidden="true"><use href="#i-search"/></svg><input id="dInput" type="search" placeholder="Toulouse, Lyon, Grenoble…" aria-label="Ville" enterkeyhint="search"></div>
     <ul class="results" id="dResults"></ul>
   </form>
 </dialog>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.6.0/maplibre-gl.js" crossorigin=""></script>
 <script>
 /* ---------- Lieux connus : nom, coin, lat, lon, altitude (m) ---------- */
 const PLACES = [
@@ -300,7 +332,7 @@ const OM = "https://api.open-meteo.com/v1/forecast";
 const SNOW_CODES = new Set([71,73,75,77,85,86]);
 const MONTHS = ["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];
 const DAY_L = ["dimanche","lundi","mardi","mercredi","jeudi","vendredi","samedi"];
-const DAY_S = ["Dim","Lun","Mar","Mer","Jeu","Ven","Sam"];
+const DAY_S = ["dim.","lun.","mar.","mer.","jeu.","ven.","sam."];
 const DIRS = ["au nord","au nord-est","à l'est","au sud-est","au sud","au sud-ouest","à l'ouest","au nord-ouest"];
 const $ = s => document.querySelector(s);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -319,14 +351,15 @@ const dirName = b => DIRS[Math.round(((b * 180 / Math.PI + 360) % 360) / 45) % 8
 function fmtDur(min) { min = Math.max(1, Math.round(min)); if (min < 60) return min + " min"; const h = Math.floor(min / 60), m = min % 60; return h + " h " + String(m).padStart(2, "0"); }
 const dateOf = iso => new Date(iso + "T12:00:00");
 const dayWord = i => i === 0 ? "aujourd'hui" : i === 1 ? "demain" : DAY_L[dateOf(S.dates[i]).getDay()];
-const dayTag = i => i === 0 ? "Auj." : i === 1 ? "Demain" : DAY_S[dateOf(S.dates[i]).getDay()] + " " + dateOf(S.dates[i]).getDate();
+const dayTag = i => i === 0 ? "aujourd'hui" : i === 1 ? "demain" : DAY_S[dateOf(S.dates[i]).getDay()] + " " + dateOf(S.dates[i]).getDate();
 const dateShort = i => { const d = dateOf(S.dates[i]); return d.getDate() + " " + MONTHS[d.getMonth()]; };
 const mapsDir = s => "https://www.google.com/maps/dir/?api=1&destination=" + s.lat.toFixed(4) + "," + s.lon.toFixed(4);
-const mapsSee = s => "https://www.google.com/maps/search/?api=1&query=" + s.lat.toFixed(4) + "," + s.lon.toFixed(4);
+const camUrl = s => "https://www.google.com/search?q=" + encodeURIComponent("webcam " + label(s).replace(/^Près de /, "") + (s.region ? " " + s.region : ""));
 const label = s => s.name || ("À " + nf(s.dist) + " km " + dirName(s.brg));
 const driveTxt = s => (s.exact ? "" : "≈ ") + fmtDur(s.drive);
 const kmTxt = s => nf(s.exact ? s.roadKm : s.dist);
 const icon = id => `<svg aria-hidden="true"><use href="#${id}"/></svg>`;
+const snowTxt = s => s.kind === "now" ? (s.depth >= 1 ? s.depth + " cm au sol" : "il neige") + (s.snowing && s.depth >= 1 ? ", il neige" : "") : Math.round(s.fall[s.firstDay]) + " cm " + dayWord(s.firstDay);
 
 async function getJSON(url, ms = 20000) {
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms);
@@ -338,56 +371,50 @@ const store = {
   set(p) { try { localStorage.setItem("neige.place", JSON.stringify(p)); } catch {} }
 };
 
-/* ---------- Illustration : sommet enneigé à facettes ---------- */
-let artN = 0;
-function peakArt(callout) {
-  const u = "p" + (++artN);
-  const call = callout ? `<g><circle cx="200" cy="40" r="4.5" fill="#0D0E11"/><path d="M200 40 L232 6 H372" fill="none" stroke="#0D0E11" stroke-width="1"/>
-    <text x="236" y="-2" font-family="Archivo,sans-serif" font-size="12.5" font-weight="800" letter-spacing="1.4" fill="#0D0E11">${esc(callout)}</text></g>` : "";
-  const flakes = [[48,40,2],[90,10,1.4],[130,64,1.8],[330,52,2.2],[370,120,1.5],[300,18,1.3],[60,120,1.6],[392,190,1.8],[24,210,1.3],[150,8,1.2],[262,92,1.4]]
-    .map(([x, y, r]) => `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" opacity=".9"/>`).join("");
-  return `<svg viewBox="0 -30 420 350" preserveAspectRatio="xMidYMid meet" aria-hidden="true"><defs>
-    <radialGradient id="${u}-g-glow" cx="60%" cy="34%" r="58%"><stop offset="0" stop-color="#FFF5E3"/><stop offset=".5" stop-color="#FFE9C9" stop-opacity=".6"/><stop offset="1" stop-color="#FFE9C9" stop-opacity="0"/></radialGradient>
-    <linearGradient id="${u}-g-lit" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EDF0F5"/></linearGradient>
-    <linearGradient id="${u}-g-mid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F1F3F7"/><stop offset="1" stop-color="#D3DAE5"/></linearGradient>
-    <linearGradient id="${u}-g-sh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#C7D0DF"/><stop offset="1" stop-color="#93A3BC"/></linearGradient>
-    <linearGradient id="${u}-g-sh2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#B4C0D2"/><stop offset="1" stop-color="#8797B2"/></linearGradient>
-    <radialGradient id="${u}-g-ground" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#4E5D7A" stop-opacity=".32"/><stop offset="1" stop-color="#4E5D7A" stop-opacity="0"/></radialGradient>
-  </defs>
-  <circle cx="255" cy="110" r="190" fill="url(#${u}-g-glow)"/>
-  <g class="peak">
-    <ellipse cx="214" cy="292" rx="214" ry="20" fill="url(#${u}-g-ground)"/>
-    <polygon points="318,100 262,290 340,290" fill="#D9E0EA"/>
-    <polygon points="318,100 340,290 420,290" fill="url(#${u}-g-sh2)"/>
-    <polygon points="72,190 0,290 80,290" fill="#E6EAF1"/>
-    <polygon points="72,190 80,290 132,290" fill="#FAF9F6"/>
-    <polygon points="200,40 142,132 40,290 168,290 190,178" fill="url(#${u}-g-lit)"/>
-    <polygon points="200,40 190,178 168,290 256,290 236,160" fill="url(#${u}-g-mid)"/>
-    <polygon points="200,40 236,160 256,290 384,290 278,152" fill="url(#${u}-g-sh)"/>
-    <polyline points="40,290 142,132 200,40" fill="none" stroke="#FFE2B6" stroke-width="2" stroke-linejoin="round" opacity=".9"/>
-    <path d="M142 132 L166 150 L190 178 M236 160 L250 205 M278 152 L300 196" fill="none" stroke="#ffffff" stroke-width="1" opacity=".7"/>
-    ${flakes}
-  </g>
-  ${call}
-</svg>`;
+/* ---------- État ---------- */
+const S = { place: null, pts: [], dates: [], home: null, sel: null, shown: 8, run: 0, updated: null, map: null, markers: [] };
+function show(id) {
+  for (const k of ["welcome", "loading", "error", "results"]) $("#" + k).hidden = k !== id;
+  const root = $("#" + id);
+  const els = [root, ...root.querySelectorAll(".enter")].filter(e => e.classList.contains("enter") || e.dataset.enter);
+  els.forEach(e => { e.dataset.enter = "1"; e.classList.remove("enter"); void e.offsetWidth; e.classList.add("enter"); });
+  clearTimeout(S.enterT); S.enterT = setTimeout(() => els.forEach(e => e.classList.remove("enter")), 1300);
+  window.scrollTo(0, 0);
 }
 
-/* ---------- État ---------- */
-const S = { place: null, pts: [], dates: [], home: null, sel: null, shown: 8, run: 0, updated: null };
-function show(id) { for (const k of ["welcome", "loading", "error", "results"]) $("#" + k).hidden = k !== id; window.scrollTo(0, 0); }
-
-/* ---------- Localisation ---------- */
-function locate(msgEl, btn) {
-  if (!("geolocation" in navigator)) { msgEl.hidden = false; msgEl.textContent = "Ton téléphone ne donne pas sa position. Tape ta ville."; return; }
+/* ---------- Position : GPS précis d'abord, puis approximatif, puis affinage en arrière-plan ---------- */
+function getPosition(onUpdate) {
+  return new Promise((resolve, reject) => {
+    const geo = navigator.geolocation;
+    let done = false;
+    const ok = p => { if (done) return; done = true; resolve(p); refine(p); };
+    const refine = first => {
+      // on continue d'écouter 25 s : si le GPS trouve une position bien meilleure et plus loin, on relance
+      let best = first;
+      const id = geo.watchPosition(p => {
+        if (p.coords.accuracy < best.coords.accuracy * .6 && dist(p.coords.latitude, p.coords.longitude, best.coords.latitude, best.coords.longitude) > 8) { best = p; onUpdate && onUpdate(p); }
+      }, () => {}, { enableHighAccuracy: true, maximumAge: 0 });
+      setTimeout(() => geo.clearWatch(id), 25000);
+    };
+    geo.getCurrentPosition(ok, e => {
+      if (e.code === 1) return reject(e);
+      geo.getCurrentPosition(ok, reject, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+    }, { enableHighAccuracy: true, timeout: 9000, maximumAge: 120000 });
+  });
+}
+const fromPos = p => ({ lat: p.coords.latitude, lon: p.coords.longitude, acc: Math.round(p.coords.accuracy || 0), label: "", gps: true });
+async function locate(msgEl, btn) {
+  if (!("geolocation" in navigator)) { msgEl.hidden = false; msgEl.textContent = "Ton appareil ne donne pas sa position. Tape ta ville."; return; }
   msgEl.hidden = false; msgEl.textContent = "Je cherche ta position…"; btn.disabled = true;
-  navigator.geolocation.getCurrentPosition(p => {
+  try {
+    const p = await getPosition(p2 => run(fromPos(p2)));
     btn.disabled = false; msgEl.hidden = true;
     if ($("#dlg").open) $("#dlg").close();
-    run({ lat: p.coords.latitude, lon: p.coords.longitude, label: "", gps: true });
-  }, e => {
+    run(fromPos(p));
+  } catch (e) {
     btn.disabled = false;
     msgEl.textContent = e.code === 1 ? "Position refusée. Autorise la localisation pour ce site, ou tape ta ville." : "Position introuvable pour l'instant. Tape ta ville.";
-  }, { enableHighAccuracy: false, timeout: 15000, maximumAge: 600000 });
+  }
 }
 function bindSearch(input, list, onPick) {
   let t = 0;
@@ -465,6 +492,7 @@ async function fetchRoutes(me, pts, runId) {
 function cluster(list, km) { const out = []; for (const s of list) if (!out.some(o => dist(o.lat, o.lon, s.lat, s.lon) < km)) out.push(s); return out; }
 
 async function run(place) {
+  if (S.place && S.place.gps && place.gps && dist(place.lat, place.lon, S.place.lat, S.place.lon) < 8 && S.pts.length) { S.place = place; store.set(place); renderMap(); return; }
   const runId = ++S.run;
   S.place = place; S.sel = null; S.shown = 8;
   store.set(place);
@@ -500,17 +528,22 @@ async function run(place) {
     S.dates = home?.dates || all[0]?.dates || [];
     S.updated = new Date();
     show("results");
-    render();
+    render(true);
     fetchRoutes(me, S.pts, runId);
-    if (!place.label) placeName(me, 10).then(n => { if (n && runId === S.run) { place.label = n; store.set(place); $("#placeName").textContent = n; } });
-    nameGrid(runId);
+    nameGrid(runId, place);
   } catch (e) {
     if (runId === S.run) show("error");
   }
 }
 
 /* Noms des points de la grille (1 par seconde, règle d'OpenStreetMap) */
-async function nameGrid(runId) {
+async function nameGrid(runId, place) {
+  if (place && !place.label) {
+    const n = await placeName(place, 10);
+    if (runId !== S.run) return;
+    if (n) { place.label = n; store.set(place); $("#placeName").textContent = n; }
+    await wait(1100);
+  }
   const want = [];
   const add = s => { if (s && s.grid && !s.name && !s.tried && !want.includes(s)) want.push(s); };
   add(S.pts.find(s => s.kind === "now")); add(S.pts[0]);
@@ -527,135 +560,123 @@ async function nameGrid(runId) {
 }
 
 /* ---------- Affichage ---------- */
-function render() {
-  renderHero(); renderDays(); renderRadar(); renderList();
+function render(fresh) {
+  renderHero(); renderDays(); renderList(); renderMap(fresh);
   const u = S.updated;
   $("#updated").textContent = u ? "Mis à jour à " + u.getHours() + " h " + String(u.getMinutes()).padStart(2, "0") + "." : "";
 }
-function bigTitle(lines) {
-  const longest = Math.max(...lines.map(l => l.length));
-  const k = Math.min(1, 8.5 / longest);
-  return `<h1 class="big" style="font-size:min(${(13.5 * k).toFixed(2)}vw,${Math.round(118 * k)}px)">${lines.map(l => `<span>${esc(l)}</span>`).join("")}</h1>`;
-}
+const pill = (ic, v, l) => `<span class="pill">${icon(ic)}${v}${l ? ` <em>${l}</em>` : ""}</span>`;
 function renderHero() {
   const el = $("#hero"), home = S.home;
   const now = S.pts.find(s => s.kind === "now");
   const soon = S.pts.find(s => s.firstDay >= 0);
+  const acc = S.place?.acc > 3000 ? `<p class="note">Position approximative (à ${nf(S.place.acc / 1000)} km près). Pour plus de précision, active le GPS.</p>` : "";
   let html = "";
   if (home && (home.snowing || home.depth >= 2)) {
-    html = `<p class="kicker">Regarde dehors</p>${bigTitle(home.snowing ? ["Il neige", "chez toi"] : ["La neige", "est chez", "toi"])}
-      <div class="art">${peakArt(home.depth >= 1 ? home.depth + " CM AU SOL" : "")}</div>
-      <p class="lede">${home.depth >= 1 ? `<b>${home.depth} cm</b> de neige au sol chez toi.` : "Il neige en ce moment là où tu es."}</p>`;
+    html = `<p class="eyebrow">Regarde dehors</p><h1 class="big" style="font-size:clamp(44px,12vw,72px)">${home.snowing ? "Il neige chez toi" : "La neige est chez toi"}</h1>
+      <p class="sub">${home.depth >= 1 ? home.depth + " cm au sol" : "Il neige en ce moment"}${now && now.depth > home.depth + 5 ? ` · plus épais : ${esc(label(now))}, ${now.depth} cm à ${driveTxt(now)}` : ""}.</p>${acc}`;
   } else if (now) {
-    let lede = `<b>${esc(label(now))}</b>${now.region ? ", " + esc(now.region) : ""}, à ${nf(now.alt)} m d'altitude. ${now.depth >= 1 ? now.depth + " cm au sol" + (now.snowing ? ", et il neige en ce moment" : "") : "Il neige en ce moment"}.`;
-    if (soon && soon !== now && soon.dist < now.dist * .7) lede += ` Plus près, il va neiger ${dayWord(soon.firstDay)} : ${esc(label(soon))}, ${Math.round(soon.fall[soon.firstDay])} cm, à ${driveTxt(soon)}.`;
+    let note = "";
+    if (soon && soon !== now && soon.dist < now.dist * .7) note += `Plus près, il va neiger ${dayWord(soon.firstDay)} : <b>${esc(label(soon))}</b>, ${Math.round(soon.fall[soon.firstDay])} cm, à ${driveTxt(soon)}. `;
     const homeFall = home ? home.fall.findIndex(v => v >= .5) : -1;
-    if (homeFall >= 0) lede += ` Et chez toi, il va neiger ${dayWord(homeFall)} !`;
-    html = `<p class="kicker">La neige la plus proche</p>${bigTitle(["La neige", "est à", kmTxt(now) + " km"])}
-      <div class="art">${peakArt(nf(now.alt) + " M · " + (now.depth >= 1 ? now.depth : "<1") + " CM")}</div>
-      <p class="lede">${lede}</p>
-      <div class="cta"><a class="b b-black" href="${mapsDir(now)}" target="_blank" rel="noopener">Y aller ${icon("i-arrow")}</a><a class="b b-line" href="${mapsSee(now)}" target="_blank" rel="noopener">Voir sur la carte</a></div>
-      <ul class="specs">
-        <li><b>${now.depth >= 1 ? now.depth : "<1"} cm</b><span>au sol</span></li>
-        <li><b>${nf(now.alt)} m</b><span>altitude</span></li>
-        <li><b>${driveTxt(now)}</b><span>de route</span></li>
-        <li><b>${now.temp != null ? Math.round(now.temp) + "°" : "—"}</b><span>là-bas</span></li>
-      </ul>`;
+    if (homeFall >= 0) note += `Et chez toi, il va neiger <b>${dayWord(homeFall)}</b>.`;
+    html = `<p class="eyebrow">La neige la plus proche</p><h1 class="big">${kmTxt(now)}<small>km</small></h1>
+      <p class="where">${esc(label(now))}</p><p class="sub">${now.region ? esc(now.region) + " · " : ""}${now.depth >= 1 ? now.depth + " cm au sol" : "il neige en ce moment"}${now.snowing && now.depth >= 1 ? ", et il neige" : ""}</p>
+      <div class="pills">${pill("i-car", driveTxt(now), "de route")}${pill("i-peak", nf(now.alt) + " m")}${now.temp != null ? pill("i-temp", Math.round(now.temp) + " °") : ""}</div>
+      <div class="cta"><a class="b b-blue" href="${mapsDir(now)}" target="_blank" rel="noopener">${icon("i-go")}Y aller</a><a class="b b-glass" href="${camUrl(now)}" target="_blank" rel="noopener">${icon("i-cam")}Webcams</a></div>
+      <p class="note">${note}</p>${acc}`;
   } else if (soon) {
     const i = soon.firstDay, w = dayWord(i);
-    html = `<p class="kicker">Pas encore de neige au sol autour de toi</p>${bigTitle(["La neige", "arrive", w])}
-      <div class="art">${peakArt("+" + Math.round(soon.fall[i]) + " CM " + w.toUpperCase())}</div>
-      <p class="lede"><b>${esc(label(soon))}</b>${soon.region ? ", " + esc(soon.region) : ""}, à ${nf(soon.alt)} m : ${Math.round(soon.fall[i])} cm attendus ${w}.</p>
-      <div class="cta"><a class="b b-black" href="${mapsDir(soon)}" target="_blank" rel="noopener">Itinéraire ${icon("i-arrow")}</a><a class="b b-line" href="${mapsSee(soon)}" target="_blank" rel="noopener">Voir sur la carte</a></div>
-      <ul class="specs">
-        <li><b>${Math.round(soon.fall[i])} cm</b><span>prévus</span></li>
-        <li><b>${nf(soon.alt)} m</b><span>altitude</span></li>
-        <li><b>${driveTxt(soon)}</b><span>de route</span></li>
-        <li><b>${kmTxt(soon)} km</b><span>distance</span></li>
-      </ul>`;
+    html = `<p class="eyebrow">Pas de neige au sol pour l'instant</p><h1 class="big" style="font-size:clamp(44px,12vw,72px)">Neige ${esc(w)}</h1>
+      <p class="where">${esc(label(soon))}</p><p class="sub">${soon.region ? esc(soon.region) + " · " : ""}${Math.round(soon.fall[i])} cm attendus ${esc(w)}</p>
+      <div class="pills">${pill("i-car", driveTxt(soon), "de route")}${pill("i-peak", nf(soon.alt) + " m")}${pill("i-flake", kmTxt(soon) + " km")}</div>
+      <div class="cta"><a class="b b-blue" href="${mapsDir(soon)}" target="_blank" rel="noopener">${icon("i-go")}Itinéraire</a></div>${acc}`;
   } else {
-    html = `<p class="kicker">Rien pour l'instant</p>${bigTitle(["Pas de", "neige", "en vue"])}
-      <div class="art">${peakArt("")}</div>
-      <p class="lede">Ni au sol, ni prévue dans les 10 prochains jours, à moins de 450 km de toi.</p>`;
+    html = `<p class="eyebrow">Rien pour l'instant</p><h1 class="big" style="font-size:clamp(44px,12vw,72px)">Pas de neige en vue</h1>
+      <p class="sub">Ni au sol, ni prévue dans les 10 prochains jours, à moins de 450 km.</p>${acc}`;
   }
   el.innerHTML = html;
-  el.classList.toggle("intro", S.introRun !== S.run);
-  S.introRun = S.run;
 }
 function renderDays() {
   const out = [], n = Math.min(10, S.dates.length);
   for (let i = 0; i < n; i++) {
     const c = S.pts.filter(s => s.fall[i] >= 1), best = c[0];
     const line = S.home?.line?.[i];
-    const ln = line == null ? "" : `<span class="ln">Neige dès<b>${nf(line)} m</b></span>`;
-    const head = `<span class="dl">${i === 0 ? "Aujourd'hui" : i === 1 ? "Demain" : DAY_L[dateOf(S.dates[i]).getDay()]}</span><span class="dd">${dateShort(i)}</span>`;
+    const ln = line == null ? "" : `<span class="ln">Dès <b>${nf(line)} m</b></span>`;
+    const head = `<span class="dl">${i === 0 ? "Aujourd'hui" : i === 1 ? "Demain" : DAY_L[dateOf(S.dates[i]).getDay()][0].toUpperCase() + DAY_L[dateOf(S.dates[i]).getDay()].slice(1)}</span><span class="dd">${dateShort(i)}</span>`;
     if (best) out.push(`<div class="day">${head}<span class="num">${Math.round(best.fall[i])}<small>cm</small></span><span class="wh">${esc(label(best))}</span><span class="ds">${kmTxt(best)} km${c.length > 1 ? " · +" + (c.length - 1) : ""}</span>${ln}</div>`);
     else out.push(`<div class="day no">${head}<span class="num">—</span><span class="wh">Rien de prévu autour</span>${ln}</div>`);
   }
   $("#days").innerHTML = out.join("");
 }
-function renderRadar() {
-  const svg = $("#radar"), C = 170, R = 148;
-  const pts = S.pts;
-  const now = pts.find(s => s.kind === "now");
-  let far = Math.max(60, pts.length ? pts[Math.min(3, pts.length - 1)].dist * 1.05 : 60);
-  if (now) far = Math.max(far, now.dist * 1.15);
-  far = Math.min(far, 900);
-  const step = far <= 120 ? 30 : far <= 240 ? 60 : far <= 480 ? 120 : 200;
-  const max = Math.ceil(far / step) * step;
-  let g = "";
-  for (let k = 1; k <= max / step; k++) {
-    const r = R * k * step / max;
-    g += `<circle cx="${C}" cy="${C}" r="${r.toFixed(1)}" fill="none" stroke="var(--line-2)" stroke-width="${k === max / step ? 1 : .6}" ${k < max / step ? 'stroke-dasharray="1.5 4"' : ""}/>`;
-    g += `<text x="${C + 5}" y="${(C - r + 13).toFixed(1)}" fill="var(--ink-2)" font-size="9" font-weight="700" letter-spacing="1" font-family="Archivo,sans-serif">${k * step} KM</text>`;
-  }
-  g += `<path d="M${C} ${C - R - 6} V${C + R + 6} M${C - R - 6} ${C} H${C + R + 6}" stroke="var(--line-2)" stroke-width=".6"/>`;
-  g += `<text x="${C}" y="${C - R - 10}" text-anchor="middle" fill="var(--ink)" font-size="10" font-weight="800" letter-spacing="1.5" font-family="Archivo,sans-serif">N</text>`;
-  const shown = pts.filter(s => s.dist <= max);
-  for (const s of shown.slice().sort((a, b) => (a.kind === "now") - (b.kind === "now"))) {
-    const r = R * s.dist / max, x = C + r * Math.sin(s.brg), y = C - r * Math.cos(s.brg);
-    s._x = x; s._y = y;
-    const i = S.pts.indexOf(s), sel = S.sel === s;
-    if (sel) g += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="13" fill="none" stroke="var(--ink)" stroke-width="1"/>`;
-    g += s.kind === "now"
-      ? `<circle class="dot" data-i="${i}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${(3.5 + Math.min(s.depth, 100) / 100 * 4.5).toFixed(1)}" fill="var(--ink)"/>`
-      : `<circle class="dot" data-i="${i}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="rgba(255,255,255,.6)" stroke="var(--ink)" stroke-width="1.3"/>`;
-    g += `<circle class="dot" data-i="${i}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="14" fill="transparent"/>`;
-  }
-  const lab = shown.filter(s => s.kind === "now").slice(0, 2).concat(shown.filter(s => s.kind === "soon").slice(0, 1));
-  const used = [];
-  for (const s of lab) {
-    const left = s._x > C; let ty = s._y + 3.5;
-    if (used.some(p => Math.abs(p - ty) < 12)) continue;
-    used.push(ty);
-    g += `<text x="${(left ? s._x - 10 : s._x + 10).toFixed(1)}" y="${ty.toFixed(1)}" text-anchor="${left ? "end" : "start"}" fill="var(--ink)" font-size="10.5" font-weight="700" font-family="Archivo,sans-serif" paint-order="stroke" stroke="#EEF0F4" stroke-width="3">${esc(label(s).replace(/^Près de /, ""))}</text>`;
-  }
-  g += `<rect x="${C - 5}" y="${C - 5}" width="10" height="10" fill="var(--ink)" transform="rotate(45 ${C} ${C})"/>`;
-  svg.innerHTML = g;
-  svg.setAttribute("aria-label", `Radar : ${shown.filter(s => s.kind === "now").length} endroits avec de la neige au sol et ${shown.filter(s => s.kind === "soon").length} avec de la neige prévue, dans un rayon de ${max} km.`);
-  svg.querySelectorAll(".dot").forEach(d => d.addEventListener("click", () => { S.sel = S.pts[+d.dataset.i]; renderRadar(); }));
-  const s = S.sel || now || pts[0];
-  $("#radarCap").innerHTML = s ? `<b>${esc(label(s))}</b><span>${s.kind === "now" ? (s.depth >= 1 ? s.depth + " cm au sol" : "il neige") : Math.round(s.fall[s.firstDay]) + " cm " + dayWord(s.firstDay)} · ${nf(s.alt)} m · ${driveTxt(s)}</span>` : `<span>Aucune neige dans le rayon.</span>`;
-}
 function renderList() {
   const items = S.pts.slice(0, S.shown);
   if (!items.length) { $("#list").innerHTML = `<li class="empty">Aucune neige au sol ni prévue autour de toi pour l'instant.</li>`; $("#moreBtn").hidden = true; return; }
-  $("#list").innerHTML = items.map((s, k) => {
+  $("#list").innerHTML = items.map(s => {
     const v = s.kind === "now"
       ? `<b>${s.depth >= 1 ? s.depth : "<1"}<small>cm</small></b><span>${s.snowing ? "il neige" : "au sol"}</span>`
       : `<b>+${Math.round(s.fall[s.firstDay])}<small>cm</small></b><span>${dayTag(s.firstDay)}</span>`;
-    return `<li class="it ${s.kind}"><span class="n">${String(k + 1).padStart(2, "0")}</span>
+    return `<li><a class="it ${s.kind}" href="${mapsDir(s)}" target="_blank" rel="noopener">
       <div class="t"><b>${esc(label(s))}</b><span>${nf(s.alt)} m · ${kmTxt(s)} km · ${driveTxt(s)}</span></div>
-      <div class="v">${v}</div><a class="go" href="${mapsDir(s)}" target="_blank" rel="noopener" aria-label="Itinéraire vers ${esc(label(s))}">${icon("i-arrow")}</a></li>`;
+      <div class="v">${v}</div><svg class="chev" aria-hidden="true"><use href="#i-chev"/></svg></a></li>`;
   }).join("");
   $("#moreBtn").hidden = S.pts.length <= S.shown;
 }
 
+/* ---------- Carte géographique ---------- */
+function renderMap(fresh) {
+  if (!window.maplibregl) return;
+  const me = S.place;
+  if (!S.map) {
+    S.map = new maplibregl.Map({
+      container: "map", style: "https://tiles.openfreemap.org/styles/positron", center: [me.lon, me.lat], zoom: 7,
+      attributionControl: { compact: true }, cooperativeGestures: true, dragRotate: false, pitchWithRotate: false, touchPitch: false,
+      locale: { "CooperativeGesturesHandler.WindowsHelpText": "Ctrl + molette pour zoomer", "CooperativeGesturesHandler.MacHelpText": "⌘ + molette pour zoomer", "CooperativeGesturesHandler.MobileHelpText": "Deux doigts pour bouger la carte" }
+    });
+    S.map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-left");
+    S.map.touchZoomRotate.disableRotation();
+  }
+  S.markers.forEach(m => m.remove()); S.markers = [];
+  const pts = S.pts;
+  // on cadre : toi + les 5 lieux enneigés les plus proches (dont le plus proche avec neige au sol)
+  const focus = pts.slice(0, 5);
+  const now = pts.find(s => s.kind === "now");
+  if (now && !focus.includes(now)) focus.push(now);
+  const labelled = [];
+  for (const s of [now, ...pts.slice(0, 4)].filter(Boolean)) if (labelled.length < 3 && !labelled.includes(s) && !labelled.some(o => dist(o.lat, o.lon, s.lat, s.lon) < 45)) labelled.push(s);
+  for (const s of pts.slice().reverse()) {
+    const el = document.createElement("div");
+    el.className = "pt " + s.kind + (S.sel === s ? " sel" : "");
+    el.style.setProperty("--d", (s.kind === "now" ? 14 + Math.min(s.depth, 100) / 100 * 8 : 14) + "px");
+    if (labelled.includes(s) && s.name) { const l = document.createElement("span"); l.className = "pt-lbl"; l.textContent = s.name.replace(/^Près de /, ""); el.appendChild(l); }
+    el.addEventListener("click", e => { e.stopPropagation(); S.sel = s; renderMap(); });
+    S.markers.push(new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([s.lon, s.lat]).addTo(S.map));
+  }
+  const meEl = document.createElement("div"); meEl.className = "me"; meEl.title = "Toi";
+  S.markers.push(new maplibregl.Marker({ element: meEl, anchor: "center" }).setLngLat([me.lon, me.lat]).addTo(S.map));
+  if (fresh || !S.fitted) {
+    S.map.resize();
+    if (!focus.length) S.map.jumpTo({ center: [me.lon, me.lat], zoom: 7.5 });
+    else {
+      const b = new maplibregl.LngLatBounds([me.lon, me.lat], [me.lon, me.lat]);
+      focus.forEach(s => b.extend([s.lon, s.lat]));
+      S.map.fitBounds(b, { padding: { top: 44, bottom: 36, left: 44, right: 96 }, maxZoom: 9.5, animate: false });
+    }
+    S.fitted = true;
+  }
+  renderSel();
+}
+function renderSel() {
+  const s = S.sel || S.pts.find(p => p.kind === "now") || S.pts[0];
+  const el = $("#sel");
+  if (!s) { el.hidden = true; $("#mapHint").textContent = "Aucune neige dans ce rayon pour l'instant."; return; }
+  el.hidden = false;
+  el.innerHTML = `<b>${esc(label(s))}</b><a href="${mapsDir(s)}" target="_blank" rel="noopener" aria-label="Itinéraire">${icon("i-go")}</a><span>${snowTxt(s)} · ${nf(s.alt)} m · ${driveTxt(s)}</span>`;
+}
+
 /* ---------- Démarrage ---------- */
-$("#welcomeArt").innerHTML = peakArt("");
-$("#loadingArt").innerHTML = peakArt("");
 $("#moreBtn").addEventListener("click", () => { S.shown += 10; renderList(); });
-$("#refreshBtn").addEventListener("click", () => S.place && run(S.place));
+$("#refreshBtn").addEventListener("click", () => { S.pts = []; S.place && run(S.place); });
 $("#retryBtn").addEventListener("click", () => S.place ? run(S.place) : show("welcome"));
 $("#locBtn").addEventListener("click", () => locate($("#locMsg"), $("#locBtn")));
 $("#dLoc").addEventListener("click", () => locate($("#dMsg"), $("#dLoc")));
@@ -670,18 +691,14 @@ $("#dInput").addEventListener("keydown", e => { if (e.key === "Enter") e.prevent
   const q = new URLSearchParams(location.search);
   if (q.has("lat") && q.has("lon")) return run({ lat: +q.get("lat"), lon: +q.get("lon"), label: q.get("nom") || "", gps: false });
   const saved = store.get();
+  let granted = false;
+  try { if (navigator.permissions && navigator.geolocation) granted = (await navigator.permissions.query({ name: "geolocation" })).state === "granted"; } catch {}
   if (saved && isFinite(saved.lat)) {
     run(saved);
-    if (saved.gps && navigator.permissions && navigator.geolocation) {
-      try {
-        const st = await navigator.permissions.query({ name: "geolocation" });
-        if (st.state === "granted") navigator.geolocation.getCurrentPosition(p => {
-          if (dist(p.coords.latitude, p.coords.longitude, saved.lat, saved.lon) > 5) run({ lat: p.coords.latitude, lon: p.coords.longitude, label: "", gps: true });
-        }, () => {}, { timeout: 15000, maximumAge: 600000 });
-      } catch {}
-    }
+    if (saved.gps && granted) getPosition(p => run(fromPos(p))).then(p => { const np = fromPos(p); if (dist(np.lat, np.lon, saved.lat, saved.lon) > 8) run(np); else { S.place.acc = np.acc; } }).catch(() => {});
     return;
   }
+  if (granted) { show("loading"); $("#loadMsg").textContent = "Je cherche ta position…"; return locate($("#locMsg"), $("#locBtn")); }
   show("welcome");
 })();
 
