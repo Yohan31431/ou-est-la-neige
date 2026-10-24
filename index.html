@@ -362,7 +362,7 @@ async function webcamsNear(s) {
     if (!r.ok) throw new Error("HTTP " + r.status);
     const d = await r.json();
     s.cams = (d.webcams || []).filter(w => w.status !== "inactive" && (w.images?.current?.preview || w.images?.current?.thumbnail)).map(w => ({
-      id: w.webcamId, title: w.title || "", city: w.location?.city || "",
+      id: w.webcamId, title: (w.title || "").replace(/^[^:]{2,40}:\s*/, ""), city: w.location?.city || "",
       img: w.images.current.preview || w.images.current.thumbnail, thumb: w.images.current.thumbnail || w.images.current.preview,
       url: w.urls?.detail || ("https://www.windy.com/webcams/" + w.webcamId), live: !!(w.player && w.player.live),
       km: w.location?.latitude != null ? dist(s.lat, s.lon, w.location.latitude, w.location.longitude) : 99
