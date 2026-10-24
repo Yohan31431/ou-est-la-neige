@@ -79,6 +79,21 @@ main{padding-top:16px;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px)
 .b svg{width:18px;height:18px}
 .b-blue{background:var(--blue);color:var(--blue-ink);box-shadow:0 8px 20px -8px rgba(10,122,255,.6),inset 0 1px 0 rgba(255,255,255,.35)}
 .b-glass{background:var(--glass-2);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 #fff,0 1px 3px rgba(30,45,80,.06)}
+.cams{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,46%);gap:8px;overflow-x:auto;margin:16px -22px 0;padding:0 22px;scroll-snap-type:x proximity;scrollbar-width:none}
+.cams::-webkit-scrollbar{display:none}
+.cam{display:block;scroll-snap-align:start;border-radius:14px;overflow:hidden;aspect-ratio:16/10;position:relative;background:#DDE3EC;text-decoration:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
+.cam img{width:100%;height:100%;object-fit:cover;display:block}
+.cam span{position:absolute;left:8px;right:8px;bottom:8px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:11px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cam i{position:absolute;top:8px;left:8px;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;color:#fff;background:#FF3B30;border-radius:999px;padding:2px 7px}
+.cams-h{margin:18px 0 0;font-size:13px;font-weight:600;color:var(--ink-2);display:flex;justify-content:space-between;align-items:center}
+.cams-h a{font-weight:600;color:var(--blue);text-decoration:none}
+.camgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.camgrid .cam{aspect-ratio:16/11}
+.camgrid .cam b{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;font-size:12px;font-weight:600;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.55));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.camgrid .cam em{display:block;font-style:normal;font-weight:400;font-size:11px;opacity:.85}
+.sel .cambtn{grid-row:1/3;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.06);color:var(--ink);cursor:pointer}
+.sel .cambtn svg{width:18px;height:18px}
+.sel.has-cam{grid-template-columns:1fr auto auto}
 .note{margin:16px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2)}
 .note b{color:var(--ink);font-weight:600}
 .note:empty{display:none}
@@ -267,6 +282,16 @@ dialog h3{margin:0 0 16px;font-size:24px;font-weight:700;letter-spacing:-.02em}
   </div>
 </main>
 
+<dialog id="cams">
+  <form method="dialog">
+    <button class="x" value="cancel" aria-label="Fermer">×</button>
+    <h3 id="camsTitle">Webcams</h3>
+    <p class="msg" id="camsMsg" style="margin:0"></p>
+    <div class="camgrid" id="camsGrid"></div>
+    <p class="foot" style="padding-top:14px" id="camsFoot"></p>
+  </form>
+</dialog>
+
 <dialog id="dlg">
   <form method="dialog" autocomplete="off">
     <button class="x" value="cancel" aria-label="Fermer">×</button>
@@ -326,6 +351,42 @@ const PLACES = [
 ["Bansko","Bulgarie",41.838,23.488,1000],["Kopaonik","Serbie",43.285,20.810,1770],["Parnasse","Grèce",38.535,22.585,1750],
 ["Oukaïmeden","Maroc",31.205,-7.860,2600]
 ];
+
+/* ---------- Webcams (Windy) : clé gratuite à créer sur https://api.windy.com/keys ---------- */
+const WINDY_KEY = "";
+async function webcamsNear(s) {
+  if (s.cams) return s.cams;
+  if (!WINDY_KEY) return (s.cams = []);
+  try {
+    const r = await fetch(`https://api.windy.com/webcams/api/v3/webcams?nearby=${s.lat.toFixed(4)},${s.lon.toFixed(4)},15&limit=10&include=images,urls,location,player&lang=fr`, { headers: { "x-windy-api-key": WINDY_KEY } });
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    const d = await r.json();
+    s.cams = (d.webcams || []).filter(w => w.status !== "inactive" && (w.images?.current?.preview || w.images?.current?.thumbnail)).map(w => ({
+      id: w.webcamId, title: w.title || "", city: w.location?.city || "",
+      img: w.images.current.preview || w.images.current.thumbnail, thumb: w.images.current.thumbnail || w.images.current.preview,
+      url: w.urls?.detail || ("https://www.windy.com/webcams/" + w.webcamId), live: !!(w.player && w.player.live),
+      km: w.location?.latitude != null ? dist(s.lat, s.lon, w.location.latitude, w.location.longitude) : 99
+    })).sort((a, b) => a.km - b.km);
+  } catch { s.cams = undefined; return []; }
+  return s.cams;
+}
+const camsBtn = s => WINDY_KEY ? `<button class="b b-glass" type="button" data-cams="${S.pts.indexOf(s)}">${icon("i-cam")}Webcams</button>` : `<a class="b b-glass" href="${camUrl(s)}" target="_blank" rel="noopener">${icon("i-cam")}Webcams</a>`;
+async function openCams(s) {
+  const d = $("#cams");
+  $("#camsTitle").textContent = "Webcams · " + label(s).replace(/^Près de /, "");
+  $("#camsMsg").textContent = "Je cherche les webcams…"; $("#camsGrid").innerHTML = ""; $("#camsFoot").innerHTML = "";
+  d.showModal();
+  const cams = await webcamsNear(s);
+  if (!d.open) return;
+  if (!cams.length) {
+    $("#camsMsg").innerHTML = `Pas de webcam connue à moins de 15 km. <a href="${camUrl(s)}" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600;text-decoration:none">Chercher sur Google</a>`;
+    return;
+  }
+  $("#camsMsg").textContent = "";
+  $("#camsGrid").innerHTML = cams.slice(0, 8).map(c => `<a class="cam" href="${esc(c.url)}" target="_blank" rel="noopener"><img src="${esc(c.img)}" alt="" loading="lazy">${c.live ? "<i>EN DIRECT</i>" : ""}<b>${esc(c.title)}<em>${esc(c.city)}${c.km < 99 ? " · " + (c.km < 1 ? "<1" : nf(c.km)) + " km" : ""}</em></b></a>`).join("");
+  $("#camsFoot").innerHTML = `Touche une image pour la voir en direct. Webcams : <a href="https://www.windy.com/webcams" target="_blank" rel="noopener" style="color:inherit">Windy.com</a>`;
+}
+document.addEventListener("click", e => { const b = e.target.closest("[data-cams]"); if (b) { e.preventDefault(); openCams(S.pts[+b.dataset.cams]); } });
 
 /* ---------- Outils ---------- */
 const OM = "https://api.open-meteo.com/v1/forecast";
@@ -565,6 +626,12 @@ function render(fresh) {
   const u = S.updated;
   $("#updated").textContent = u ? "Mis à jour à " + u.getHours() + " h " + String(u.getMinutes()).padStart(2, "0") + "." : "";
 }
+function heroCams(s) {
+  if (!WINDY_KEY) return "";
+  if (s.cams === undefined) { webcamsNear(s).then(() => { if (S.pts.includes(s)) renderHero(); }); return ""; }
+  if (!s.cams.length) return "";
+  return `<p class="cams-h">Webcams en direct<a href="#" data-cams="${S.pts.indexOf(s)}">Toutes</a></p><div class="cams">${s.cams.slice(0, 4).map(c => `<a class="cam" href="${esc(c.url)}" target="_blank" rel="noopener"><img src="${esc(c.thumb)}" alt="" loading="lazy">${c.live ? "<i>EN DIRECT</i>" : ""}<span>${esc(c.title)}</span></a>`).join("")}</div>`;
+}
 const pill = (ic, v, l) => `<span class="pill">${icon(ic)}${v}${l ? ` <em>${l}</em>` : ""}</span>`;
 function renderHero() {
   const el = $("#hero"), home = S.home;
@@ -583,8 +650,8 @@ function renderHero() {
     html = `<p class="eyebrow">La neige la plus proche</p><h1 class="big">${kmTxt(now)}<small>km</small></h1>
       <p class="where">${esc(label(now))}</p><p class="sub">${now.region ? esc(now.region) + " · " : ""}${now.depth >= 1 ? now.depth + " cm au sol" : "il neige en ce moment"}${now.snowing && now.depth >= 1 ? ", et il neige" : ""}</p>
       <div class="pills">${pill("i-car", driveTxt(now), "de route")}${pill("i-peak", nf(now.alt) + " m")}${now.temp != null ? pill("i-temp", Math.round(now.temp) + " °") : ""}</div>
-      <div class="cta"><a class="b b-blue" href="${mapsDir(now)}" target="_blank" rel="noopener">${icon("i-go")}Y aller</a><a class="b b-glass" href="${camUrl(now)}" target="_blank" rel="noopener">${icon("i-cam")}Webcams</a></div>
-      <p class="note">${note}</p>${acc}`;
+      <div class="cta"><a class="b b-blue" href="${mapsDir(now)}" target="_blank" rel="noopener">${icon("i-go")}Y aller</a>${camsBtn(now)}</div>
+      ${heroCams(now)}<p class="note">${note}</p>${acc}`;
   } else if (soon) {
     const i = soon.firstDay, w = dayWord(i);
     html = `<p class="eyebrow">Pas de neige au sol pour l'instant</p><h1 class="big" style="font-size:clamp(44px,12vw,72px)">Neige ${esc(w)}</h1>
@@ -671,7 +738,8 @@ function renderSel() {
   const el = $("#sel");
   if (!s) { el.hidden = true; $("#mapHint").textContent = "Aucune neige dans ce rayon pour l'instant."; return; }
   el.hidden = false;
-  el.innerHTML = `<b>${esc(label(s))}</b><a href="${mapsDir(s)}" target="_blank" rel="noopener" aria-label="Itinéraire">${icon("i-go")}</a><span>${snowTxt(s)} · ${nf(s.alt)} m · ${driveTxt(s)}</span>`;
+  el.classList.toggle("has-cam", !!WINDY_KEY);
+  el.innerHTML = `<b>${esc(label(s))}</b>${WINDY_KEY ? `<button class="cambtn" type="button" data-cams="${S.pts.indexOf(s)}" aria-label="Webcams">${icon("i-cam")}</button>` : ""}<a href="${mapsDir(s)}" target="_blank" rel="noopener" aria-label="Itinéraire">${icon("i-go")}</a><span>${snowTxt(s)} · ${nf(s.alt)} m · ${driveTxt(s)}</span>`;
 }
 
 /* ---------- Démarrage ---------- */
