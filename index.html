@@ -85,7 +85,9 @@ main{padding-top:16px;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px)
 .b-glass{background:var(--glass-2);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 #fff,0 1px 3px rgba(30,45,80,.06)}
 .cams{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(150px,46%);gap:8px;overflow-x:auto;margin:16px -22px 0;padding:0 22px;scroll-snap-type:x proximity;scrollbar-width:none}
 .cams::-webkit-scrollbar{display:none}
-.cam{display:block;scroll-snap-align:start;border-radius:14px;overflow:hidden;aspect-ratio:16/10;position:relative;background:#DDE3EC;text-decoration:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
+.cam{display:block;width:100%;padding:0;border:0;cursor:pointer;scroll-snap-align:start;border-radius:14px;overflow:hidden;aspect-ratio:16/10;position:relative;background:#DDE3EC;text-decoration:none;text-align:left;box-shadow:inset 0 0 0 1px rgba(255,255,255,.6);-webkit-tap-highlight-color:transparent;transition:transform .1s ease-out}
+.cam:active{transform:scale(.97)}
+.cam .day{position:absolute;top:8px;right:8px;font-style:normal;font-size:10px;font-weight:700;color:var(--ink);background:rgba(255,255,255,.85);border-radius:999px;padding:2px 7px}
 .cam img{width:100%;height:100%;object-fit:cover;display:block}
 .cam span{position:absolute;left:8px;right:8px;bottom:8px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:11px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cam i{position:absolute;top:8px;left:8px;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;color:#fff;background:#FF3B30;border-radius:999px;padding:2px 7px}
@@ -232,6 +234,44 @@ dialog.sheet[open] form{animation:up .42s cubic-bezier(.2,.9,.25,1)}
 .camgrid .cam b{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;font-size:12px;font-weight:600;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.55));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .camgrid .cam em{display:block;font-style:normal;font-weight:400;font-size:11px;opacity:.85}
 .sheet .msg{margin:0}
+
+/* Visionneuse de webcam (plein écran, lecteur officiel Windy) */
+dialog.viewer{width:100%;height:100%;max-width:none;max-height:none;margin:0;inset:0;background:transparent;overflow:hidden}
+dialog.viewer::backdrop{background:rgba(6,8,14,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px)}
+dialog.viewer[open] .v-in{animation:fade .25s ease}
+.v-in{height:100%;max-width:960px;margin:0 auto;display:flex;flex-direction:column;gap:12px;color:#fff;padding:calc(env(safe-area-inset-top,0px) + 14px) max(12px,env(safe-area-inset-right,0px)) calc(env(safe-area-inset-bottom,0px) + 16px) max(12px,env(safe-area-inset-left,0px))}
+.v-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:0 4px}
+.v-top b{display:block;font-size:18px;font-weight:700;letter-spacing:-.01em;line-height:1.25}
+.v-top span{display:block;margin-top:2px;font-size:13px;color:rgba(255,255,255,.65)}
+.v-x{flex:none;width:36px;height:36px;border:0;border-radius:50%;background:rgba(255,255,255,.16);color:#fff;font-size:19px;line-height:1;cursor:pointer}
+.v-frame{position:relative;width:100%;aspect-ratio:4/3;max-height:calc(100dvh - 260px);margin:auto 0;border-radius:18px;overflow:hidden;background:#000}
+.v-frame img,.v-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.v-frame img{object-fit:contain}
+.v-tabs{align-self:center;display:flex;gap:4px;padding:4px;border-radius:999px;background:rgba(255,255,255,.13)}
+.v-tabs button{border:0;background:none;color:#fff;font-size:14px;font-weight:600;height:34px;padding:0 16px;border-radius:999px;cursor:pointer}
+.v-tabs button[aria-pressed="true"]{background:#fff;color:#111}
+.v-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.v-nav button,.v-src{display:inline-flex;align-items:center;gap:6px;height:42px;padding:0 16px;border:0;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer}
+.v-nav button:disabled{opacity:.3}
+.v-nav span{font-size:13px;color:rgba(255,255,255,.6)}
+.v-src{align-self:center}
+.v-foot{margin:0;text-align:center;font-size:11px;color:rgba(255,255,255,.45)}
+.v-foot a{color:inherit}
+.v-bar{display:flex;flex-direction:column;gap:12px}
+/* Téléphone tourné : la vidéo en grand à gauche, les commandes à droite */
+@media (orientation:landscape) and (max-height:560px){
+  .v-in{max-width:none;display:grid;grid-template-columns:minmax(0,1fr) 220px;grid-template-rows:auto 1fr auto auto;column-gap:14px;row-gap:10px;padding-top:calc(env(safe-area-inset-top,0px) + 10px);padding-bottom:calc(env(safe-area-inset-bottom,0px) + 10px)}
+  .v-frame{grid-column:1;grid-row:1/5;width:100%;height:100%;max-height:none;aspect-ratio:auto;margin:0;border-radius:14px}
+  .v-top{grid-column:2;grid-row:1;padding:0}
+  .v-top b{font-size:15px}
+  .v-bar{grid-column:2;grid-row:2;align-self:center}
+  .v-tabs{align-self:stretch;justify-content:center}
+  .v-tabs button{padding:0 10px;font-size:13px}
+  .v-nav button{padding:0 16px;height:38px;font-size:18px}
+  .v-nav .w{display:none}
+  .v-src{grid-column:2;grid-row:3;height:38px;font-size:13px}
+  .v-foot{grid-column:2;grid-row:4}
+}
 .sheet .foot{padding:14px 0 0}
 </style>
 </head>
@@ -339,8 +379,21 @@ dialog.sheet[open] form{animation:up .42s cubic-bezier(.2,.9,.25,1)}
     <p class="h4">Webcams en direct</p>
     <p class="msg" id="pCamsMsg"></p>
     <div class="camgrid" id="pCams"></div>
-    <p class="foot">Touche une image pour la voir en direct. Webcams : <a href="https://www.windy.com/webcams" target="_blank" rel="noopener">Windy.com</a></p>
+    <p class="foot">Touche une image pour la voir en grand, en direct ou en accéléré sur 24 h. Webcams : <a href="https://www.windy.com/webcams" target="_blank" rel="noopener">Windy.com</a></p>
   </form>
+</dialog>
+
+<dialog id="cam" class="viewer" aria-labelledby="vTitle">
+  <div class="v-in">
+    <div class="v-top"><div><b id="vTitle"></b><span id="vSub"></span></div><button class="v-x" type="button" id="vClose" aria-label="Fermer">×</button></div>
+    <div class="v-frame"><img id="vImg" alt=""><iframe id="vFrame" title="Lecteur de la webcam" allow="fullscreen; autoplay" allowfullscreen referrerpolicy="origin"></iframe></div>
+    <div class="v-bar">
+      <div class="v-tabs" id="vTabs" role="group" aria-label="Affichage"><button type="button" data-mode="live">En direct</button><button type="button" data-mode="day">Dernières 24 h</button></div>
+      <div class="v-nav"><button type="button" id="vPrev" aria-label="Webcam précédente">‹<span class="w"> Précédente</span></button><span id="vCount"></span><button type="button" id="vNext" aria-label="Webcam suivante"><span class="w">Suivante </span>›</button></div>
+    </div>
+    <a class="v-src" id="vSrc" href="#" target="_blank" rel="noopener">Site de la webcam ↗</a>
+    <p class="v-foot">Webcam : <a href="https://www.windy.com/webcams" target="_blank" rel="noopener">Windy.com</a></p>
+  </div>
 </dialog>
 
 <dialog id="dlg">
@@ -516,8 +569,10 @@ function webcamsNear(s, force) {
       const d = await getJSON(`https://api.windy.com/webcams/api/v3/webcams?nearby=${s.lat.toFixed(4)},${s.lon.toFixed(4)},15&limit=12&include=images,urls,location,player&lang=fr`, 10000, { "x-windy-api-key": WINDY_KEY });
       s.cams = (d.webcams || []).filter(w => w.status !== "inactive" && (w.images?.current?.preview || w.images?.current?.thumbnail)).map(w => ({
         title: (w.title || "").replace(/^[^:]{2,40}:\s*/, ""), city: w.location?.city || "",
-        img: w.images.current.preview || w.images.current.thumbnail, thumb: w.images.current.thumbnail || w.images.current.preview,
-        url: w.urls?.detail || ("https://www.windy.com/webcams/" + w.webcamId), live: !!(w.player && w.player.live),
+        img: w.images.current.preview || w.images.current.thumbnail,
+        imgDay: w.images.daylight?.preview || w.images.daylight?.thumbnail || "",
+        live: w.player?.live || "", day: w.player?.day || "", src: w.urls?.provider || "",
+        lat: w.location?.latitude ?? s.lat, lon: w.location?.longitude ?? s.lon,
         km: w.location?.latitude != null ? dist(s.lat, s.lon, w.location.latitude, w.location.longitude) : 99
       })).sort((a, b) => a.km - b.km);
     } catch { s.cams = s.cams || []; }
@@ -525,6 +580,40 @@ function webcamsNear(s, force) {
     return s.cams;
   })();
   return s.camsP;
+}
+
+/* Nuit ou jour là où est la webcam (position du soleil) : la nuit, on montre la dernière image de jour */
+function sunAlt(lat, lon, date = new Date()) {
+  const r = Math.PI / 180, d = date / 864e5 - 10957.5;
+  const g = (357.529 + .98560028 * d) * r, q = 280.459 + .98564736 * d;
+  const L = (q + 1.915 * Math.sin(g) + .02 * Math.sin(2 * g)) * r, e = (23.439 - 3.6e-7 * d) * r;
+  const ra = Math.atan2(Math.cos(e) * Math.sin(L), Math.cos(L)), dec = Math.asin(Math.sin(e) * Math.sin(L));
+  const ha = (((18.697374558 + 24.06570982441908 * d) % 24) * 15 + lon) * r - ra;
+  return Math.asin(Math.sin(lat * r) * Math.sin(dec) + Math.cos(lat * r) * Math.cos(dec) * Math.cos(ha)) / r;
+}
+const isNight = c => sunAlt(c.lat, c.lon) < -4;
+const camImg = c => isNight(c) && c.imgDay ? c.imgDay : c.img;
+function openCam(s, j) {
+  if (!s || !s.cams || !s.cams.length) return;
+  S.cam = { s, j: (j + s.cams.length) % s.cams.length, mode: S.cam && S.cam.s === s ? S.cam.mode : null };
+  renderCam();
+  const d = $("#cam"); if (!d.open) d.showModal();
+}
+function renderCam() {
+  const { s, j } = S.cam, c = s.cams[j], n = s.cams.length;
+  const modes = [c.live && "live", c.day && "day"].filter(Boolean);
+  const mode = modes.includes(S.cam.mode) ? S.cam.mode : modes[0] || null;
+  S.cam.mode = mode;
+  $("#vTitle").textContent = c.title || "Webcam";
+  $("#vSub").textContent = [c.city, c.km < 99 ? (c.km < 1 ? "à moins d'1 km" : "à " + nf(c.km) + " km") + " de " + label(s).replace(/^Près de /, "") : ""].filter(Boolean).join(" · ");
+  $("#vImg").src = camImg(c);
+  const f = $("#vFrame"), url = mode === "live" ? c.live : mode === "day" ? c.day : "";
+  if (url) { f.hidden = false; if (f.getAttribute("src") !== url) f.src = url; } else { f.hidden = true; f.removeAttribute("src"); }
+  $("#vTabs").hidden = modes.length < 2;
+  $("#vTabs").querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+  $("#vCount").textContent = n > 1 ? `${j + 1} / ${n}` : "";
+  $("#vPrev").disabled = $("#vNext").disabled = n < 2;
+  const a = $("#vSrc"); a.hidden = !c.src; if (c.src) a.href = c.src;
 }
 
 /* ---------- État ---------- */
@@ -783,7 +872,8 @@ function heroCams(s) {
   if (!WINDY_KEY || !s) return "";
   if (!s.cams) { if (!s.camsP) webcamsNear(s).then(() => { if (S.heroSpot === s) renderHero(); }); return ""; }
   if (!s.cams.length) return "";
-  return `<p class="cams-h">Webcams en direct<button type="button" data-place="${S.pts.indexOf(s)}">Toutes</button></p><div class="cams">${s.cams.slice(0, 4).map(c => `<a class="cam" href="${esc(c.url)}" target="_blank" rel="noopener"><img src="${esc(c.thumb)}" alt="" loading="lazy">${c.live ? "<i>EN DIRECT</i>" : ""}<span>${esc(c.title)}</span></a>`).join("")}</div>`;
+  const i = S.pts.indexOf(s);
+  return `<p class="cams-h">Webcams en direct<button type="button" data-place="${i}">Toutes</button></p><div class="cams">${s.cams.slice(0, 4).map((c, j) => `<button class="cam" type="button" data-spot="${i}" data-cam="${j}" aria-label="Voir la webcam ${esc(c.title)}"><img src="${esc(camImg(c))}" alt="">${c.live ? "<i>EN DIRECT</i>" : ""}${isNight(c) && c.imgDay ? '<em class="day">Image de jour</em>' : ""}<span>${esc(c.title)}</span></button>`).join("")}</div>`;
 }
 const pill = (ic, v, cls) => `<span class="pill${cls ? " " + cls : ""}">${icon(ic)}${v}</span>`;
 function renderHero() {
@@ -947,7 +1037,8 @@ function renderPlaceCams() {
   if (!s.cams) { g.innerHTML = ""; m.textContent = "Je cherche les webcams…"; return; }
   if (!s.cams.length) { g.innerHTML = ""; m.innerHTML = `Pas de webcam connue à moins de 15 km. ${google}`; return; }
   m.textContent = "";
-  g.innerHTML = s.cams.slice(0, 6).map(c => `<a class="cam" href="${esc(c.url)}" target="_blank" rel="noopener"><img src="${esc(c.img)}" alt="" loading="lazy">${c.live ? "<i>EN DIRECT</i>" : ""}<b>${esc(c.title)}<em>${esc(c.city)}${c.km < 99 ? " · " + (c.km < 1 ? "<1" : nf(c.km)) + " km" : ""}</em></b></a>`).join("");
+  const i = S.pts.indexOf(s);
+  g.innerHTML = s.cams.slice(0, 8).map((c, j) => `<button class="cam" type="button" data-spot="${i}" data-cam="${j}" aria-label="Voir la webcam ${esc(c.title)}"><img src="${esc(camImg(c))}" alt="">${c.live ? "<i>EN DIRECT</i>" : ""}${isNight(c) && c.imgDay ? '<em class="day">Image de jour</em>' : ""}<b>${esc(c.title)}<em>${esc(c.city)}${c.km < 99 ? " · " + (c.km < 1 ? "<1" : nf(c.km)) + " km" : ""}</em></b></button>`).join("");
 }
 
 /* ---------- Démarrage ---------- */
@@ -955,7 +1046,16 @@ document.addEventListener("click", e => {
   const b = e.target.closest("[data-place]");
   if (b && b.dataset.place !== "-1" && S.pts[+b.dataset.place]) { e.preventDefault(); openPlace(S.pts[+b.dataset.place], b.dataset.day != null ? +b.dataset.day : null); }
 });
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-cam]");
+  if (b) { e.preventDefault(); e.stopPropagation(); openCam(S.pts[+b.dataset.spot], +b.dataset.cam); }
+}, true);
 for (const d of document.querySelectorAll("dialog")) d.addEventListener("click", e => { if (e.target === d) d.close(); });
+$("#vClose").addEventListener("click", () => { $("#vFrame").removeAttribute("src"); $("#cam").close(); });
+$("#vPrev").addEventListener("click", () => { S.cam.j = (S.cam.j - 1 + S.cam.s.cams.length) % S.cam.s.cams.length; renderCam(); });
+$("#vNext").addEventListener("click", () => { S.cam.j = (S.cam.j + 1) % S.cam.s.cams.length; renderCam(); });
+$("#vTabs").addEventListener("click", e => { const b = e.target.closest("[data-mode]"); if (b) { S.cam.mode = b.dataset.mode; renderCam(); } });
+$("#cam").addEventListener("close", () => { $("#vFrame").removeAttribute("src"); });
 $("#moreBtn").addEventListener("click", () => { S.shown += 10; renderList(); });
 $("#refreshBtn").addEventListener("click", () => S.place && run(S.place, { quiet: true, force: true }));
 $("#retryBtn").addEventListener("click", () => S.place ? run(S.place, { force: true }) : show("welcome"));
