@@ -611,7 +611,10 @@ async function fetchWeather(list) {
     let u = OM + "?latitude=" + ch.map(s => s.lat.toFixed(3)).join(",") + "&longitude=" + ch.map(s => s.lon.toFixed(3)).join(",");
     if (ch[0].alt != null) u += "&elevation=" + ch.map(s => s.alt).join(",");
     u += "&current=snow_depth,weather_code,temperature_2m&daily=snowfall_sum,temperature_2m_max&hourly=snow_depth&temporal_resolution=hourly_6&forecast_days=10&timezone=auto";
-    let r = await getJSON(u); if (!Array.isArray(r)) r = [r];
+    let r;
+    try { r = await getJSON(u); }
+    catch (e) { if (e.status === 429 || e.status >= 500 || e.name === "AbortError") { await wait(2500); r = await getJSON(u); } else throw e; } // 2e essai si le service sature
+    if (!Array.isArray(r)) r = [r];
     r.forEach((d, i) => {
       const s = ch[i]; if (!s || !d || !d.daily) return;
       const c = d.current || {};
