@@ -12,14 +12,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://tiles.openfreemap.org">
+<link rel="preconnect" href="https://api.open-meteo.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400..800&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.6.0/maplibre-gl.css" crossorigin="">
 <style>
 /* Mise en page : fond « aurore » fixe (bleu pâle, lavande, pêche), barre flottante en verre, une colonne de cartes
-   en verre dépoli (verdict, carte géographique, 10 jours, liste). Une seule couleur : le bleu système. */
+   en verre dépoli (verdict, carte, jours, liste) et une fiche qui monte du bas pour chaque lieu. Accent unique : bleu système. */
 :root{
   --ink:#1D1D1F; --ink-2:#6E6E73; --ink-3:#AEAEB2; --hair:rgba(60,60,67,.12);
-  --bg:#EEF2F8; --blue:#0A7AFF; --blue-ink:#FFFFFF;
+  --bg:#EEF2F8; --blue:#0A7AFF; --blue-ink:#FFFFFF; --amber:#B25E00;
   --glass:rgba(255,255,255,.58); --glass-2:rgba(255,255,255,.78); --glass-edge:rgba(255,255,255,.85);
   --shadow:0 24px 60px -24px rgba(30,45,80,.22),0 2px 6px rgba(30,45,80,.05);
   --r:28px; --r-s:18px;
@@ -28,6 +29,7 @@
 }
 *{box-sizing:border-box}
 html{-webkit-text-size-adjust:100%}
+html:has(dialog[open]){overflow:hidden}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);font-size:16px;line-height:1.45;font-optical-sizing:auto;font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased}
 body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:
   radial-gradient(42% 34% at 12% 8%,#CFE3FF 0%,rgba(207,227,255,0) 70%),
@@ -43,7 +45,7 @@ a{color:inherit}
 
 /* Verre */
 .glass{background:var(--glass);-webkit-backdrop-filter:blur(26px) saturate(1.5);backdrop-filter:blur(26px) saturate(1.5);border:1px solid var(--glass-edge);box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.95);border-radius:var(--r)}
-@media (prefers-reduced-transparency:reduce){.glass,.bar-in{background:#fff;-webkit-backdrop-filter:none;backdrop-filter:none}}
+@media (prefers-reduced-transparency:reduce){.glass,.bar-in,dialog form{background:#fff!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}}
 
 /* Barre flottante */
 .bar{position:sticky;top:0;z-index:30;padding-top:calc(env(safe-area-inset-top,0px) + 10px);pointer-events:none}
@@ -65,14 +67,16 @@ main{padding-top:16px;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px)
 @media (prefers-reduced-motion:reduce){.enter{animation:enter .25s ease both}@keyframes enter{from{opacity:0}to{opacity:1}}}
 
 /* Verdict */
-.big{margin:6px 0 0;font-weight:800;font-size:clamp(60px,19vw,104px);line-height:.95;letter-spacing:-.045em;font-optical-sizing:auto}
+.big{margin:6px 0 0;font-weight:800;font-size:clamp(60px,19vw,104px);line-height:.95;letter-spacing:-.045em;font-optical-sizing:auto;overflow-wrap:anywhere}
 .big small{font-size:.38em;font-weight:700;letter-spacing:-.02em;margin-left:.1em;color:var(--ink-2)}
+.big.mid{font-size:clamp(40px,12vw,72px);line-height:1}
 .where{margin:10px 0 0;font-size:22px;font-weight:700;letter-spacing:-.02em;line-height:1.2;overflow-wrap:anywhere}
 .sub{margin:3px 0 0;font-size:15px;color:var(--ink-2)}
-.pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
-.pill{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 13px 0 10px;border-radius:999px;background:var(--glass-2);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 #fff,0 1px 3px rgba(30,45,80,.06);font-size:14px;font-weight:600;white-space:nowrap}
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin-top:18px}
+.pill{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 9px;border-radius:999px;background:var(--glass-2);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 #fff,0 1px 3px rgba(30,45,80,.06);font-size:14px;font-weight:600;white-space:nowrap}
 .pill svg{width:16px;height:16px;color:var(--ink-2);flex:none}
-.pill em{font-style:normal;font-weight:500;color:var(--ink-2)}
+.pill.warn{color:var(--amber)}
+.pill.warn svg{color:var(--amber)}
 .cta{display:flex;gap:10px;margin-top:20px}
 .b{flex:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;height:50px;padding:0 18px;border-radius:999px;border:0;font-size:16px;font-weight:600;letter-spacing:-.01em;text-decoration:none;cursor:pointer;transition:transform .1s ease-out;-webkit-tap-highlight-color:transparent}
 .b:active{transform:scale(.97)}
@@ -86,14 +90,7 @@ main{padding-top:16px;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px)
 .cam span{position:absolute;left:8px;right:8px;bottom:8px;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.82);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font-size:11px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cam i{position:absolute;top:8px;left:8px;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;color:#fff;background:#FF3B30;border-radius:999px;padding:2px 7px}
 .cams-h{margin:18px 0 0;font-size:13px;font-weight:600;color:var(--ink-2);display:flex;justify-content:space-between;align-items:center}
-.cams-h a{font-weight:600;color:var(--blue);text-decoration:none}
-.camgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
-.camgrid .cam{aspect-ratio:16/11}
-.camgrid .cam b{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;font-size:12px;font-weight:600;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.55));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.camgrid .cam em{display:block;font-style:normal;font-weight:400;font-size:11px;opacity:.85}
-.sel .cambtn{grid-row:1/3;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.06);color:var(--ink);cursor:pointer}
-.sel .cambtn svg{width:18px;height:18px}
-.sel.has-cam{grid-template-columns:1fr auto auto}
+.cams-h button{border:0;background:none;padding:0;font-size:13px;font-weight:600;color:var(--blue);cursor:pointer}
 .note{margin:16px 0 0;font-size:15px;line-height:1.5;color:var(--ink-2)}
 .note b{color:var(--ink);font-weight:600}
 .note:empty{display:none}
@@ -119,15 +116,16 @@ main{padding-top:16px;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px)
 @media (prefers-reduced-motion:reduce){.me::after{animation:none;transform:scale(.8);opacity:.5}}
 .pt{width:0;height:0;position:relative;cursor:pointer}
 .pt::before{content:"";position:absolute;left:0;top:0;width:var(--d);height:var(--d);transform:translate(-50%,-50%);border-radius:50%;background:#1D1D1F;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.25);transition:box-shadow .15s}
+.pt::after{content:"";position:absolute;left:-16px;top:-16px;width:32px;height:32px}
 .pt.soon::before{background:#fff;border:2px solid #1D1D1F}
 .pt.sel::before{box-shadow:0 0 0 3px var(--blue),0 2px 6px rgba(0,0,0,.25)}
 .pt-lbl{position:absolute;left:calc(var(--d) / 2 + 6px);top:0;transform:translateY(-50%);background:rgba(255,255,255,.9);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.95);border-radius:999px;box-shadow:0 4px 12px -4px rgba(30,45,80,.3);padding:3px 9px;font-size:12px;font-weight:600;white-space:nowrap;pointer-events:none}
-.sel{margin:8px 4px 4px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:12px 6px 10px 14px;border-radius:var(--r-s);background:var(--glass-2);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 #fff}
+.sel{width:calc(100% - 8px);margin:8px 4px 4px;display:grid;grid-template-columns:1fr 22px;gap:2px 12px;align-items:center;padding:12px 10px 10px 14px;border-radius:var(--r-s);background:var(--glass-2);border:1px solid var(--glass-edge);box-shadow:inset 0 1px 0 #fff;text-align:left;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.sel:active{transform:scale(.99)}
 .sel b{font-size:16px;font-weight:700;letter-spacing:-.01em;overflow-wrap:anywhere}
-.sel span{font-size:13px;color:var(--ink-2)}
-.sel a{grid-row:1/3;display:flex;align-items:center;justify-content:center;width:40px;height:40px;border-radius:50%;background:rgba(10,122,255,.12);color:var(--blue);text-decoration:none}
-.sel a svg{width:18px;height:18px}
-.legend{display:flex;gap:16px;margin:10px 14px 4px;font-size:12px;font-weight:500;color:var(--ink-2)}
+.sel span{grid-column:1;font-size:13px;color:var(--ink-2)}
+.sel svg{grid-row:1/3;grid-column:2;width:22px;height:22px;color:var(--ink-3)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:10px 14px 4px;font-size:12px;font-weight:500;color:var(--ink-2)}
 .legend span{display:flex;align-items:center;gap:6px}
 .legend i{width:10px;height:10px;border-radius:50%;display:inline-block;background:var(--ink)}
 .legend i.o{background:#fff;border:2px solid var(--ink);width:8px;height:8px}
@@ -135,29 +133,36 @@ main{padding-top:16px;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px)
 
 /* Jours */
 .days-card{padding:6px 0 8px}
-.days{display:grid;grid-auto-flow:column;grid-auto-columns:124px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:8px 10px}
+.days{display:grid;grid-auto-flow:column;grid-auto-columns:128px;overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:8px 10px}
 .days::-webkit-scrollbar{display:none}
-.day{scroll-snap-align:start;padding:10px 12px;border-left:1px solid var(--hair);display:flex;flex-direction:column;gap:2px;min-height:150px}
-.day:first-child{border-left:0}
+.day{scroll-snap-align:start;padding:10px 12px;border:0;border-left:1px solid var(--hair);background:none;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:2px;min-height:164px;-webkit-tap-highlight-color:transparent}
+.day:first-child{border-left-color:transparent}
+.day:active{background:rgba(0,0,0,.03)}
+.day.best{background:rgba(10,122,255,.08);border-radius:18px;border-left-color:transparent}
+.day.best + .day{border-left-color:transparent}
 .day .dl{font-size:13px;font-weight:600}
 .day .dd{font-size:12px;color:var(--ink-2)}
-.day .num{font-size:36px;font-weight:800;letter-spacing:-.04em;line-height:1;margin-top:12px}
+.tag{align-self:flex-start;margin-top:6px;font-size:11px;font-weight:700;color:var(--blue);background:rgba(10,122,255,.12);border-radius:999px;padding:2px 8px}
+.day .num{font-size:32px;font-weight:800;letter-spacing:-.04em;line-height:1;margin-top:10px}
 .day .num small{font-size:13px;font-weight:600;letter-spacing:0;margin-left:2px;color:var(--ink-2)}
-.day .wh{font-size:13px;font-weight:500;line-height:1.3;overflow-wrap:anywhere;margin-top:2px}
+.day .wh{font-size:13px;font-weight:600;line-height:1.3;overflow-wrap:anywhere;margin-top:4px}
 .day .ds{font-size:12px;color:var(--ink-2)}
-.day .ln{margin-top:auto;padding-top:8px;font-size:12px;color:var(--ink-2)}
-.day .ln b{font-weight:600;color:var(--ink)}
+.day .ln{margin-top:auto;padding-top:8px;font-size:11px;color:var(--ink-3)}
+.day .ln b{font-weight:600;color:var(--ink-2)}
+.day.no{cursor:default}
 .day.no .num{color:var(--ink-3)}
-.day.no .wh{color:var(--ink-2)}
+.day.no .wh{color:var(--ink-2);font-weight:500}
 
 /* Liste */
 .list{list-style:none;margin:0;padding:4px 0}
-.it{display:grid;grid-template-columns:1fr auto 22px;gap:4px 12px;align-items:center;padding:13px 16px 13px 20px;text-decoration:none;position:relative}
-.it + .it::before{content:"";position:absolute;left:20px;right:0;top:0;height:1px;background:var(--hair)}
+.list li{position:relative}
+.list li + li::before{content:"";position:absolute;left:20px;right:0;top:0;height:1px;background:var(--hair)}
+.it{width:100%;border:0;background:none;text-align:left;cursor:pointer;display:grid;grid-template-columns:1fr auto 22px;gap:4px 12px;align-items:center;padding:13px 16px 13px 20px;-webkit-tap-highlight-color:transparent}
 .it:active{background:rgba(0,0,0,.03)}
 .it .t{min-width:0}
 .it .t b{display:block;font-size:16px;font-weight:600;letter-spacing:-.01em;line-height:1.25;overflow-wrap:anywhere}
 .it .t span{font-size:13px;color:var(--ink-2)}
+.it .t em{font-style:normal;color:var(--amber)}
 .it .v{text-align:right}
 .it .v b{display:block;font-size:20px;font-weight:700;letter-spacing:-.03em;line-height:1.05}
 .it .v b small{font-size:12px;font-weight:600;letter-spacing:0;margin-left:1px;color:var(--ink-2)}
@@ -182,19 +187,52 @@ main{padding-top:16px;padding-bottom:calc(32px + env(safe-area-inset-bottom,0px)
 .results button:active{background:rgba(0,0,0,.04)}
 .results button span{display:block;font-size:13px;font-weight:400;color:var(--ink-2)}
 .msg{margin:10px 4px 0;font-size:14px;color:var(--ink-2)}
+.msg a{color:var(--blue);font-weight:600;text-decoration:none}
 .loading .dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--blue);animation:pulse 1.2s ease-in-out infinite;margin-right:10px;vertical-align:middle}
 @keyframes pulse{50%{opacity:.25;transform:scale(.7)}}
 
 .foot{padding:12px 8px 0;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink-3);text-align:center}
 .foot p{margin:0}
+.foot a{color:inherit}
 .foot button{border:0;background:none;padding:0;font-size:13px;font-weight:600;color:var(--blue);cursor:pointer}
 
-/* Fenêtre « changer de lieu » */
-dialog{border:0;padding:0;width:min(520px,calc(100vw - 20px));background:transparent;overflow:visible}
+/* Fenêtres */
+dialog{border:0;padding:0;width:min(520px,calc(100vw - 20px));background:transparent;overflow:visible;color:var(--ink)}
 dialog::backdrop{background:rgba(40,50,70,.25);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
-dialog form{padding:22px 20px 20px;background:rgba(255,255,255,.86);-webkit-backdrop-filter:blur(30px) saturate(1.5);backdrop-filter:blur(30px) saturate(1.5);border:1px solid var(--glass-edge);border-radius:var(--r);box-shadow:var(--shadow);position:relative}
+dialog form{padding:22px 20px 20px;background:rgba(255,255,255,.88);-webkit-backdrop-filter:blur(30px) saturate(1.5);backdrop-filter:blur(30px) saturate(1.5);border:1px solid var(--glass-edge);border-radius:var(--r);box-shadow:var(--shadow);position:relative}
 dialog h3{margin:0 0 16px;font-size:24px;font-weight:700;letter-spacing:-.02em}
-.x{position:absolute;top:14px;right:14px;width:32px;height:32px;border:0;border-radius:50%;background:rgba(0,0,0,.06);color:var(--ink-2);cursor:pointer;font-size:17px;line-height:1}
+.x{position:absolute;top:14px;right:14px;width:32px;height:32px;border:0;border-radius:50%;background:rgba(0,0,0,.06);color:var(--ink-2);cursor:pointer;font-size:17px;line-height:1;z-index:2}
+
+/* Fiche d'un lieu : monte du bas sur téléphone */
+dialog.sheet{width:100%;max-width:560px;margin:auto auto 0;max-height:94vh;max-height:94dvh}
+dialog.sheet form{border-radius:var(--r) var(--r) 0 0;padding:8px 20px calc(22px + env(safe-area-inset-bottom,0px));max-height:94vh;max-height:94dvh;overflow-y:auto;overscroll-behavior:contain}
+dialog.sheet[open] form{animation:up .42s cubic-bezier(.2,.9,.25,1)}
+@keyframes up{from{transform:translateY(70px);opacity:.2}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){dialog.sheet[open] form{animation:fade .2s ease}@keyframes fade{from{opacity:0}to{opacity:1}}}
+@media (min-width:700px){dialog.sheet{margin:auto}dialog.sheet form{border-radius:var(--r);padding-top:16px}}
+.grab{display:block;width:38px;height:5px;border-radius:3px;background:rgba(60,60,67,.2);margin:0 auto 14px}
+@media (min-width:700px){.grab{display:none}}
+.sheet h3{margin:4px 44px 0 0;font-size:27px;font-weight:800;letter-spacing:-.03em;line-height:1.1;overflow-wrap:anywhere}
+.pstate{margin:10px 0 0;font-size:17px;font-weight:600;letter-spacing:-.01em}
+.pstate span{display:block;margin-top:2px;font-size:15px;font-weight:500;color:var(--ink-2)}
+.access{margin:14px 0 0;font-size:14px;line-height:1.45;color:#7A4300;background:rgba(255,149,0,.12);border-radius:14px;padding:10px 12px}
+.h4{margin:22px 0 10px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.chart{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;align-items:end;height:116px;padding:0 2px}
+.cb{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;min-width:0;border-radius:10px;padding-bottom:2px}
+.cb.on{background:rgba(10,122,255,.08)}
+.cb b{font-size:11px;font-weight:700;line-height:1;min-height:11px}
+.cb svg{width:12px;height:12px;color:var(--blue)}
+.cb i{display:block;width:72%;max-width:22px;border-radius:6px;background:rgba(29,29,31,.82);min-height:3px}
+.cb i.z{background:rgba(60,60,67,.14)}
+.cb i.f{background:var(--blue)}
+.cb em{font-style:normal;font-size:11px;color:var(--ink-2);white-space:nowrap}
+.chart-l{margin:8px 2px 0;font-size:12px;color:var(--ink-3)}
+.camgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.camgrid .cam{aspect-ratio:16/11}
+.camgrid .cam b{position:absolute;left:0;right:0;bottom:0;padding:22px 10px 8px;font-size:12px;font-weight:600;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.55));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.camgrid .cam em{display:block;font-style:normal;font-weight:400;font-size:11px;opacity:.85}
+.sheet .msg{margin:0}
+.sheet .foot{padding:14px 0 0}
 </style>
 </head>
 <body>
@@ -209,8 +247,11 @@ dialog h3{margin:0 0 16px;font-size:24px;font-weight:700;letter-spacing:-.02em}
     <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l5 5"/></g></symbol>
     <symbol id="i-peak" viewBox="0 0 24 24"><path d="M3 19 9.5 7l3.2 5.4 1.8-2.6L21 19H3Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
     <symbol id="i-car" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12 6.6 7.6A2 2 0 0 1 8.5 6.3h7a2 2 0 0 1 1.9 1.3L19 12M4 12h16v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-5ZM6 18v2M18 18v2"/><circle cx="7.5" cy="15" r=".8" fill="currentColor"/><circle cx="16.5" cy="15" r=".8" fill="currentColor"/></g></symbol>
+    <symbol id="i-walk" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="4.5" r="1.8"/><path d="M9.5 21l2.3-6.3 2.9 2.7V21M7.5 12.5l2.6-4 3.6 1.5 2.3 3.2M12.2 14.8 11 8.6"/></g></symbol>
+    <symbol id="i-lift" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5.5 21 2.5M12 4v4.5"/><rect x="6" y="8.5" width="12" height="11" rx="2.5"/><path d="M6 13.5h12"/></g></symbol>
     <symbol id="i-temp" viewBox="0 0 24 24"><path d="M10 4a2 2 0 0 1 4 0v9.3a4 4 0 1 1-4 0V4Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="17" r="1.6" fill="currentColor"/></symbol>
     <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 7h9a2 2 0 0 1 2 2v1.5l4.3-2.5a.5.5 0 0 1 .7.4v7.2a.5.5 0 0 1-.7.4L15 13.5V15a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-map" viewBox="0 0 24 24"><path d="M9 4 3 6.5v13L9 17l6 2.5 6-2.5v-13L15 6.5 9 4Zm0 0v13m6-10.5v13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
   </defs>
 </svg>
 
@@ -246,7 +287,7 @@ dialog h3{margin:0 0 16px;font-size:24px;font-weight:700;letter-spacing:-.02em}
     <section class="glass card screen enter" id="error" hidden>
       <p class="eyebrow">Oups</p>
       <h1>Pas de<br>réponse</h1>
-      <p class="lead">La météo ne répond pas. Vérifie ta connexion, puis réessaie.</p>
+      <p class="lead" id="errMsg">La météo ne répond pas. Vérifie ta connexion, puis réessaie.</p>
       <div class="cta"><button class="b b-blue" id="retryBtn" type="button">Réessayer</button></div>
     </section>
 
@@ -254,27 +295,27 @@ dialog h3{margin:0 0 16px;font-size:24px;font-weight:700;letter-spacing:-.02em}
       <section class="glass card enter" id="hero" aria-live="polite"></section>
 
       <div class="enter">
-        <div class="sec-h"><h2>Autour de toi</h2><p id="mapHint">Touche un point pour voir le lieu.</p></div>
+        <div class="sec-h"><h2>Autour de toi</h2><p id="mapHint">Touche un point pour ses webcams et ses prévisions.</p></div>
         <section class="glass map-card">
           <div id="map" role="img" aria-label="Carte de la neige autour de toi"></div>
           <div class="legend"><span><i class="u"></i>Toi</span><span><i></i>Neige au sol</span><span><i class="o"></i>Neige prévue</span></div>
-          <div class="sel" id="sel" hidden></div>
+          <button class="sel" id="sel" type="button" hidden></button>
         </section>
       </div>
 
       <div class="enter">
-        <div class="sec-h"><h2>Les 10 prochains jours</h2><p>Où il va neiger au plus près. « Dès 1 500 m » : l'altitude où il peut neiger chez toi.</p></div>
+        <div class="sec-h"><h2>Jour par jour</h2><p>La neige la plus proche de toi chaque jour. En bas : l'altitude où il peut neiger près de chez toi.</p></div>
         <section class="glass days-card"><div class="days" id="days"></div></section>
       </div>
 
       <div class="enter">
-        <div class="sec-h"><h2>Partout où il y a de la neige</h2><p>Du plus proche au plus loin. Touche pour l'itinéraire.</p></div>
+        <div class="sec-h"><h2>Toute la neige autour de toi</h2><p>Maintenant et dans les 10 jours, du plus rapide à rejoindre au plus loin.</p></div>
         <section class="glass"><ol class="list" id="list"></ol><button class="b b-glass more" id="moreBtn" type="button" hidden>Voir plus</button></section>
       </div>
 
       <footer class="foot">
         <p id="updated"></p>
-        <p>Neige : modèles météo via Open-Meteo. Routes : OSRM. Lieux : OpenStreetMap. Avant de partir, vérifie la météo locale et l'état des routes.</p>
+        <p>Neige : modèles météo via Open-Meteo (au sol prévue = estimation). Routes : OSRM. Lieux : OpenStreetMap. Webcams : <a href="https://www.windy.com/webcams" target="_blank" rel="noopener">Windy.com</a>. Avant de partir, vérifie la météo locale et l'état des routes.</p>
         <p><button type="button" id="refreshBtn">Actualiser</button></p>
       </footer>
     </div>
@@ -282,13 +323,23 @@ dialog h3{margin:0 0 16px;font-size:24px;font-weight:700;letter-spacing:-.02em}
   </div>
 </main>
 
-<dialog id="cams">
+<dialog id="place" class="sheet" aria-labelledby="pName">
   <form method="dialog">
+    <span class="grab" aria-hidden="true"></span>
     <button class="x" value="cancel" aria-label="Fermer">×</button>
-    <h3 id="camsTitle">Webcams</h3>
-    <p class="msg" id="camsMsg" style="margin:0"></p>
-    <div class="camgrid" id="camsGrid"></div>
-    <p class="foot" style="padding-top:14px" id="camsFoot"></p>
+    <p class="eyebrow" id="pTop"></p>
+    <h3 id="pName"></h3>
+    <p class="pstate" id="pState"></p>
+    <div class="pills" id="pPills"></div>
+    <p class="access" id="pAccess" hidden></p>
+    <div class="cta"><a class="b b-blue" id="pGo" href="#" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-go"/></svg>Y aller</a><a class="b b-glass" id="pMap" href="#" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-map"/></svg>Carte</a></div>
+    <p class="h4">Neige au sol, 10 jours</p>
+    <div class="chart" id="pChart"></div>
+    <p class="chart-l">Barre : neige au sol estimée (cm). Flocon bleu : il neige ce jour-là.</p>
+    <p class="h4">Webcams en direct</p>
+    <p class="msg" id="pCamsMsg"></p>
+    <div class="camgrid" id="pCams"></div>
+    <p class="foot">Touche une image pour la voir en direct. Webcams : <a href="https://www.windy.com/webcams" target="_blank" rel="noopener">Windy.com</a></p>
   </form>
 </dialog>
 
@@ -312,9 +363,10 @@ const PLACES = [
 ["Plateau de Beille","Ariège",42.725,1.700,1800],["Ax-les-Thermes, Bonascre","Ariège",42.700,1.800,1500],["Guzet","Ariège",42.785,1.300,1450],
 ["Le Mourtis","Pyrénées",42.935,0.800,1400],["Superbagnères","Pyrénées",42.760,0.580,1800],["Peyragudes","Pyrénées",42.795,0.455,1600],
 ["Saint-Lary","Pyrénées",42.810,0.320,1700],["Piau-Engaly","Pyrénées",42.785,0.160,1850],["Col du Tourmalet","Pyrénées",42.908,0.145,2115],
-["Pic du Midi","Pyrénées",42.936,0.142,2877],["Luz-Ardiden","Pyrénées",42.875,-0.065,1720],["Cauterets","Pyrénées",42.870,-0.140,1700],
+["Pic du Midi","Pyrénées",42.936,0.142,2877,1],["Luz-Ardiden","Pyrénées",42.875,-0.065,1720],["Cauterets","Pyrénées",42.870,-0.140,1700],
 ["Gavarnie","Pyrénées",42.750,-0.010,1850],["Hautacam","Pyrénées",43.000,-0.050,1500],["Col d'Aubisque","Pyrénées",42.976,-0.339,1709],
 ["Artouste","Pyrénées",42.880,-0.400,1400],["La Pierre Saint-Martin","Pyrénées",42.980,-0.750,1650],["Col du Somport","Pyrénées",42.800,-0.530,1630],
+["Iraty","Pays basque",43.035,-1.065,1300],["Larrun (La Rhune)","Pays basque",43.310,-1.635,900],
 ["Formigal","Pyrénées espagnoles",42.775,-0.365,1550],["Baqueira","Pyrénées espagnoles",42.700,0.935,1500],["Port d'Envalira","Andorre",42.540,1.720,2400],
 ["Soldeu","Andorre",42.577,1.667,1800],["La Molina","Pyrénées espagnoles",42.340,1.940,1700],["Pic de Nore","Montagne Noire",43.425,2.465,1150],
 ["Plomb du Cantal","Cantal",45.060,2.760,1850],["Le Lioran","Cantal",45.085,2.750,1250],["Puy de Sancy","Auvergne",45.528,2.814,1880],
@@ -331,7 +383,7 @@ const PLACES = [
 ["La Plagne","Savoie",45.505,6.680,1970],["Les Arcs","Savoie",45.570,6.800,1800],["Tignes","Savoie",45.468,6.907,2100],
 ["Val d'Isère","Savoie",45.448,6.980,1850],["Bonneval-sur-Arc","Savoie",45.372,7.048,1800],["Col du Mont-Cenis","Savoie",45.250,6.900,2080],
 ["Les Saisies","Savoie",45.760,6.535,1650],["Le Revard","Savoie",45.670,5.990,1550],["Le Semnoz","Haute-Savoie",45.800,6.100,1650],
-["Col des Aravis","Haute-Savoie",45.875,6.465,1490],["Chamonix","Haute-Savoie",45.923,6.870,1050],["Aiguille du Midi","Haute-Savoie",45.879,6.887,3770],
+["Col des Aravis","Haute-Savoie",45.875,6.465,1490],["Chamonix","Haute-Savoie",45.923,6.870,1050],["Aiguille du Midi","Haute-Savoie",45.879,6.887,3770,1],
 ["Flaine","Haute-Savoie",46.005,6.690,1600],["Avoriaz","Haute-Savoie",46.190,6.775,1800],["Crêt de la Neige","Jura",46.270,5.940,1700],
 ["Les Rousses","Jura",46.485,6.065,1120],["Mont d'Or","Jura",46.735,6.355,1400],["Ballon d'Alsace","Vosges",47.822,6.840,1150],
 ["Grand Ballon","Vosges",47.901,7.098,1400],["Hohneck","Vosges",48.040,7.010,1350],["Le Champ du Feu","Vosges",48.395,7.265,1050],
@@ -344,49 +396,17 @@ const PLACES = [
 ["Limone Piemonte","Italie",44.200,7.575,1010],["Livigno","Italie",46.538,10.135,1820],["Passo del Tonale","Italie",46.260,10.580,1880],
 ["Val Gardena","Italie",46.557,11.760,1560],["Cortina d'Ampezzo","Italie",46.540,12.137,1220],["Abetone","Italie",44.142,10.665,1390],
 ["Campo Imperatore","Italie",42.442,13.558,2100],["Etna","Sicile",37.700,14.998,1900],["Saint-Anton","Autriche",47.128,10.265,1300],
-["Sölden","Autriche",46.968,11.007,1370],["Hintertux","Autriche",47.072,11.672,1500],["Kitzbühel","Autriche",47.447,12.392,800],
-["Obertauern","Autriche",47.250,13.560,1740],["Feldberg","Forêt-Noire",47.865,8.005,1280],["Zugspitze","Allemagne",47.421,10.985,2600],
+["Sölden","Autriche",46.968,11.007,1370],["Glacier de Hintertux","Autriche",47.072,11.672,3000,1],["Kitzbühel","Autriche",47.447,12.392,800],
+["Obertauern","Autriche",47.250,13.560,1740],["Feldberg","Forêt-Noire",47.865,8.005,1280],["Zugspitze","Allemagne",47.421,10.985,2600,1],
 ["Winterberg","Allemagne",51.193,8.533,750],["Brocken","Harz",51.799,10.616,1100],["Signal de Botrange","Belgique",50.502,6.093,690],
 ["Cairngorm","Écosse",57.133,-3.670,650],["Zakopane","Pologne",49.295,19.955,950],["Kranjska Gora","Slovénie",46.485,13.785,810],
 ["Bansko","Bulgarie",41.838,23.488,1000],["Kopaonik","Serbie",43.285,20.810,1770],["Parnasse","Grèce",38.535,22.585,1750],
-["Oukaïmeden","Maroc",31.205,-7.860,2600]
+["Oukaïmeden","Maroc",31.205,-7.860,2600],
+["Glacier des 2 Alpes","Isère",44.985,6.165,3200,1],["Pic Blanc (Alpe d'Huez)","Isère",45.122,6.111,3300,1],["Glacier de la Girose (La Grave)","Hautes-Alpes",45.018,6.280,3200,1],
+["Grande Motte (Tignes)","Savoie",45.427,6.888,3450,1],["Glacier de Pissaillas (Val d'Isère)","Savoie",45.420,7.065,3000,1],["Pointe Helbronner (Skyway)","Vallée d'Aoste",45.844,6.936,3460,1],
+["Petit Cervin (Zermatt)","Suisse",45.938,7.730,3880,1],["Glacier 3000","Suisse",46.327,7.207,2970,1],["Jungfraujoch","Suisse",46.547,7.985,3450,1],
+["Titlis","Suisse",46.773,8.433,3020,1],["Glacier du Stubai","Autriche",46.993,11.115,3150,1],["Kitzsteinhorn","Autriche",47.187,12.686,3000,1]
 ];
-
-/* ---------- Webcams (Windy) : clé gratuite à créer sur https://api.windy.com/keys ---------- */
-const WINDY_KEY = "KHL8KNYMlMsdUpGN0GVYXLAqt5bG8Lpj";
-async function webcamsNear(s) {
-  if (s.cams) return s.cams;
-  if (!WINDY_KEY) return (s.cams = []);
-  try {
-    const r = await fetch(`https://api.windy.com/webcams/api/v3/webcams?nearby=${s.lat.toFixed(4)},${s.lon.toFixed(4)},15&limit=10&include=images,urls,location,player&lang=fr`, { headers: { "x-windy-api-key": WINDY_KEY } });
-    if (!r.ok) throw new Error("HTTP " + r.status);
-    const d = await r.json();
-    s.cams = (d.webcams || []).filter(w => w.status !== "inactive" && (w.images?.current?.preview || w.images?.current?.thumbnail)).map(w => ({
-      id: w.webcamId, title: (w.title || "").replace(/^[^:]{2,40}:\s*/, ""), city: w.location?.city || "",
-      img: w.images.current.preview || w.images.current.thumbnail, thumb: w.images.current.thumbnail || w.images.current.preview,
-      url: w.urls?.detail || ("https://www.windy.com/webcams/" + w.webcamId), live: !!(w.player && w.player.live),
-      km: w.location?.latitude != null ? dist(s.lat, s.lon, w.location.latitude, w.location.longitude) : 99
-    })).sort((a, b) => a.km - b.km);
-  } catch { s.cams = undefined; return []; }
-  return s.cams;
-}
-const camsBtn = s => WINDY_KEY ? `<button class="b b-glass" type="button" data-cams="${S.pts.indexOf(s)}">${icon("i-cam")}Webcams</button>` : `<a class="b b-glass" href="${camUrl(s)}" target="_blank" rel="noopener">${icon("i-cam")}Webcams</a>`;
-async function openCams(s) {
-  const d = $("#cams");
-  $("#camsTitle").textContent = "Webcams · " + label(s).replace(/^Près de /, "");
-  $("#camsMsg").textContent = "Je cherche les webcams…"; $("#camsGrid").innerHTML = ""; $("#camsFoot").innerHTML = "";
-  d.showModal();
-  const cams = await webcamsNear(s);
-  if (!d.open) return;
-  if (!cams.length) {
-    $("#camsMsg").innerHTML = `Pas de webcam connue à moins de 15 km. <a href="${camUrl(s)}" target="_blank" rel="noopener" style="color:var(--blue);font-weight:600;text-decoration:none">Chercher sur Google</a>`;
-    return;
-  }
-  $("#camsMsg").textContent = "";
-  $("#camsGrid").innerHTML = cams.slice(0, 8).map(c => `<a class="cam" href="${esc(c.url)}" target="_blank" rel="noopener"><img src="${esc(c.img)}" alt="" loading="lazy">${c.live ? "<i>EN DIRECT</i>" : ""}<b>${esc(c.title)}<em>${esc(c.city)}${c.km < 99 ? " · " + (c.km < 1 ? "<1" : nf(c.km)) + " km" : ""}</em></b></a>`).join("");
-  $("#camsFoot").innerHTML = `Touche une image pour la voir en direct. Webcams : <a href="https://www.windy.com/webcams" target="_blank" rel="noopener" style="color:inherit">Windy.com</a>`;
-}
-document.addEventListener("click", e => { const b = e.target.closest("[data-cams]"); if (b) { e.preventDefault(); openCams(S.pts[+b.dataset.cams]); } });
 
 /* ---------- Outils ---------- */
 const OM = "https://api.open-meteo.com/v1/forecast";
@@ -400,6 +420,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">"
 const rad = d => d * Math.PI / 180;
 const nf = n => Math.round(n).toLocaleString("fr-FR");
 const wait = ms => new Promise(r => setTimeout(r, ms));
+const cap = t => t ? t.charAt(0).toUpperCase() + t.slice(1) : t;
 function dist(a, b, c, d) { const h = Math.sin(rad(c - a) / 2) ** 2 + Math.cos(rad(a)) * Math.cos(rad(c)) * Math.sin(rad(d - b) / 2) ** 2; return 12742 * Math.asin(Math.sqrt(h)); }
 function bearing(a, b, c, d) { const y = Math.sin(rad(d - b)) * Math.cos(rad(c)); const x = Math.cos(rad(a)) * Math.sin(rad(c)) - Math.sin(rad(a)) * Math.cos(rad(c)) * Math.cos(rad(d - b)); return Math.atan2(y, x); }
 function destination(lat, lon, km, b) {
@@ -410,30 +431,104 @@ function destination(lat, lon, km, b) {
 }
 const dirName = b => DIRS[Math.round(((b * 180 / Math.PI + 360) % 360) / 45) % 8];
 function fmtDur(min) { min = Math.max(1, Math.round(min)); if (min < 60) return min + " min"; const h = Math.floor(min / 60), m = min % 60; return h + " h " + String(m).padStart(2, "0"); }
+const fmtKm = k => k < 10 ? (Math.round(k * 10) / 10).toLocaleString("fr-FR") + " km" : nf(k) + " km";
 const dateOf = iso => new Date(iso + "T12:00:00");
 const dayWord = i => i === 0 ? "aujourd'hui" : i === 1 ? "demain" : DAY_L[dateOf(S.dates[i]).getDay()];
-const dayTag = i => i === 0 ? "aujourd'hui" : i === 1 ? "demain" : DAY_S[dateOf(S.dates[i]).getDay()] + " " + dateOf(S.dates[i]).getDate();
+const dayName = i => cap(dayWord(i));
+const dayTag = i => i === 0 ? "auj." : i === 1 ? "demain" : DAY_S[dateOf(S.dates[i]).getDay()] + " " + dateOf(S.dates[i]).getDate();
 const dateShort = i => { const d = dateOf(S.dates[i]); return d.getDate() + " " + MONTHS[d.getMonth()]; };
-const mapsDir = s => "https://www.google.com/maps/dir/?api=1&destination=" + s.lat.toFixed(4) + "," + s.lon.toFixed(4);
-const camUrl = s => "https://www.google.com/search?q=" + encodeURIComponent("webcam " + label(s).replace(/^Près de /, "") + (s.region ? " " + s.region : ""));
 const label = s => s.name || ("À " + nf(s.dist) + " km " + dirName(s.brg));
+const goTo = s => (s.road && s.walk > .3) ? s.road : [s.lat, s.lon];
+const mapsDir = s => { const [a, b] = goTo(s); return "https://www.google.com/maps/dir/?api=1&destination=" + a.toFixed(5) + "," + b.toFixed(5); };
+const mapsSee = s => "https://www.google.com/maps/search/?api=1&query=" + s.lat.toFixed(5) + "," + s.lon.toFixed(5);
+const camUrl = s => "https://www.google.com/search?q=" + encodeURIComponent("webcam " + label(s).replace(/^Près de /, "") + (s.region ? " " + s.region : ""));
 const driveTxt = s => (s.exact ? "" : "≈ ") + fmtDur(s.drive);
 const kmTxt = s => nf(s.exact ? s.roadKm : s.dist);
 const icon = id => `<svg aria-hidden="true"><use href="#${id}"/></svg>`;
-const snowTxt = s => s.kind === "now" ? (s.depth >= 1 ? s.depth + " cm au sol" : "il neige") + (s.snowing && s.depth >= 1 ? ", il neige" : "") : Math.round(s.fall[s.firstDay]) + " cm " + dayWord(s.firstDay);
+const nowTxt = s => s.depth >= 1 ? s.depth + " cm au sol" + (s.snowing ? ", il neige" : "") : "il neige en ce moment";
+const dayAmt = (s, i) => s.fall[i] >= 1 ? "+" + Math.round(s.fall[i]) + " cm" : "≈ " + s.est[i] + " cm";
+const dayAmtLong = (s, i) => s.fall[i] >= 1 ? Math.round(s.fall[i]) + " cm de neige fraîche" : "≈ " + s.est[i] + " cm au sol";
+const walkTxt = s => fmtKm(s.walk) + " à pied";
+const accessPill = s => s.lift ? pill("i-lift", "Téléphérique") : s.foot ? pill("i-walk", walkTxt(s), "warn") : "";
 
-async function getJSON(url, ms = 20000) {
+async function getJSON(url, ms = 20000, headers) {
   const ctl = new AbortController(); const t = setTimeout(() => ctl.abort(), ms);
-  try { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error("HTTP " + r.status); return await r.json(); }
-  finally { clearTimeout(t); }
+  try {
+    const r = await fetch(url, { signal: ctl.signal, headers });
+    if (!r.ok) { const e = new Error("HTTP " + r.status); e.status = r.status; throw e; }
+    return await r.json();
+  } finally { clearTimeout(t); }
 }
 const store = {
   get() { try { return JSON.parse(localStorage.getItem("neige.place") || "null"); } catch { return null; } },
   set(p) { try { localStorage.setItem("neige.place", JSON.stringify(p)); } catch {} }
 };
 
+/* ---------- Mémoire : derniers résultats (ouverture instantanée, hors connexion) ---------- */
+const CK = "neige.cache.v2";
+const FIELDS = ["name","region","lat","lon","alt","grid","lift","dist","brg","depth","snowing","temp","fall","tmax","est","day","kind","firstDay","drive","roadKm","exact","walk","road","roadAlt","climb","foot","hike","cost","tried"];
+const slim = s => Object.fromEntries(FIELDS.filter(k => s[k] !== undefined).map(k => [k, s[k]]));
+const cache = {
+  save() { try { if (S.place && S.updated) localStorage.setItem(CK, JSON.stringify({ lat: S.place.lat, lon: S.place.lon, t: S.updated.getTime(), dates: S.dates, home: S.home, pts: S.pts.map(slim) })); } catch {} },
+  load(p) { try { const c = JSON.parse(localStorage.getItem(CK) || "null"); if (c && c.pts && dist(c.lat, c.lon, p.lat, p.lon) < 3) return c; } catch {} return null; }
+};
+function applyCache(c) { S.pts = c.pts; S.home = c.home; S.dates = c.dates; S.updated = new Date(c.t); S.stale = false; S.fitted = false; }
+
+/* ---------- Noms des lieux (mémorisés ; OpenStreetMap, 1 demande par seconde, Photon en secours) ---------- */
+const NK = "neige.names.v1";
+let NAMES = {}; try { NAMES = JSON.parse(localStorage.getItem(NK) || "{}") || {}; } catch {}
+const nkey = (p, z) => z + ":" + p.lat.toFixed(2) + "," + p.lon.toFixed(2);
+const nameCached = (p, z) => NAMES[nkey(p, z)];
+let lastNom = 0;
+async function placeName(p, zoom) {
+  const hit = nameCached(p, zoom); if (hit) return hit;
+  let n = "";
+  const gap = 1100 - (Date.now() - lastNom); if (gap > 0) await wait(gap);
+  lastNom = Date.now();
+  try {
+    const r = await getJSON(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=${zoom}&accept-language=fr&lat=${p.lat.toFixed(4)}&lon=${p.lon.toFixed(4)}`, 8000);
+    const a = r.address || {};
+    n = a.village || a.town || a.city || a.hamlet || a.municipality || a.county || a.state || "";
+  } catch {}
+  if (!n) {
+    try {
+      const r = await getJSON(`https://photon.komoot.io/reverse?lat=${p.lat.toFixed(4)}&lon=${p.lon.toFixed(4)}&lang=fr&limit=1`, 8000);
+      const pr = r.features?.[0]?.properties || {};
+      n = pr.city || pr.county || pr.name || pr.state || "";
+    } catch {}
+  }
+  if (n) {
+    NAMES[nkey(p, zoom)] = n;
+    try { const ks = Object.keys(NAMES); if (ks.length > 500) ks.slice(0, 150).forEach(k => delete NAMES[k]); localStorage.setItem(NK, JSON.stringify(NAMES)); } catch {}
+  }
+  return n;
+}
+function applyNames(pts) { for (const s of pts) if (s.grid && !s.name) { const n = nameCached(s, 12); if (n) { s.name = "Près de " + n; s.tried = true; } } }
+
+/* ---------- Webcams (Windy) : clé gratuite créée sur https://api.windy.com/keys ---------- */
+const WINDY_KEY = "KHL8KNYMlMsdUpGN0GVYXLAqt5bG8Lpj";
+function webcamsNear(s, force) {
+  if (!WINDY_KEY) return Promise.resolve([]);
+  if (s.cams && !force && Date.now() - s.camsAt < 8 * 60000) return Promise.resolve(s.cams);
+  if (s.camsP) return s.camsP;
+  s.camsP = (async () => {
+    try {
+      const d = await getJSON(`https://api.windy.com/webcams/api/v3/webcams?nearby=${s.lat.toFixed(4)},${s.lon.toFixed(4)},15&limit=12&include=images,urls,location,player&lang=fr`, 10000, { "x-windy-api-key": WINDY_KEY });
+      s.cams = (d.webcams || []).filter(w => w.status !== "inactive" && (w.images?.current?.preview || w.images?.current?.thumbnail)).map(w => ({
+        title: (w.title || "").replace(/^[^:]{2,40}:\s*/, ""), city: w.location?.city || "",
+        img: w.images.current.preview || w.images.current.thumbnail, thumb: w.images.current.thumbnail || w.images.current.preview,
+        url: w.urls?.detail || ("https://www.windy.com/webcams/" + w.webcamId), live: !!(w.player && w.player.live),
+        km: w.location?.latitude != null ? dist(s.lat, s.lon, w.location.latitude, w.location.longitude) : 99
+      })).sort((a, b) => a.km - b.km);
+    } catch { s.cams = s.cams || []; }
+    s.camsAt = Date.now(); s.camsP = null;
+    return s.cams;
+  })();
+  return s.camsP;
+}
+
 /* ---------- État ---------- */
-const S = { place: null, pts: [], dates: [], home: null, sel: null, shown: 8, run: 0, updated: null, map: null, markers: [] };
+const S = { place: null, pts: [], dates: [], home: null, sel: null, shown: 8, run: 0, updated: null, stale: false, busy: false, map: null, markers: [], heroSpot: null, sheet: null, sheetDay: null, fitted: false };
 function show(id) {
   for (const k of ["welcome", "loading", "error", "results"]) $("#" + k).hidden = k !== id;
   const root = $("#" + id);
@@ -450,7 +545,6 @@ function getPosition(onUpdate) {
     let done = false;
     const ok = p => { if (done) return; done = true; resolve(p); refine(p); };
     const refine = first => {
-      // on continue d'écouter 25 s : si le GPS trouve une position bien meilleure et plus loin, on relance
       let best = first;
       const id = geo.watchPosition(p => {
         if (p.coords.accuracy < best.coords.accuracy * .6 && dist(p.coords.latitude, p.coords.longitude, best.coords.latitude, best.coords.longitude) > 8) { best = p; onUpdate && onUpdate(p); }
@@ -465,16 +559,20 @@ function getPosition(onUpdate) {
 }
 const fromPos = p => ({ lat: p.coords.latitude, lon: p.coords.longitude, acc: Math.round(p.coords.accuracy || 0), label: "", gps: true });
 async function locate(msgEl, btn) {
-  if (!("geolocation" in navigator)) { msgEl.hidden = false; msgEl.textContent = "Ton appareil ne donne pas sa position. Tape ta ville."; return; }
+  const fail = txt => {
+    btn.disabled = false;
+    if (!$("#loading").hidden) { show("welcome"); msgEl = $("#locMsg"); }
+    msgEl.hidden = false; msgEl.textContent = txt;
+  };
+  if (!("geolocation" in navigator)) return fail("Ton appareil ne donne pas sa position. Tape ta ville.");
   msgEl.hidden = false; msgEl.textContent = "Je cherche ta position…"; btn.disabled = true;
   try {
-    const p = await getPosition(p2 => run(fromPos(p2)));
+    const p = await getPosition(p2 => run(fromPos(p2), { quiet: true }));
     btn.disabled = false; msgEl.hidden = true;
     if ($("#dlg").open) $("#dlg").close();
-    run(fromPos(p));
+    run(fromPos(p), { force: true });
   } catch (e) {
-    btn.disabled = false;
-    msgEl.textContent = e.code === 1 ? "Position refusée. Autorise la localisation pour ce site, ou tape ta ville." : "Position introuvable pour l'instant. Tape ta ville.";
+    fail(e.code === 1 ? "Position refusée. Autorise la localisation pour ce site (icône à gauche de l'adresse), ou tape ta ville." : "Position introuvable pour l'instant. Tape ta ville.");
   }
 }
 function bindSearch(input, list, onPick) {
@@ -483,8 +581,12 @@ function bindSearch(input, list, onPick) {
     const q = input.value.trim();
     if (q.length < 2) { list.innerHTML = ""; return; }
     try {
-      const r = await getJSON("https://geocoding-api.open-meteo.com/v1/search?count=6&language=fr&name=" + encodeURIComponent(q), 10000);
-      const res = r.results || [];
+      const r = await getJSON("https://geocoding-api.open-meteo.com/v1/search?count=10&language=fr&name=" + encodeURIComponent(q), 10000);
+      // nom exact d'abord, puis le pays de l'utilisateur, puis les plus grandes villes
+      const norm = t => (t || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+      const cc = ((navigator.language || "fr-FR").split("-")[1] || "FR").toUpperCase();
+      const res = (r.results || []).map(c => ({ c, k: (norm(c.name) === norm(q) ? 0 : 4) + (c.country_code === cc ? 0 : 2) - Math.log10((c.population || 1) + 1) / 10 }))
+        .sort((x, y) => x.k - y.k).map(x => x.c).slice(0, 6);
       list.innerHTML = res.length ? res.map((c, i) => `<li><button type="button" data-i="${i}">${esc(c.name)}<span>${esc([c.admin1, c.country].filter(Boolean).join(", "))}</span></button></li>`).join("") : `<li class="msg">Aucune ville trouvée.</li>`;
       list.querySelectorAll("button").forEach(b => b.onclick = () => { const c = res[+b.dataset.i]; onPick({ lat: c.latitude, lon: c.longitude, label: c.name, gps: false }); });
     } catch { list.innerHTML = `<li class="msg">Recherche impossible. Vérifie ta connexion.</li>`; }
@@ -492,15 +594,8 @@ function bindSearch(input, list, onPick) {
   input.addEventListener("input", () => { clearTimeout(t); t = setTimeout(go, 300); });
   return go;
 }
-async function placeName(p, zoom) {
-  try {
-    const r = await getJSON(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=${zoom}&accept-language=fr&lat=${p.lat.toFixed(4)}&lon=${p.lon.toFixed(4)}`, 8000);
-    const a = r.address || {};
-    return a.village || a.town || a.city || a.hamlet || a.municipality || a.county || a.state || "";
-  } catch { return ""; }
-}
 
-/* ---------- Données ---------- */
+/* ---------- Données météo ---------- */
 function gridPoint(me, lat, lon) { return { name: "", region: "", lat, lon, alt: null, grid: true, dist: dist(me.lat, me.lon, lat, lon), brg: bearing(me.lat, me.lon, lat, lon) }; }
 function gridAround(me) {
   const out = [];
@@ -515,7 +610,7 @@ async function fetchWeather(list) {
   const res = await Promise.allSettled(chunks.map(async ch => {
     let u = OM + "?latitude=" + ch.map(s => s.lat.toFixed(3)).join(",") + "&longitude=" + ch.map(s => s.lon.toFixed(3)).join(",");
     if (ch[0].alt != null) u += "&elevation=" + ch.map(s => s.alt).join(",");
-    u += "&current=snow_depth,weather_code,temperature_2m&daily=snowfall_sum&forecast_days=10&timezone=auto";
+    u += "&current=snow_depth,weather_code,temperature_2m&daily=snowfall_sum,temperature_2m_max&hourly=snow_depth&temporal_resolution=hourly_6&forecast_days=10&timezone=auto";
     let r = await getJSON(u); if (!Array.isArray(r)) r = [r];
     r.forEach((d, i) => {
       const s = ch[i]; if (!s || !d || !d.daily) return;
@@ -524,6 +619,9 @@ async function fetchWeather(list) {
       s.snowing = SNOW_CODES.has(c.weather_code);
       s.temp = c.temperature_2m;
       s.fall = (d.daily.snowfall_sum || []).map(v => v || 0);
+      s.tmax = (d.daily.temperature_2m_max || []).map(v => v == null ? null : v);
+      const hs = d.hourly?.snow_depth || [];
+      s.mdep = s.fall.map((_, k) => { const v = hs.slice(k * 4, k * 4 + 4).filter(x => x != null); return v.length ? Math.round(Math.max(...v) * 100) : 0; });
       s.dates = d.daily.time;
       if (s.alt == null) s.alt = Math.round(d.elevation || 0);
       s.ok = true;
@@ -538,35 +636,64 @@ async function fetchHome(me) {
   const line = d.daily.time.map((_, i) => { const day = fz.slice(i * 24, i * 24 + 24).filter(v => v != null); return day.length ? Math.max(0, Math.round((Math.min(...day) - 300) / 100) * 100) : null; });
   return { dates: d.daily.time, fall: (d.daily.snowfall_sum || []).map(v => v || 0), line, depth: Math.round((d.current?.snow_depth || 0) * 100), snowing: SNOW_CODES.has(d.current?.weather_code) };
 }
-async function fetchRoutes(me, pts, runId) {
+/* Neige au sol jour par jour : ce qui est là + ce qui tombe − ce qui fond (selon la température max) */
+const keep = t => t == null ? .8 : t <= 0 ? .97 : t <= 3 ? .85 : t <= 6 ? .65 : t <= 10 ? .4 : .15;
+function snowModel(s) {
+  let pack = s.depth;
+  s.est = s.fall.map((f, i) => { pack = pack * keep(s.tmax[i]) + f; return Math.round(Math.max(pack, s.mdep[i] || 0, i === 0 ? s.depth : 0)); });
+  s.day = s.est.map((e, i) => e >= 2 || s.fall[i] >= 1);
+}
+/* Accès : temps de route réel, et distance entre la fin de la route et la neige */
+async function fetchAccess(me, pts) {
   const pick = pts.slice(0, 90);
   if (!pick.length) return;
-  const u = "https://router.project-osrm.org/table/v1/driving/" + [me.lon.toFixed(5) + "," + me.lat.toFixed(5), ...pick.map(s => s.lon.toFixed(5) + "," + s.lat.toFixed(5))].join(";") + "?sources=0&annotations=duration,distance";
-  try {
-    const r = await getJSON(u, 12000);
-    if (runId !== S.run) return;
-    const du = r.durations?.[0] || [], di = r.distances?.[0] || [];
-    pick.forEach((s, i) => { const t = du[i + 1], k = di[i + 1]; if (t > 0 && k > 0 && k / 1000 < s.dist * 3 + 50) { s.drive = t / 60; s.roadKm = k / 1000; s.exact = true; } });
-    render();
-  } catch {}
+  const coords = [me, ...pick].map(p => p.lon.toFixed(5) + "," + p.lat.toFixed(5)).join(";");
+  const r = await getJSON(`https://router.project-osrm.org/table/v1/driving/${coords}?sources=0&annotations=duration,distance`, 9000);
+  const du = r.durations?.[0] || [], di = r.distances?.[0] || [], de = r.destinations || [];
+  const needAlt = [];
+  pick.forEach((s, i) => {
+    const t = du[i + 1], k = di[i + 1], d = de[i + 1];
+    if (t > 0 && k > 0 && k / 1000 < s.dist * 3 + 60) { s.drive = t / 60; s.roadKm = k / 1000; s.exact = true; }
+    if (d && d.location) { s.walk = (d.distance || 0) / 1000; s.road = [d.location[1], d.location[0]]; if (s.walk > .3) needAlt.push(s); }
+  });
+  if (needAlt.length) {
+    try {
+      const e = await getJSON(`https://api.open-meteo.com/v1/elevation?latitude=${needAlt.map(s => s.road[0].toFixed(4)).join(",")}&longitude=${needAlt.map(s => s.road[1].toFixed(4)).join(",")}`, 6000);
+      (e.elevation || []).forEach((v, i) => { if (v != null && isFinite(v)) needAlt[i].roadAlt = Math.round(v); });
+    } catch {}
+  }
+}
+function scoreAccess(s) {
+  const w = s.walk || 0;
+  if (s.roadAlt != null && w > 1.5 && s.roadAlt > s.alt - 150) s.roadAlt = null; // route en tunnel sous la montagne : altitude inconnue
+  s.climb = s.roadAlt != null ? Math.max(0, s.alt - s.roadAlt) : null;
+  if (s.lift) { s.foot = false; s.hike = 35; }
+  else { s.foot = w > .6 && !(w <= 1.5 && (s.climb ?? 0) <= 150); s.hike = s.foot ? w * 15 + (s.climb ?? 300) / 100 * 10 : 0; }
+  s.cost = s.drive + s.hike;
 }
 function cluster(list, km) { const out = []; for (const s of list) if (!out.some(o => dist(o.lat, o.lon, s.lat, s.lon) < km)) out.push(s); return out; }
 
-async function run(place) {
-  if (S.place && S.place.gps && place.gps && dist(place.lat, place.lon, S.place.lat, S.place.lon) < 8 && S.pts.length) { S.place = place; store.set(place); renderMap(); return; }
+async function run(place, opts = {}) {
+  if (!opts.force && S.place && S.place.gps && place.gps && S.pts.length && dist(place.lat, place.lon, S.place.lat, S.place.lon) < 8) {
+    place.label = place.label || S.place.label; S.place = place; store.set(place); return;
+  }
   const runId = ++S.run;
-  S.place = place; S.sel = null; S.shown = 8;
-  store.set(place);
+  const quiet = !!opts.quiet && !$("#results").hidden;
+  const moved = !S.place || dist(place.lat, place.lon, S.place.lat, S.place.lon) > 3;
+  if (!place.label && S.place && !moved) place.label = S.place.label;
+  S.place = place; store.set(place);
   $("#placeBtn").hidden = false;
   $("#placeName").textContent = place.label || "Ma position";
-  show("loading");
+  if (quiet) { S.busy = true; renderFoot(); }
+  else { S.sel = null; S.shown = 8; show("loading"); $("#loadMsg").textContent = "J'interroge la météo de centaines de points autour de toi."; }
   const me = { lat: place.lat, lon: place.lon };
   try {
-    const known = PLACES.map(([name, region, lat, lon, alt]) => ({ name, region, lat, lon, alt, dist: dist(me.lat, me.lon, lat, lon), brg: bearing(me.lat, me.lon, lat, lon) }))
+    if (navigator.onLine === false) throw Object.assign(new Error("offline"), { offline: true });
+    const known = PLACES.map(([name, region, lat, lon, alt, lift]) => ({ name, region, lat, lon, alt, lift: !!lift, dist: dist(me.lat, me.lon, lat, lon), brg: bearing(me.lat, me.lon, lat, lon) }))
       .filter(s => s.dist <= 900).sort((a, b) => a.dist - b.dist).slice(0, 80);
     const [home, first] = await Promise.all([fetchHome(me).catch(() => null), fetchWeather([...known, ...gridAround(me)])]);
     if (runId !== S.run) return;
-    // 2e passe : on resserre la recherche sur les reliefs plus proches que la neige trouvée
+    // 2e passe : on resserre la recherche sur les reliefs plus proches que la neige déjà trouvée
     const isNow = s => s.depth >= 2 || s.snowing;
     const nearest = first.filter(isNow).sort((a, b) => a.dist - b.dist)[0];
     const limit = nearest ? nearest.dist : 450;
@@ -577,122 +704,148 @@ async function run(place) {
     if (runId !== S.run) return;
     const all = first.concat(second);
     for (const s of all) {
-      s.firstDay = s.fall.findIndex(v => v >= 1);
-      s.kind = isNow(s) ? "now" : s.firstDay >= 0 ? "soon" : "none";
+      snowModel(s);
+      if (isNow(s)) { s.kind = "now"; s.firstDay = 0; }
+      else { s.firstDay = s.day.findIndex(Boolean); s.kind = s.firstDay >= 0 ? "soon" : "none"; }
       s.roadKm = s.dist * 1.3; s.drive = s.roadKm / (s.dist < 80 ? 55 : 82) * 60; s.exact = false;
     }
-    const byDist = (a, b) => a.dist - b.dist;
+    const byDist = (a, b) => (a.dist + (a.grid ? 12 : 0)) - (b.dist + (b.grid ? 12 : 0));
     const nows = cluster(all.filter(s => s.kind === "now").sort(byDist), 14);
     const soons = cluster(all.filter(s => s.kind === "soon").sort(byDist), 14).filter(s => !nows.some(n => dist(n.lat, n.lon, s.lat, s.lon) < 14));
-    S.pts = nows.concat(soons).sort(byDist);
-    S.home = home;
-    S.dates = home?.dates || all[0]?.dates || [];
-    S.updated = new Date();
-    show("results");
-    render(true);
-    fetchRoutes(me, S.pts, runId);
+    const pts = nows.concat(soons).sort(byDist);
+    applyNames(pts);
+    if (!quiet) $("#loadMsg").textContent = "Je calcule les routes jusqu'à la neige…";
+    try { await fetchAccess(me, pts); } catch {}
+    if (runId !== S.run) return;
+    pts.forEach(scoreAccess);
+    pts.sort((a, b) => a.cost - b.cost);
+    S.pts = pts; S.home = home; S.dates = home?.dates || all[0]?.dates || [];
+    S.updated = new Date(); S.stale = false; S.busy = false;
+    if (!quiet || moved) S.fitted = false;
+    cache.save();
+    if (!quiet) show("results");
+    render(!quiet || moved);
     nameGrid(runId, place);
   } catch (e) {
-    if (runId === S.run) show("error");
+    if (runId !== S.run) return;
+    S.busy = false;
+    if (quiet) { S.stale = true; renderFoot(); return; }
+    const c = cache.load(place);
+    if (c) { applyCache(c); S.stale = true; show("results"); render(true); return; }
+    $("#errMsg").textContent = e.status === 429 ? "Trop de recherches en peu de temps. Réessaie dans une minute." : (e.offline || e instanceof TypeError) ? "Pas de connexion internet. Reconnecte-toi, puis réessaie." : "La météo ne répond pas. Réessaie dans un instant.";
+    show("error");
   }
 }
 
-/* Noms des points de la grille (1 par seconde, règle d'OpenStreetMap) */
+/* Noms des points de la grille, en commençant par ceux qui s'affichent en premier */
 async function nameGrid(runId, place) {
   if (place && !place.label) {
     const n = await placeName(place, 10);
     if (runId !== S.run) return;
     if (n) { place.label = n; store.set(place); $("#placeName").textContent = n; }
-    await wait(1100);
   }
-  const want = [];
+  const H = heroPick(), want = [];
   const add = s => { if (s && s.grid && !s.name && !s.tried && !want.includes(s)) want.push(s); };
-  add(S.pts.find(s => s.kind === "now")); add(S.pts[0]);
-  for (let i = 0; i < Math.min(10, S.dates.length); i++) add(S.pts.find(s => s.fall[i] >= 1));
+  add(H.s); add(H.other);
+  for (let i = 0; i < Math.min(10, S.dates.length); i++) add(S.pts.find(s => s.day && s.day[i]));
   S.pts.slice(0, 10).forEach(add);
   for (const s of want) {
     if (runId !== S.run) return;
     s.tried = true;
     const n = await placeName(s, 12);
     if (runId !== S.run) return;
-    if (n) { s.name = "Près de " + n; render(); }
-    await wait(1100);
+    if (n) { s.name = "Près de " + n; render(); cache.save(); }
   }
 }
 
 /* ---------- Affichage ---------- */
 function render(fresh) {
-  renderHero(); renderDays(); renderList(); renderMap(fresh);
-  const u = S.updated;
-  $("#updated").textContent = u ? "Mis à jour à " + u.getHours() + " h " + String(u.getMinutes()).padStart(2, "0") + "." : "";
+  renderHero(); renderDays(); renderList(); renderMap(fresh); renderFoot();
+  if ($("#place").open && S.sheet) renderPlace();
+}
+function renderFoot() {
+  const u = S.updated; if (!u) return;
+  const hm = u.getHours() + " h " + String(u.getMinutes()).padStart(2, "0");
+  const dd = u.toDateString() === new Date().toDateString() ? "" : " le " + u.getDate() + " " + MONTHS[u.getMonth()];
+  $("#updated").textContent = S.busy ? "Mise à jour en cours…" : S.stale ? `Pas de mise à jour possible pour l'instant. Données de${dd} ${hm}.` : `Mis à jour${dd} à ${hm}.`;
+}
+/* Ce qu'on affiche en grand : la neige au sol la plus proche, sauf s'il va neiger bien plus près dans les prochains jours */
+function heroPick() {
+  const now = S.pts.find(s => s.kind === "now"), soon = S.pts.find(s => s.kind === "soon");
+  if (now && (!soon || now.cost <= soon.cost * 1.6 + 30)) return { mode: "now", s: now, other: soon && soon.cost < now.cost * 1.2 ? soon : null };
+  if (soon) return { mode: "soon", s: soon, other: now || null };
+  return { mode: "none", s: null, other: null };
 }
 function heroCams(s) {
-  if (!WINDY_KEY) return "";
-  if (s.cams === undefined) { webcamsNear(s).then(() => { if (S.pts.includes(s)) renderHero(); }); return ""; }
+  if (!WINDY_KEY || !s) return "";
+  if (!s.cams) { if (!s.camsP) webcamsNear(s).then(() => { if (S.heroSpot === s) renderHero(); }); return ""; }
   if (!s.cams.length) return "";
-  return `<p class="cams-h">Webcams en direct<a href="#" data-cams="${S.pts.indexOf(s)}">Toutes</a></p><div class="cams">${s.cams.slice(0, 4).map(c => `<a class="cam" href="${esc(c.url)}" target="_blank" rel="noopener"><img src="${esc(c.thumb)}" alt="" loading="lazy">${c.live ? "<i>EN DIRECT</i>" : ""}<span>${esc(c.title)}</span></a>`).join("")}</div>`;
+  return `<p class="cams-h">Webcams en direct<button type="button" data-place="${S.pts.indexOf(s)}">Toutes</button></p><div class="cams">${s.cams.slice(0, 4).map(c => `<a class="cam" href="${esc(c.url)}" target="_blank" rel="noopener"><img src="${esc(c.thumb)}" alt="" loading="lazy">${c.live ? "<i>EN DIRECT</i>" : ""}<span>${esc(c.title)}</span></a>`).join("")}</div>`;
 }
-const pill = (ic, v, l) => `<span class="pill">${icon(ic)}${v}${l ? ` <em>${l}</em>` : ""}</span>`;
+const pill = (ic, v, cls) => `<span class="pill${cls ? " " + cls : ""}">${icon(ic)}${v}</span>`;
 function renderHero() {
-  const el = $("#hero"), home = S.home;
-  const now = S.pts.find(s => s.kind === "now");
-  const soon = S.pts.find(s => s.firstDay >= 0);
+  const el = $("#hero"), home = S.home, H = heroPick(), s = H.s;
+  S.heroSpot = s;
   const acc = S.place?.acc > 3000 ? `<p class="note">Position approximative (à ${nf(S.place.acc / 1000)} km près). Pour plus de précision, active le GPS.</p>` : "";
-  let html = "";
+  const homeFall = home ? home.fall.findIndex(v => v >= .5) : -1;
+  const homeNote = homeFall >= 0 && !(home.snowing || home.depth >= 2) ? ` Et chez toi, il va neiger <b>${dayWord(homeFall)}</b>.` : "";
+  const i = s ? S.pts.indexOf(s) : -1;
+  const pills = s ? `<div class="pills">${pill("i-car", driveTxt(s))}${accessPill(s)}${H.mode === "now" && s.temp != null ? pill("i-temp", Math.round(s.temp) + " °") : ""}</div>` : "";
+  const cta = s ? `<div class="cta"><a class="b b-blue" href="${mapsDir(s)}" target="_blank" rel="noopener">${icon("i-go")}Y aller</a><button class="b b-glass" type="button" data-place="${i}">${icon("i-cam")}Webcams</button></div>` : "";
+  let html;
   if (home && (home.snowing || home.depth >= 2)) {
-    html = `<p class="eyebrow">Regarde dehors</p><h1 class="big" style="font-size:clamp(44px,12vw,72px)">${home.snowing ? "Il neige chez toi" : "La neige est chez toi"}</h1>
-      <p class="sub">${home.depth >= 1 ? home.depth + " cm au sol" : "Il neige en ce moment"}${now && now.depth > home.depth + 5 ? ` · plus épais : ${esc(label(now))}, ${now.depth} cm à ${driveTxt(now)}` : ""}.</p>${acc}`;
-  } else if (now) {
-    let note = "";
-    if (soon && soon !== now && soon.dist < now.dist * .7) note += `Plus près, il va neiger ${dayWord(soon.firstDay)} : <b>${esc(label(soon))}</b>, ${Math.round(soon.fall[soon.firstDay])} cm, à ${driveTxt(soon)}. `;
-    const homeFall = home ? home.fall.findIndex(v => v >= .5) : -1;
-    if (homeFall >= 0) note += `Et chez toi, il va neiger <b>${dayWord(homeFall)}</b>.`;
-    html = `<p class="eyebrow">La neige la plus proche</p><h1 class="big">${kmTxt(now)}<small>km</small></h1>
-      <p class="where">${esc(label(now))}</p><p class="sub">${now.region ? esc(now.region) + " · " : ""}${now.depth >= 1 ? now.depth + " cm au sol" : "il neige en ce moment"}${now.snowing && now.depth >= 1 ? ", et il neige" : ""}</p>
-      <div class="pills">${pill("i-car", driveTxt(now), "de route")}${pill("i-peak", nf(now.alt) + " m")}${now.temp != null ? pill("i-temp", Math.round(now.temp) + " °") : ""}</div>
-      <div class="cta"><a class="b b-blue" href="${mapsDir(now)}" target="_blank" rel="noopener">${icon("i-go")}Y aller</a>${camsBtn(now)}</div>
-      ${heroCams(now)}<p class="note">${note}</p>${acc}`;
-  } else if (soon) {
-    const i = soon.firstDay, w = dayWord(i);
-    html = `<p class="eyebrow">Pas de neige au sol pour l'instant</p><h1 class="big" style="font-size:clamp(44px,12vw,72px)">Neige ${esc(w)}</h1>
-      <p class="where">${esc(label(soon))}</p><p class="sub">${soon.region ? esc(soon.region) + " · " : ""}${Math.round(soon.fall[i])} cm attendus ${esc(w)}</p>
-      <div class="pills">${pill("i-car", driveTxt(soon), "de route")}${pill("i-peak", nf(soon.alt) + " m")}${pill("i-flake", kmTxt(soon) + " km")}</div>
-      <div class="cta"><a class="b b-blue" href="${mapsDir(soon)}" target="_blank" rel="noopener">${icon("i-go")}Itinéraire</a></div>${acc}`;
+    html = `<p class="eyebrow">Regarde dehors</p><h1 class="big mid">${home.snowing ? "Il neige chez toi" : "La neige est chez toi"}</h1>
+      <p class="sub">${home.depth >= 1 ? home.depth + " cm au sol chez toi" : "Il neige en ce moment"}.</p>
+      ${s ? `<p class="note">Plus loin : <b>${esc(label(s))}</b>, ${H.mode === "now" ? nowTxt(s) : dayAmtLong(s, s.firstDay) + " " + dayWord(s.firstDay)}, à ${driveTxt(s)} de route.</p>${cta}` : ""}${acc}`;
+  } else if (H.mode === "now") {
+    let note = H.other ? `${H.other.drive < s.drive * .9 ? "Plus près, il va neiger" : "Il va aussi neiger"} ${dayWord(H.other.firstDay)} : <b>${esc(label(H.other))}</b> (${dayAmt(H.other, H.other.firstDay)}), à ${driveTxt(H.other)}.` : "";
+    note += homeNote;
+    html = `<p class="eyebrow">La neige la plus proche</p><h1 class="big">${kmTxt(s)}<small>km</small></h1>
+      <p class="where">${esc(label(s))}</p><p class="sub">${[s.region && esc(s.region), nf(s.alt) + " m", cap(nowTxt(s))].filter(Boolean).join(" · ")}</p>
+      ${pills}${cta}${heroCams(s)}<p class="note">${note.trim()}</p>${acc}`;
+  } else if (H.mode === "soon") {
+    const d = s.firstDay, w = dayName(d), k = Math.min(1, 8.5 / Math.max(8.5, w.length));
+    let note = H.other ? `Neige au sol dès maintenant : <b>${esc(label(H.other))}</b> (${H.other.depth >= 1 ? H.other.depth + " cm" : "il neige"}), mais à ${driveTxt(H.other)} de route.` : "";
+    note += homeNote;
+    html = `<p class="eyebrow">La neige arrive près de toi</p><h1 class="big mid" style="font-size:min(${(12 * k).toFixed(1)}vw,${Math.round(72 * k)}px)">${esc(w)}</h1>
+      <p class="where">${esc(label(s))}</p><p class="sub">${cap(dayAmtLong(s, d))} · ${nf(s.alt)} m · à ${kmTxt(s)} km</p>
+      ${pills}${cta}${heroCams(s)}<p class="note">${note.trim()}</p>${acc}`;
   } else {
-    html = `<p class="eyebrow">Rien pour l'instant</p><h1 class="big" style="font-size:clamp(44px,12vw,72px)">Pas de neige en vue</h1>
-      <p class="sub">Ni au sol, ni prévue dans les 10 prochains jours, à moins de 450 km.</p>${acc}`;
+    html = `<p class="eyebrow">Rien pour l'instant</p><h1 class="big mid">Pas de neige en vue</h1>
+      <p class="sub">Ni au sol, ni prévue dans les 10 prochains jours, à moins de 450 km.</p>${homeNote ? `<p class="note">${homeNote.trim()}</p>` : ""}${acc}`;
   }
   el.innerHTML = html;
 }
 function renderDays() {
-  const out = [], n = Math.min(10, S.dates.length);
-  for (let i = 0; i < n; i++) {
-    const c = S.pts.filter(s => s.fall[i] >= 1), best = c[0];
+  const n = Math.min(10, S.dates.length), rows = [];
+  for (let i = 0; i < n; i++) { const c = S.pts.filter(s => s.day && s.day[i]); rows.push({ s: c[0], n: c.length }); }
+  const costs = rows.filter(r => r.s).map(r => r.s.cost), min = costs.length ? Math.min(...costs) : 0, varies = costs.some(c => c > min + 1);
+  $("#days").innerHTML = rows.map((r, i) => {
     const line = S.home?.line?.[i];
-    const ln = line == null ? "" : `<span class="ln">Dès <b>${nf(line)} m</b></span>`;
-    const head = `<span class="dl">${i === 0 ? "Aujourd'hui" : i === 1 ? "Demain" : DAY_L[dateOf(S.dates[i]).getDay()][0].toUpperCase() + DAY_L[dateOf(S.dates[i]).getDay()].slice(1)}</span><span class="dd">${dateShort(i)}</span>`;
-    if (best) out.push(`<div class="day">${head}<span class="num">${Math.round(best.fall[i])}<small>cm</small></span><span class="wh">${esc(label(best))}</span><span class="ds">${kmTxt(best)} km${c.length > 1 ? " · +" + (c.length - 1) : ""}</span>${ln}</div>`);
-    else out.push(`<div class="day no">${head}<span class="num">—</span><span class="wh">Rien de prévu autour</span>${ln}</div>`);
-  }
-  $("#days").innerHTML = out.join("");
+    const ln = line == null ? "" : `<span class="ln">Neige dès <b>${nf(line)} m</b></span>`;
+    const head = `<span class="dl">${dayName(i)}</span><span class="dd">${dateShort(i)}</span>`;
+    if (!r.s) return `<div class="day no">${head}<span class="num">—</span><span class="wh">Pas de neige à moins de 900 km</span>${ln}</div>`;
+    const best = varies && r.s.cost <= min + 1;
+    return `<button class="day${best ? " best" : ""}" type="button" data-place="${S.pts.indexOf(r.s)}" data-day="${i}">${head}${best ? `<span class="tag">Au plus près</span>` : ""}<span class="num">${kmTxt(r.s)}<small>km</small></span><span class="wh">${esc(label(r.s))}</span><span class="ds">${dayAmt(r.s, i)} · ${driveTxt(r.s)}</span>${ln}</button>`;
+  }).join("");
 }
 function renderList() {
   const items = S.pts.slice(0, S.shown);
   if (!items.length) { $("#list").innerHTML = `<li class="empty">Aucune neige au sol ni prévue autour de toi pour l'instant.</li>`; $("#moreBtn").hidden = true; return; }
   $("#list").innerHTML = items.map(s => {
+    const f = s.firstDay;
     const v = s.kind === "now"
       ? `<b>${s.depth >= 1 ? s.depth : "<1"}<small>cm</small></b><span>${s.snowing ? "il neige" : "au sol"}</span>`
-      : `<b>+${Math.round(s.fall[s.firstDay])}<small>cm</small></b><span>${dayTag(s.firstDay)}</span>`;
-    return `<li><a class="it ${s.kind}" href="${mapsDir(s)}" target="_blank" rel="noopener">
-      <div class="t"><b>${esc(label(s))}</b><span>${nf(s.alt)} m · ${kmTxt(s)} km · ${driveTxt(s)}</span></div>
-      <div class="v">${v}</div><svg class="chev" aria-hidden="true"><use href="#i-chev"/></svg></a></li>`;
+      : `<b>${s.fall[f] >= 1 ? "+" + Math.round(s.fall[f]) : "≈" + s.est[f]}<small>cm</small></b><span>${dayTag(f)}</span>`;
+    const meta = [nf(s.alt) + " m", driveTxt(s)].join(" · ") + (s.lift ? " · téléphérique" : s.foot ? ` · <em>+ ${walkTxt(s)}</em>` : "");
+    return `<li><button class="it ${s.kind}" type="button" data-place="${S.pts.indexOf(s)}"><div class="t"><b>${esc(label(s))}</b><span>${meta}</span></div><div class="v">${v}</div><svg class="chev" aria-hidden="true"><use href="#i-chev"/></svg></button></li>`;
   }).join("");
   $("#moreBtn").hidden = S.pts.length <= S.shown;
 }
 
 /* ---------- Carte géographique ---------- */
 function renderMap(fresh) {
-  if (!window.maplibregl) return;
+  if (!window.maplibregl || !S.place) return;
   const me = S.place;
   if (!S.map) {
     S.map = new maplibregl.Map({
@@ -704,19 +857,17 @@ function renderMap(fresh) {
     S.map.touchZoomRotate.disableRotation();
   }
   S.markers.forEach(m => m.remove()); S.markers = [];
-  const pts = S.pts;
-  // on cadre : toi + les 5 lieux enneigés les plus proches (dont le plus proche avec neige au sol)
-  const focus = pts.slice(0, 5);
-  const now = pts.find(s => s.kind === "now");
-  if (now && !focus.includes(now)) focus.push(now);
+  const pts = S.pts, hero = S.heroSpot;
+  const focus = [...new Set([hero, ...pts.slice(0, 4)].filter(Boolean))];
   const labelled = [];
-  for (const s of [now, ...pts.slice(0, 4)].filter(Boolean)) if (labelled.length < 3 && !labelled.includes(s) && !labelled.some(o => dist(o.lat, o.lon, s.lat, s.lon) < 45)) labelled.push(s);
+  for (const s of focus) if (labelled.length < 3 && !labelled.some(o => dist(o.lat, o.lon, s.lat, s.lon) < 45)) labelled.push(s);
   for (const s of pts.slice().reverse()) {
     const el = document.createElement("div");
     el.className = "pt " + s.kind + (S.sel === s ? " sel" : "");
     el.style.setProperty("--d", (s.kind === "now" ? 14 + Math.min(s.depth, 100) / 100 * 8 : 14) + "px");
+    el.setAttribute("role", "button"); el.setAttribute("aria-label", label(s));
     if (labelled.includes(s) && s.name) { const l = document.createElement("span"); l.className = "pt-lbl"; l.textContent = s.name.replace(/^Près de /, ""); el.appendChild(l); }
-    el.addEventListener("click", e => { e.stopPropagation(); S.sel = s; renderMap(); });
+    el.addEventListener("click", e => { e.stopPropagation(); S.sel = s; renderMap(); openPlace(s); });
     S.markers.push(new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([s.lon, s.lat]).addTo(S.map));
   }
   const meEl = document.createElement("div"); meEl.className = "me"; meEl.title = "Toi";
@@ -734,36 +885,110 @@ function renderMap(fresh) {
   renderSel();
 }
 function renderSel() {
-  const s = S.sel || S.pts.find(p => p.kind === "now") || S.pts[0];
-  const el = $("#sel");
+  const s = S.sel || S.heroSpot || S.pts[0], el = $("#sel");
   if (!s) { el.hidden = true; $("#mapHint").textContent = "Aucune neige dans ce rayon pour l'instant."; return; }
-  el.hidden = false;
-  el.classList.toggle("has-cam", !!WINDY_KEY);
-  el.innerHTML = `<b>${esc(label(s))}</b>${WINDY_KEY ? `<button class="cambtn" type="button" data-cams="${S.pts.indexOf(s)}" aria-label="Webcams">${icon("i-cam")}</button>` : ""}<a href="${mapsDir(s)}" target="_blank" rel="noopener" aria-label="Itinéraire">${icon("i-go")}</a><span>${snowTxt(s)} · ${nf(s.alt)} m · ${driveTxt(s)}</span>`;
+  el.hidden = false; el.dataset.place = S.pts.indexOf(s);
+  el.innerHTML = `<b>${esc(label(s))}</b><svg aria-hidden="true"><use href="#i-chev"/></svg><span>${s.kind === "now" ? cap(nowTxt(s)) : cap(dayAmtLong(s, s.firstDay)) + " " + dayWord(s.firstDay)} · ${driveTxt(s)}${s.lift ? " · téléphérique" : s.foot ? " · + " + walkTxt(s) : ""}</span>`;
+}
+
+/* ---------- Fiche d'un lieu ---------- */
+function openPlace(s, day) {
+  if (!s) return;
+  S.sheet = s; S.sheetDay = day == null ? null : day;
+  renderPlace();
+  const d = $("#place");
+  if (!d.open) d.showModal();
+  d.querySelector("form").scrollTop = 0;
+  if (WINDY_KEY && (!s.cams || Date.now() - s.camsAt > 8 * 60000)) webcamsNear(s, !!s.cams).then(() => { if (S.sheet === s && d.open) renderPlaceCams(); });
+}
+function chart(s, sel) {
+  const n = Math.min(10, S.dates.length, s.est.length), top = Math.max(10, ...s.est.slice(0, n));
+  return Array.from({ length: n }, (_, i) => {
+    const e = s.est[i] || 0, f = s.fall[i] || 0, h = e >= 1 ? 6 + Math.min(e, top) / top * 60 : 3;
+    return `<div class="cb${i === sel ? " on" : ""}" title="${dayName(i)} : ≈ ${e} cm au sol${f >= 1 ? ", " + Math.round(f) + " cm de neige fraîche" : ""}"><b>${e >= 1 ? e : ""}</b>${f >= 1 ? icon("i-flake") : ""}<i class="${e >= 1 ? (f >= 1 ? "f" : "") : "z"}" style="height:${h.toFixed(0)}px"></i><em>${i === 0 ? "auj." : DAY_S[dateOf(S.dates[i]).getDay()]}</em></div>`;
+  }).join("");
+}
+function renderPlace() {
+  const s = S.sheet, sel = S.sheetDay;
+  $("#pTop").textContent = [s.region, nf(s.alt) + " m d'altitude"].filter(Boolean).join(" · ");
+  $("#pName").textContent = label(s);
+  let main, sub = "";
+  if (s.kind === "now") {
+    main = cap(nowTxt(s));
+    const nx = s.fall.findIndex((v, k) => k > 0 && v >= 1);
+    if (nx > 0) sub = `Encore ${dayAmtLong(s, nx)} ${dayWord(nx)}.`;
+  } else {
+    main = "Pas de neige au sol pour l'instant";
+    sub = `Neige ${dayWord(s.firstDay)} : ${dayAmtLong(s, s.firstDay)}.`;
+  }
+  if (sel != null && sel !== 0 && sel !== s.firstDay && s.day[sel]) sub = `${dayName(sel)} : ${dayAmtLong(s, sel)}. ` + sub;
+  $("#pState").innerHTML = esc(main) + (sub ? `<span>${esc(sub)}</span>` : "");
+  $("#pPills").innerHTML = pill("i-car", driveTxt(s) + " · " + kmTxt(s) + " km") + accessPill(s) + (s.temp != null ? pill("i-temp", Math.round(s.temp) + " ° maintenant") : "");
+  const a = $("#pAccess");
+  if (s.lift) {
+    a.hidden = false;
+    a.textContent = "Accès en téléphérique ou remontée mécanique depuis le bas de la station. Vérifie qu'elle est ouverte avant de partir.";
+  } else if (s.foot) {
+    a.hidden = false;
+    a.textContent = `La route s'arrête à ${fmtKm(s.walk)} de ce point${s.roadAlt != null ? `, à ${nf(s.roadAlt)} m d'altitude. Il reste environ ${nf(s.climb)} m de montée` : ""}, à pied ou en remontée mécanique. « Y aller » t'emmène au bout de la route.`;
+  } else a.hidden = true;
+  $("#pGo").href = mapsDir(s);
+  $("#pMap").href = mapsSee(s);
+  $("#pChart").innerHTML = chart(s, sel);
+  renderPlaceCams();
+}
+function renderPlaceCams() {
+  const s = S.sheet, g = $("#pCams"), m = $("#pCamsMsg");
+  const google = `<a href="${camUrl(s)}" target="_blank" rel="noopener">Chercher sur Google</a>`;
+  if (!WINDY_KEY) { g.innerHTML = ""; m.innerHTML = google; return; }
+  if (!s.cams) { g.innerHTML = ""; m.textContent = "Je cherche les webcams…"; return; }
+  if (!s.cams.length) { g.innerHTML = ""; m.innerHTML = `Pas de webcam connue à moins de 15 km. ${google}`; return; }
+  m.textContent = "";
+  g.innerHTML = s.cams.slice(0, 6).map(c => `<a class="cam" href="${esc(c.url)}" target="_blank" rel="noopener"><img src="${esc(c.img)}" alt="" loading="lazy">${c.live ? "<i>EN DIRECT</i>" : ""}<b>${esc(c.title)}<em>${esc(c.city)}${c.km < 99 ? " · " + (c.km < 1 ? "<1" : nf(c.km)) + " km" : ""}</em></b></a>`).join("");
 }
 
 /* ---------- Démarrage ---------- */
+document.addEventListener("click", e => {
+  const b = e.target.closest("[data-place]");
+  if (b && b.dataset.place !== "-1" && S.pts[+b.dataset.place]) { e.preventDefault(); openPlace(S.pts[+b.dataset.place], b.dataset.day != null ? +b.dataset.day : null); }
+});
+for (const d of document.querySelectorAll("dialog")) d.addEventListener("click", e => { if (e.target === d) d.close(); });
 $("#moreBtn").addEventListener("click", () => { S.shown += 10; renderList(); });
-$("#refreshBtn").addEventListener("click", () => { S.pts = []; S.place && run(S.place); });
-$("#retryBtn").addEventListener("click", () => S.place ? run(S.place) : show("welcome"));
+$("#refreshBtn").addEventListener("click", () => S.place && run(S.place, { quiet: true, force: true }));
+$("#retryBtn").addEventListener("click", () => S.place ? run(S.place, { force: true }) : show("welcome"));
 $("#locBtn").addEventListener("click", () => locate($("#locMsg"), $("#locBtn")));
 $("#dLoc").addEventListener("click", () => locate($("#dMsg"), $("#dLoc")));
 $("#placeBtn").addEventListener("click", () => { $("#dResults").innerHTML = ""; $("#dInput").value = ""; $("#dMsg").hidden = true; $("#dlg").showModal(); });
-const pick = p => { if ($("#dlg").open) $("#dlg").close(); run(p); };
+const pick = p => { if ($("#dlg").open) $("#dlg").close(); run(p, { force: true }); };
 const wGo = bindSearch($("#wInput"), $("#wResults"), pick);
-$("#wForm").addEventListener("submit", e => { e.preventDefault(); wGo(); });
-bindSearch($("#dInput"), $("#dResults"), pick);
-$("#dInput").addEventListener("keydown", e => { if (e.key === "Enter") e.preventDefault(); });
+$("#wForm").addEventListener("submit", async e => { e.preventDefault(); await wGo(); const b = $("#wResults button"); if (b) b.click(); });
+const dGo = bindSearch($("#dInput"), $("#dResults"), pick);
+$("#dInput").addEventListener("keydown", async e => { if (e.key === "Enter") { e.preventDefault(); await dGo(); const b = $("#dResults button"); if (b) b.click(); } });
+// Quand on revient sur l'app après un moment, ou que la connexion revient : mise à jour discrète
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && S.place && S.updated && Date.now() - S.updated > 30 * 60000 && !$("#results").hidden) run(S.place, { quiet: true, force: true });
+});
+addEventListener("online", () => { if (S.stale && S.place) run(S.place, { quiet: true, force: true }); });
 
 (async function start() {
   const q = new URLSearchParams(location.search);
-  if (q.has("lat") && q.has("lon")) return run({ lat: +q.get("lat"), lon: +q.get("lon"), label: q.get("nom") || "", gps: false });
+  if (q.has("lat") && q.has("lon")) return run({ lat: +q.get("lat"), lon: +q.get("lon"), label: q.get("nom") || "", gps: false }, { force: true });
   const saved = store.get();
   let granted = false;
   try { if (navigator.permissions && navigator.geolocation) granted = (await navigator.permissions.query({ name: "geolocation" })).state === "granted"; } catch {}
   if (saved && isFinite(saved.lat)) {
-    run(saved);
-    if (saved.gps && granted) getPosition(p => run(fromPos(p))).then(p => { const np = fromPos(p); if (dist(np.lat, np.lon, saved.lat, saved.lon) > 8) run(np); else { S.place.acc = np.acc; } }).catch(() => {});
+    const c = cache.load(saved);
+    if (c && Date.now() - c.t < 12 * 3600e3) {
+      // ouverture instantanée avec les derniers résultats, puis mise à jour discrète s'ils ont plus de 20 min
+      S.place = saved; $("#placeBtn").hidden = false; $("#placeName").textContent = saved.label || "Ma position";
+      applyCache(c); show("results"); render(true); nameGrid(S.run, saved);
+      if (Date.now() - c.t > 20 * 60000) run(saved, { quiet: true, force: true });
+    } else run(saved, { force: true });
+    if (saved.gps && granted) getPosition(p => run(fromPos(p), { quiet: true })).then(p => {
+      const np = fromPos(p);
+      if (dist(np.lat, np.lon, saved.lat, saved.lon) > 8) run(np, { quiet: true, force: true });
+      else if (S.place) S.place.acc = np.acc;
+    }).catch(() => {});
     return;
   }
   if (granted) { show("loading"); $("#loadMsg").textContent = "Je cherche ta position…"; return locate($("#locMsg"), $("#locBtn")); }
