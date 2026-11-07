@@ -419,7 +419,9 @@ const PLACES = [
 ["Pic du Midi","Pyrénées",42.936,0.142,2877,1],["Luz-Ardiden","Pyrénées",42.875,-0.065,1720],["Cauterets","Pyrénées",42.870,-0.140,1700],
 ["Gavarnie","Pyrénées",42.750,-0.010,1850],["Hautacam","Pyrénées",43.000,-0.050,1500],["Col d'Aubisque","Pyrénées",42.976,-0.339,1709],
 ["Artouste","Pyrénées",42.880,-0.400,1400],["La Pierre Saint-Martin","Pyrénées",42.980,-0.750,1650],["Col du Somport","Pyrénées",42.800,-0.530,1630],
-["Iraty","Pays basque",43.035,-1.065,1300],["Larrun (La Rhune)","Pays basque",43.310,-1.635,900],
+["Iraty","Pays basque",43.035,-1.065,1300],["Pic d'Orhy","Pays basque",42.990,-0.995,2017],["Pic d'Anie","Pyrénées",42.958,-0.718,2504],
+["Pic du Midi d'Ossau","Pyrénées",42.843,-0.438,2884],["Balaïtous","Pyrénées",42.839,-0.290,3144],["Vignemale","Pyrénées",42.774,-0.147,3298],
+["Néouvielle","Pyrénées",42.847,0.120,3091],["Aneto","Pyrénées espagnoles",42.631,0.657,3404],["Larrun (La Rhune)","Pays basque",43.310,-1.635,900],
 ["Formigal","Pyrénées espagnoles",42.775,-0.365,1550],["Baqueira","Pyrénées espagnoles",42.700,0.935,1500],["Port d'Envalira","Andorre",42.540,1.720,2400],
 ["Soldeu","Andorre",42.577,1.667,1800],["La Molina","Pyrénées espagnoles",42.340,1.940,1700],["Pic de Nore","Montagne Noire",43.425,2.465,1150],
 ["Plomb du Cantal","Cantal",45.060,2.760,1850],["Le Lioran","Cantal",45.085,2.750,1250],["Puy de Sancy","Auvergne",45.528,2.814,1880],
@@ -518,7 +520,7 @@ const store = {
 };
 
 /* ---------- Mémoire : derniers résultats (ouverture instantanée, hors connexion) ---------- */
-const CK = "neige.cache.v2";
+const CK = "neige.cache.v3";
 const FIELDS = ["name","region","lat","lon","alt","grid","lift","dist","brg","depth","snowing","temp","fall","tmax","est","day","kind","firstDay","drive","roadKm","exact","walk","road","roadAlt","climb","foot","hike","cost","tried"];
 const slim = s => Object.fromEntries(FIELDS.filter(k => s[k] !== undefined).map(k => [k, s[k]]));
 const cache = {
@@ -699,7 +701,7 @@ async function fetchWeather(list) {
   const res = await Promise.allSettled(chunks.map(async ch => {
     let u = OM + "?latitude=" + ch.map(s => s.lat.toFixed(3)).join(",") + "&longitude=" + ch.map(s => s.lon.toFixed(3)).join(",");
     if (ch[0].alt != null) u += "&elevation=" + ch.map(s => s.alt).join(",");
-    u += "&current=snow_depth,weather_code,temperature_2m&daily=snowfall_sum,temperature_2m_max&hourly=snow_depth&temporal_resolution=hourly_6&forecast_days=10&timezone=auto";
+    u += "&current=snow_depth,weather_code,temperature_2m&daily=snowfall_sum,temperature_2m_max&hourly=snow_depth&temporal_resolution=hourly_6&past_days=3&forecast_days=10&timezone=auto";
     let r;
     try { r = await getJSON(u); }
     catch (e) { if (e.status === 429 || e.status >= 500 || e.name === "AbortError") { await wait(2500); r = await getJSON(u); } else throw e; } // 2e essai si le service sature
@@ -707,14 +709,16 @@ async function fetchWeather(list) {
     r.forEach((d, i) => {
       const s = ch[i]; if (!s || !d || !d.daily) return;
       const c = d.current || {};
-      s.depth = Math.round((c.snow_depth || 0) * 100);
+      const P = 3, fallAll = (d.daily.snowfall_sum || []).map(v => v || 0), tmaxAll = (d.daily.temperature_2m_max || []).map(v => v == null ? null : v);
+      let recent = 0; for (let k = 0; k < P; k++) recent = recent * keep(tmaxAll[k]) + fallAll[k];
+      s.depth = Math.max(Math.round((c.snow_depth || 0) * 100), Math.floor(recent));
       s.snowing = SNOW_CODES.has(c.weather_code);
       s.temp = c.temperature_2m;
-      s.fall = (d.daily.snowfall_sum || []).map(v => v || 0);
-      s.tmax = (d.daily.temperature_2m_max || []).map(v => v == null ? null : v);
+      s.fall = fallAll.slice(P);
+      s.tmax = tmaxAll.slice(P);
       const hs = d.hourly?.snow_depth || [];
-      s.mdep = s.fall.map((_, k) => { const v = hs.slice(k * 4, k * 4 + 4).filter(x => x != null); return v.length ? Math.round(Math.max(...v) * 100) : 0; });
-      s.dates = d.daily.time;
+      s.mdep = s.fall.map((_, k) => { const v = hs.slice((k + P) * 4, (k + P) * 4 + 4).filter(x => x != null); return v.length ? Math.round(Math.max(...v) * 100) : 0; });
+      s.dates = d.daily.time.slice(P);
       if (s.alt == null) s.alt = Math.round(d.elevation || 0);
       s.ok = true;
     });
@@ -733,7 +737,7 @@ const keep = t => t == null ? .8 : t <= 0 ? .97 : t <= 3 ? .85 : t <= 6 ? .65 : 
 function snowModel(s) {
   let pack = s.depth;
   s.est = s.fall.map((f, i) => { pack = pack * keep(s.tmax[i]) + f; return Math.round(Math.max(pack, s.mdep[i] || 0, i === 0 ? s.depth : 0)); });
-  s.day = s.est.map((e, i) => e >= 2 || s.fall[i] >= 1);
+  s.day = s.est.map((e, i) => e >= 1 || s.fall[i] >= 1);
 }
 /* Accès : temps de route réel, et distance entre la fin de la route et la neige */
 async function fetchAccess(me, pts) {
@@ -786,7 +790,7 @@ async function run(place, opts = {}) {
     const [home, first] = await Promise.all([fetchHome(me).catch(() => null), fetchWeather([...known, ...gridAround(me)])]);
     if (runId !== S.run) return;
     // 2e passe : on resserre la recherche sur les reliefs plus proches que la neige déjà trouvée
-    const isNow = s => s.depth >= 2 || s.snowing;
+    const isNow = s => s.depth >= 1 || s.snowing;
     const nearest = first.filter(isNow).sort((a, b) => a.dist - b.dist)[0];
     const limit = nearest ? nearest.dist : 450;
     const hills = first.filter(s => s.grid && s.alt >= 650 && s.dist < limit).sort((a, b) => a.dist - b.dist).slice(0, 12);
@@ -864,7 +868,8 @@ function renderFoot() {
 /* Ce qu'on affiche en grand : la neige au sol la plus proche, sauf s'il va neiger bien plus près dans les prochains jours */
 function heroPick() {
   const now = S.pts.find(s => s.kind === "now"), soon = S.pts.find(s => s.kind === "soon");
-  if (now && (!soon || now.cost <= soon.cost * 1.6 + 30)) return { mode: "now", s: now, other: soon && soon.cost < now.cost * 1.2 ? soon : null };
+  // attendre des jours compte aussi : 25 min de « pénalité » par jour d'attente
+  if (now && (!soon || now.cost <= (soon.cost + soon.firstDay * 25) * 1.6 + 30)) return { mode: "now", s: now, other: soon && soon.cost < now.cost * 1.2 ? soon : null };
   if (soon) return { mode: "soon", s: soon, other: now || null };
   return { mode: "none", s: null, other: null };
 }
