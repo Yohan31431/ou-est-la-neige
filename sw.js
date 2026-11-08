@@ -1,5 +1,5 @@
 // Hors connexion : la page elle-même (réseau d'abord), la carte et la police (mémoire d'abord)
-const C = "neige-v9";
+const C = "neige-v10";
 const CDN = /^https:\/\/(cdnjs\.cloudflare\.com|fonts\.googleapis\.com|fonts\.gstatic\.com)\//;
 self.addEventListener("install", e => { e.waitUntil(caches.open(C).then(c => c.addAll(["./", "./index.html", "./icon.svg", "./icon-192.png", "./manifest.webmanifest"]))); self.skipWaiting(); });
 self.addEventListener("activate", e => e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== C && k !== "neige-alerte").map(k => caches.delete(k)))).then(() => self.clients.claim())));
