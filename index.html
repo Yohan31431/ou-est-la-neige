@@ -296,6 +296,63 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
   .v-src{grid-column:2;grid-row:3;height:38px;font-size:13px}
   .v-foot{grid-column:2;grid-row:4}
 }
+
+/* Mes coins (lieux épinglés) */
+.favs{display:flex;gap:6px;overflow-x:auto;padding:0 14px 8px;scrollbar-width:none}
+.favs::-webkit-scrollbar{display:none}
+.fav{flex:none;display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 13px 0 10px;border-radius:999px;cursor:pointer;font:inherit;font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+.fav svg{width:15px;height:15px;color:var(--blue);flex:none}
+.fav b{color:var(--ink);font-weight:700}
+.fav.snow span{color:var(--blue);font-weight:800}
+.fav.add{color:var(--blue);font-weight:700}
+.favlist{list-style:none;margin:0;padding:0}
+.favlist li{display:flex;align-items:center;gap:10px;padding:10px 2px;border-bottom:1px solid var(--hair)}
+.favlist li > svg{width:18px;height:18px;color:var(--blue);flex:none}
+.favlist li span{flex:1;min-width:0}
+.favlist li b{display:block;font-size:15px}
+.favlist li small{font-size:12px;color:var(--ink-2)}
+.favlist li button{flex:none;border:0;background:var(--bg);color:var(--ink-2);width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:17px;line-height:1}
+.favlist .none{color:var(--ink-2);font-size:14px;border:0}
+
+/* Lecture des 10 jours */
+.dplay{flex:none;scroll-snap-align:start;width:56px;height:56px;border-radius:20px;cursor:pointer;display:grid;place-items:center;color:var(--blue);padding:0}
+.dplay svg{width:22px;height:22px}
+.dplay.on{background:var(--blue);color:#fff;border-color:transparent}
+
+/* Note sur 10 */
+.amt .score{display:inline-flex;opacity:1;align-items:center;gap:6px;margin-top:9px;height:26px;padding:0 10px 0 3px;border-radius:999px;background:rgba(255,255,255,.94);color:var(--ink);font-size:12px;font-weight:700}
+.score i{font-style:normal;display:grid;place-items:center;height:20px;padding:0 7px;border-radius:999px;background:var(--blue);color:#fff;font-size:12px;font-weight:800}
+.score.hi i{background:linear-gradient(135deg,#6A4CFF,#2F7BFF)}
+.score.lo i{background:#A9A6C0}
+.verdict{display:flex;gap:14px;align-items:center;margin-top:16px;padding:14px;border-radius:20px;background:var(--bg)}
+.ring{flex:none;width:66px;height:66px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--blue) calc(var(--p) * 1%),rgba(106,76,255,.14) 0);position:relative}
+.ring::before{content:"";position:absolute;inset:6px;border-radius:50%;background:var(--bg)}
+.ring b{position:relative;font-size:23px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.ring b small{font-size:11px;color:var(--ink-2);font-weight:700;letter-spacing:0}
+.vt{min-width:0}
+.vt > b{display:block;font-size:16px;font-weight:800;line-height:1.2}
+.vt ul{margin:6px 0 0;padding:0;list-style:none;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.vt li{display:inline-flex;align-items:center;gap:5px}
+.vt li svg{width:15px;height:15px;color:var(--blue)}
+
+/* Météo sur place */
+.wx{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px;padding:0 2px}
+.wd{display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 0 6px;border-radius:10px;min-width:0;cursor:pointer;border:0;background:none;font:inherit;color:inherit}
+.wd.on,.cb.on{background:rgba(106,76,255,.1)}
+.cb{cursor:pointer}
+.wd svg{width:19px;height:19px;color:var(--ink-2)}
+.wd svg.sun{color:#F2A100}
+.wd svg.snow{color:var(--blue)}
+.wd b{font-size:12px;font-weight:700;line-height:1}
+.wd span{font-size:11px;color:var(--ink-3);line-height:1}
+.wd em{font-style:normal;font-size:10px;color:var(--ink-2);line-height:1;white-space:nowrap}
+.wd i{font-style:normal;font-size:10px;font-weight:800;color:#fff;background:var(--blue);border-radius:6px;padding:2px 4px;line-height:1}
+.wd i.lo{background:#A9A6C0}
+.cta2{display:flex;gap:8px;margin-top:8px}
+.cta2 .b{height:44px;font-size:14px;padding:0 12px}
+.b-glass.on{background:rgba(106,76,255,.13);color:var(--blue)}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 18px);transform:translateX(-50%);z-index:200;background:var(--night);color:#fff;font-size:14px;font-weight:600;padding:10px 18px;border-radius:999px;box-shadow:var(--shadow);white-space:nowrap;transition:opacity .25s}
+.toast[hidden]{display:block;opacity:0;pointer-events:none}
 </style>
 </head>
 <body>
@@ -319,7 +376,20 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
     <symbol id="i-gear" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2.2"/><circle cx="8" cy="17" r="2.2"/></g></symbol>
     <symbol id="i-list" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r=".6"/><circle cx="4.5" cy="12" r=".6"/><circle cx="4.5" cy="18" r=".6"/></g></symbol>
     <symbol id="i-loc" viewBox="0 0 24 24"><path d="M20.5 3.5 3.5 10.6l7 2.4 2.4 7 7.6-16.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
-    <symbol id="peaks" viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice">
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8L12 3.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-starf" viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.2-4.1 5.8-.8L12 3.5Z" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3.5M7.5 8 12 3.5 16.5 8"/><path d="M5 12v6.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V12"/></g></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></g></symbol>
+    <symbol id="i-psun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2.8v1.6M3.3 8.5h1.6M5 4.5l1.1 1.1M13 4.5l-1.1 1.1"/><path d="M6.1 10.9A3.6 3.6 0 0 1 12.5 8"/><path d="M9 20h8.5a3.5 3.5 0 0 0 .3-7 5 5 0 0 0-9.6 1.3A2.9 2.9 0 0 0 9 20Z"/></g></symbol>
+    <symbol id="i-cloud" viewBox="0 0 24 24"><path d="M7 18.5h10.5a4 4 0 0 0 .4-8 6 6 0 0 0-11.5 1.6A3.3 3.3 0 0 0 7 18.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-fog" viewBox="0 0 24 24"><path d="M4 8h16M3 12h18M5 16h14M8 20h8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-rain" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h10.5a3.8 3.8 0 0 0 .4-7.6A5.7 5.7 0 0 0 6.9 9 3 3 0 0 0 7 15Z"/><path d="M8.5 18l-1 2.5M12.5 18l-1 2.5M16.5 18l-1 2.5"/></g></symbol>
+    <symbol id="i-wind" viewBox="0 0 24 24"><path d="M3 9h11a3 3 0 1 0-3-3M3 13h15a3 3 0 1 1-3 3M3 17h7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5L8 5.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8.5 5.5v13M15.5 5.5v13" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15l1.5-2Z"/><path d="M10 21h4"/></g></symbol>
+    <symbol id="peaks"viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice">
       <defs>
         <linearGradient id="pk-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#241B63"/><stop offset=".6" stop-color="#6A55E8"/><stop offset="1" stop-color="#CBC0FF"/></linearGradient>
         <linearGradient id="pk-a" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F1EEFF"/><stop offset="1" stop-color="#A193F2"/></linearGradient>
@@ -353,6 +423,7 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
   <button class="rb glass meBtn" id="meBtn" type="button" aria-label="Revenir sur ma position"><svg aria-hidden="true"><use href="#i-loc"/></svg></button>
   <section class="dock" id="dock" aria-live="polite">
     <p class="homebar glass" id="homebar" hidden></p>
+    <div class="favs" id="favs" role="group" aria-label="Mes coins"></div>
     <div class="dchips" id="dchips" role="group" aria-label="Quel jour ?"></div>
     <div class="cards" id="cards"></div>
   </section>
@@ -404,10 +475,17 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
     <p class="pstate" id="pState"></p>
     <div class="pills" id="pPills"></div>
     <p class="access" id="pAccess" hidden></p>
+    <div class="verdict" id="pScore" hidden></div>
     <div class="cta"><a class="b b-blue" id="pGo" href="#" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-go"/></svg>Y aller</a><a class="b b-glass" id="pMap" href="#" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-map"/></svg>Voir le lieu</a></div>
+    <div class="cta2"><button class="b b-glass" id="pFav" type="button"></button><button class="b b-glass" id="pShare" type="button"><svg aria-hidden="true"><use href="#i-share"/></svg>Partager</button></div>
     <p class="h4">Neige au sol, 10 jours</p>
     <div class="chart" id="pChart"></div>
-    <p class="chart-l">Barre : neige au sol estimée (cm). Flocon : il neige ce jour-là.</p>
+    <p class="chart-l">Barre : neige au sol estimée (cm). Flocon : il neige ce jour-là. Touche un jour pour sa note.</p>
+    <div id="pWxBox" hidden>
+      <p class="h4">Météo sur place</p>
+      <div class="wx" id="pWx"></div>
+      <p class="chart-l" id="pLine"></p>
+    </div>
     <p class="h4">Webcams en direct</p>
     <p class="msg" id="pCamsMsg"></p>
     <div class="camgrid" id="pCams"></div>
@@ -459,6 +537,14 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
       <label class="tog"><span><b>Téléphérique</b><small>Glaciers et sommets équipés</small></span><input type="checkbox" id="cLift"><i></i></label>
     </div>
     <div class="set">
+      <div class="set-h"><span>Mes coins</span></div>
+      <div class="place-row"><span id="cFavs"></span><button class="b b-glass" id="cFavBtn" type="button">Gérer</button></div>
+    </div>
+    <div class="set">
+      <label class="tog"><span><b>Alerte neige</b><small id="cAlertSub">Une notification quand la neige arrive sur Mes coins</small></span><input type="checkbox" id="cAlert"><i></i></label>
+      <label class="tog"><span><b>Nappe de neige sur la carte</b><small>La neige en violet, en plus des points</small></span><input type="checkbox" id="cHeat"><i></i></label>
+    </div>
+    <div class="set">
       <div class="set-h"><span>Point de départ</span></div>
       <div class="place-row"><span id="cPlace"></span><button class="b b-glass" id="cPlaceBtn" type="button">Changer</button></div>
     </div>
@@ -477,6 +563,22 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
     <ol class="list" id="list"></ol>
   </form>
 </dialog>
+
+<dialog id="favDlg" class="sheet" aria-labelledby="fT">
+  <form method="dialog" autocomplete="off">
+    <span class="grab" aria-hidden="true"></span>
+    <button class="x" value="cancel" aria-label="Fermer">×</button>
+    <h3 id="fT">Mes coins</h3>
+    <p class="eyebrow" style="margin:6px 0 10px">Les lieux que tu surveilles, même sans neige. Ils restent en bas de la carte.</p>
+    <ul class="favlist" id="fList"></ul>
+    <div class="field" style="margin-top:14px"><svg aria-hidden="true"><use href="#i-search"/></svg><input id="fInput" type="search" placeholder="Iraty, Gourette, un village…" aria-label="Ajouter un coin" enterkeyhint="search"></div>
+    <ul class="results" id="fResults"></ul>
+    <p class="h4" id="fSugT">Idées près de chez toi</p>
+    <ul class="results" id="fSug"></ul>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" hidden></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/5.6.0/maplibre-gl.js" crossorigin=""></script>
 <script>
@@ -595,13 +697,228 @@ const store = {
 
 /* ---------- Mémoire : derniers résultats (ouverture instantanée, hors connexion) ---------- */
 const CK = "neige.cache.v3";
-const FIELDS = ["name","region","lat","lon","alt","grid","lift","dist","brg","depth","snowing","temp","fall","tmax","est","day","kind","firstDay","drive","roadKm","exact","walk","road","roadAlt","climb","foot","hike","cost","tried"];
+const FIELDS = ["name","region","lat","lon","alt","grid","lift","dist","brg","depth","snowing","temp","fall","tmax","est","day","kind","firstDay","drive","roadKm","exact","walk","road","roadAlt","climb","foot","hike","cost","tried","wx","fav","ok"];
 const slim = s => Object.fromEntries(FIELDS.filter(k => s[k] !== undefined).map(k => [k, s[k]]));
 const cache = {
-  save() { try { if (S.place && S.updated) localStorage.setItem(CK, JSON.stringify({ lat: S.place.lat, lon: S.place.lon, t: S.updated.getTime(), dates: S.dates, home: S.home, pts: S.pts.map(slim) })); } catch {} },
+  save() { try { if (S.place && S.updated) localStorage.setItem(CK, JSON.stringify({ lat: S.place.lat, lon: S.place.lon, t: S.updated.getTime(), dates: S.dates, home: S.home, pts: S.pts.map(slim), favs: (S.favs || []).map(slim), grid: S.grid || [] })); } catch {} },
   load(p) { try { const c = JSON.parse(localStorage.getItem(CK) || "null"); if (c && c.pts && dist(c.lat, c.lon, p.lat, p.lon) < 3) return c; } catch {} return null; }
 };
-function applyCache(c) { S.pts = c.pts; S.home = c.home; S.dates = c.dates; S.updated = new Date(c.t); S.stale = false; S.fitted = false; }
+function applyCache(c) { S.pts = c.pts; S.home = c.home; S.dates = c.dates; S.grid = c.grid || []; S.updated = new Date(c.t); S.stale = false; S.fitted = false; seedFavs(c); S.favs = syncFavObjs(c.favs || [], c); }
+
+/* Registre : chaque lieu affiché a un numéro (pour les webcams des coins épinglés et des coins partagés) */
+const REG = [];
+const rid = s => { let i = REG.indexOf(s); if (i < 0) i = REG.push(s) - 1; return i; };
+
+/* ---------- Mes coins : lieux épinglés, suivis même sans neige ---------- */
+const FK = "neige.favs.v1";
+let FAVS = (() => { try { return JSON.parse(localStorage.getItem(FK)); } catch { return null; } })();
+const saveFavs = () => { try { localStorage.setItem(FK, JSON.stringify(FAVS)); } catch {} alertSync(); };
+const favName = s => s.name ? s.name.replace(/^Près de /, "") : "Coin à " + nf(s.alt || 0) + " m";
+const favDef = s => ({ name: favName(s), region: s.region || "", lat: +s.lat.toFixed(4), lon: +s.lon.toFixed(4), alt: s.alt ?? null });
+const favIdx = s => (FAVS || []).findIndex(f => dist(f.lat, f.lon, s.lat, s.lon) < 2);
+const mkFav = (f, me) => ({ ...f, lift: false, fav: true, dist: dist(me.lat, me.lon, f.lat, f.lon), brg: bearing(me.lat, me.lon, f.lat, f.lon) });
+function syncFavObjs(list, me) { return (FAVS || []).map(f => list.find(o => o && dist(o.lat, o.lon, f.lat, f.lon) < 2) || mkFav(f, me)); }
+// première fois : les 3 coins de montagne les plus proches (ex. Iraty depuis Bayonne)
+function seedFavs(me) {
+  if (FAVS) return;
+  FAVS = [];
+  const c = PLACES.map(([name, region, lat, lon, alt, lift]) => ({ name, region, lat, lon, alt, lift, d: dist(me.lat, me.lon, lat, lon) }))
+    .filter(p => p.alt >= 1200 && !p.lift && p.d < 250).sort((a, b) => a.d - b.d);
+  for (const p of c) { if (FAVS.length >= 3) break; if (!FAVS.some(f => dist(f.lat, f.lon, p.lat, p.lon) < 12)) FAVS.push({ name: p.name, region: p.region, lat: p.lat, lon: p.lon, alt: p.alt }); }
+  saveFavs();
+}
+function prep(s) {
+  snowModel(s);
+  if (s.depth >= 1 || s.snowing) { s.kind = "now"; s.firstDay = 0; }
+  else { s.firstDay = s.day.findIndex(Boolean); s.kind = s.firstDay >= 0 ? "soon" : "none"; }
+  s.roadKm = s.dist * 1.3; s.drive = s.roadKm / (s.dist < 80 ? 55 : 82) * 60; s.exact = false;
+}
+// charge la neige, la route et la météo d'un seul lieu (coin ajouté, coin partagé)
+async function loadSpot(o) {
+  const me = S.me || S.place; if (!me) return;
+  o.dist = dist(me.lat, me.lon, o.lat, o.lon); o.brg = bearing(me.lat, me.lon, o.lat, o.lon);
+  try {
+    await fetchWeather([o]);
+    if (!o.ok) return;
+    prep(o);
+    try { await fetchAccess(me, [o]); } catch {}
+    scoreAccess(o);
+    await fetchDetails([o]);
+  } catch {}
+}
+function addFav(f) {
+  if (favIdx(f) >= 0) return toast("Déjà dans Mes coins");
+  FAVS.push(f); saveFavs();
+  const o = mkFav(f, S.me || S.place); S.favs.push(o);
+  render(); toast("Ajouté à Mes coins");
+  loadSpot(o).then(() => { render(); cache.save(); if ($("#favDlg").open) renderFavDlg(); });
+}
+function toggleFav(s) {
+  const k = favIdx(s);
+  if (k >= 0) {
+    FAVS.splice(k, 1); saveFavs();
+    S.favs = S.favs.filter(o => dist(o.lat, o.lon, s.lat, s.lon) >= 2);
+    toast("Retiré de Mes coins");
+  } else {
+    const f = favDef(s); FAVS.push(f); saveFavs();
+    S.favs.push(Object.assign(mkFav(f, S.me || S.place), slim(s), { name: f.name, fav: true }));
+    toast("Ajouté à Mes coins");
+  }
+  render(); cache.save();
+}
+function favVal(s, v) {
+  if (!s.est) return "…";
+  if (snowAt(s, v)) { const n = amtOf(s, v); return n !== "" ? n + " cm" : "il neige"; }
+  if (v == null) { const k = s.day.findIndex((x, i) => i > 0 && x); return k > 0 ? "neige " + dayTag(k) : "rien sur 10 j"; }
+  return "rien";
+}
+function renderFavs() {
+  const v = S.view, F = S.favs || [];
+  $("#favs").innerHTML = F.map((s, k) => { const on = s.est && snowAt(s, v); return `<button type="button" class="fav glass${on ? " snow" : ""}" data-f="${k}">${icon(on ? "i-starf" : "i-star")}<b>${esc(s.name)}</b><span>${esc(favVal(s, v))}</span></button>`; }).join("")
+    + `<button type="button" class="fav add glass" id="favAdd">${icon("i-plus")}${F.length ? "Coin" : "Épingler un coin"}</button>`;
+}
+const norm = t => (t || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+function renderFavDlg() {
+  const F = S.favs || [];
+  $("#fList").innerHTML = F.length ? F.map((s, k) => `<li>${icon("i-starf")}<span><b>${esc(s.name)}</b><small>${esc([s.region, s.alt ? nf(s.alt) + " m" : "", s.est ? favVal(s, null) : ""].filter(Boolean).join(" · "))}</small></span><button type="button" data-rm="${k}" aria-label="Retirer ${esc(s.name)}">×</button></li>`).join("") : `<li class="none">Aucun coin pour l'instant. Cherche un lieu ci-dessous.</li>`;
+  const me = S.place || { lat: 43.5, lon: -1.47 };
+  const sug = PLACES.map(([name, region, lat, lon, alt, lift]) => ({ name, region, lat, lon, alt, lift, d: dist(me.lat, me.lon, lat, lon) }))
+    .filter(p => !p.lift && p.alt >= 900 && favIdx(p) < 0).sort((a, b) => a.d - b.d).slice(0, 6);
+  $("#fSugT").hidden = !sug.length;
+  S.favSug = sug;
+  $("#fSug").innerHTML = sug.map((p, i) => `<li><button type="button" data-sug="${i}">${esc(p.name)}<span>${esc(p.region)} · ${nf(p.alt)} m · ${nf(p.d)} km</span></button></li>`).join("");
+}
+let favQ = 0;
+async function favSearch() {
+  const q = $("#fInput").value.trim(), id = ++favQ, out = $("#fResults");
+  if (q.length < 2) { out.innerHTML = ""; S.favRes = []; return; }
+  const me = S.place || { lat: 43.5, lon: -1.47 }, n = norm(q);
+  const loc = PLACES.filter(p => norm(p[0]).includes(n)).map(([name, region, lat, lon, alt]) => ({ name, region, lat, lon, alt }))
+    .sort((a, b) => dist(me.lat, me.lon, a.lat, a.lon) - dist(me.lat, me.lon, b.lat, b.lon)).slice(0, 5);
+  let geo = [];
+  try {
+    const r = await getJSON("https://geocoding-api.open-meteo.com/v1/search?count=8&language=fr&name=" + encodeURIComponent(q), 8000);
+    geo = (r.results || []).filter(c => !loc.some(l => dist(l.lat, l.lon, c.latitude, c.longitude) < 3)).slice(0, 5)
+      .map(c => ({ name: c.name, region: c.admin2 || c.admin1 || c.country || "", lat: c.latitude, lon: c.longitude, alt: c.elevation != null ? Math.round(c.elevation) : null }));
+  } catch {}
+  if (id !== favQ) return;
+  S.favRes = loc.concat(geo);
+  out.innerHTML = S.favRes.length ? S.favRes.map((p, i) => `<li><button type="button" data-res="${i}">${esc(p.name)}<span>${esc([p.region, p.alt != null ? nf(p.alt) + " m" : ""].filter(Boolean).join(" · "))}</span></button></li>`).join("") : `<li class="msg">Aucun lieu trouvé.</li>`;
+}
+
+/* ---------- Météo sur place : ciel, vent, température, limite pluie-neige ---------- */
+const SKY = c => c == null ? null : c <= 1 ? ["i-sun", "Soleil", "sun"] : c === 2 ? ["i-psun", "Éclaircies", "sun"] : c === 3 ? ["i-cloud", "Nuageux", ""] : c <= 48 ? ["i-fog", "Brouillard", ""] : (c >= 71 && c <= 77) || c === 85 || c === 86 ? ["i-flake", "Neige", "snow"] : c >= 95 ? ["i-rain", "Orage", ""] : ["i-rain", "Pluie", ""];
+async function fetchDetails(list) {
+  list = [...new Set(list)].filter(s => s && s.ok !== false && s.alt != null && (!s.wx || Date.now() - s.wx.t > 50 * 60000));
+  const chunks = []; for (let i = 0; i < list.length; i += 50) chunks.push(list.slice(i, i + 50));
+  await Promise.allSettled(chunks.map(async ch => {
+    const u = OM + "?latitude=" + ch.map(s => s.lat.toFixed(3)).join(",") + "&longitude=" + ch.map(s => s.lon.toFixed(3)).join(",") + "&elevation=" + ch.map(s => Math.round(s.alt)).join(",")
+      + "&current=weather_code,wind_gusts_10m&daily=weather_code,sunshine_duration,daylight_duration,wind_gusts_10m_max,temperature_2m_min,temperature_2m_max&hourly=freezing_level_height&temporal_resolution=hourly_6&forecast_days=10&timezone=auto";
+    let r;
+    try { r = await getJSON(u); } catch { await wait(3000); r = await getJSON(u); }
+    if (!Array.isArray(r)) r = [r];
+    r.forEach((d, i) => {
+      const s = ch[i], D = d && d.daily; if (!s || !D) return;
+      const fz = d.hourly?.freezing_level_height || [];
+      s.wx = { t: Date.now(), code: D.weather_code || [], sun: (D.sunshine_duration || []).map(v => (v || 0) / 3600), dl: (D.daylight_duration || []).map(v => (v || 0) / 3600),
+        gust: D.wind_gusts_10m_max || [], tmin: D.temperature_2m_min || [], tmax: D.temperature_2m_max || [],
+        line: D.time.map((_, k) => { const v = fz.slice(k * 4 + 1, k * 4 + 4).filter(x => x != null); return v.length ? Math.max(0, Math.round((Math.min(...v) - 300) / 100) * 100) : null; }),
+        cc: d.current?.weather_code, cg: d.current?.wind_gusts_10m };
+    });
+  }));
+}
+const wxCode = (s, v) => s.wx ? (v == null && s.wx.cc != null ? s.wx.cc : s.wx.code[v ?? 0]) : null;
+const wxGust = (s, v) => s.wx ? (v == null && s.wx.cg != null ? s.wx.cg : s.wx.gust[v ?? 0]) : null;
+function wxChip(s, v) {
+  const k = SKY(wxCode(s, v)), t = v == null && s.temp != null ? s.temp : s.wx ? s.wx.tmax[v] : null, g = wxGust(s, v);
+  if (!k) return t != null ? chip("i-temp", Math.round(t) + " °C") : "";
+  return chip(k[0], (t != null ? Math.round(t) + " °" : k[1]) + (g > 55 ? " · vent fort" : " · " + k[1].toLowerCase()));
+}
+
+/* ---------- Note « Ça vaut le coup ? » sur 10 : neige, neige fraîche, soleil, vent, trajet ---------- */
+function score(s, v) {
+  if (!s.est) return null;
+  const d = v ?? 0, a = v == null ? s.depth : s.est[d] || 0, f = (s.fall[d] || 0) + (d > 0 ? (s.fall[d - 1] || 0) * .5 : 0);
+  if (!(a >= 1) && !(f >= 1) && !(v == null && s.snowing)) return null;
+  const w = s.wx;
+  let n = 4.5 * Math.min(1, Math.log1p(a) / Math.log1p(50));        // neige au sol : jusqu'à 4,5
+  n += Math.min(1.5, f / 8 * 1.5);                                   // neige fraîche : jusqu'à 1,5
+  n += 2 * (w && w.dl[d] ? Math.min(1, w.sun[d] / (w.dl[d] * .7)) : .45); // soleil : jusqu'à 2
+  const g = wxGust(s, v); n += g == null ? .7 : g <= 35 ? 1 : g <= 60 ? .4 : -.5; // vent
+  n += 1.5 * Math.max(0, Math.min(1, 1 - ((s.cost ?? 120) - 30) / 240));          // trajet : jusqu'à 1,5
+  const tx = w ? w.tmax[d] : s.tmax[d]; if (tx > 7) n -= 1;                       // neige qui fond
+  return Math.max(1, Math.min(10, Math.round(n)));
+}
+const scoreWord = n => n >= 8 ? "Top" : n >= 6 ? "Bien" : n >= 4 ? "Moyen" : "Bof";
+const scoreCls = n => n >= 8 ? " hi" : n < 4 ? " lo" : "";
+const scorePill = n => n ? `<span class="score${scoreCls(n)}"><i>${n}/10</i>${scoreWord(n)}</span>` : "";
+function reasons(s, v) {
+  const d = v ?? 0, w = s.wx, out = [], a = v == null ? s.depth : s.est[d];
+  if (a >= 1) out.push(["i-flake", a + " cm au sol"]);
+  if (s.fall[d] >= 1) out.push(["i-flake", "+" + Math.round(s.fall[d]) + " cm de fraîche"]);
+  if (w) {
+    const k = SKY(wxCode(s, v)), h = Math.round(w.sun[d] || 0);
+    if (k) out.push([k[0], h >= 1 ? k[1] + ", " + h + " h de soleil" : k[1]]);
+    const g = wxGust(s, v); if (g != null) out.push(["i-wind", g <= 35 ? "Peu de vent" : (g <= 60 ? "Vent " : "Vent fort ") + Math.round(g) + " km/h"]);
+    if (w.tmax[d] != null) out.push(["i-temp", Math.round(w.tmin[d]) + " à " + Math.round(w.tmax[d]) + " °C"]);
+  }
+  out.push(["i-car", driveTxt(s)]);
+  return out;
+}
+
+/* ---------- Alerte neige : l'app installée regarde Mes coins en arrière-plan (sans serveur) ---------- */
+const ALERT_URL = new URL("alerte.json", location.href).href;
+async function alertSync() {
+  try {
+    const c = await caches.open("neige-alerte"), old = await c.match(ALERT_URL).then(r => r && r.json()).catch(() => null);
+    await c.put(ALERT_URL, new Response(JSON.stringify({ on: !!CFG.alert, min: Math.max(2, CFG.min), favs: (FAVS || []).slice(0, 12), page: new URL(".", location.href).href, seen: old?.seen || {} })));
+  } catch {}
+}
+const alertOk = () => "serviceWorker" in navigator && "Notification" in window && "periodicSync" in ServiceWorkerRegistration.prototype;
+async function alertToggle(on) {
+  if (!on) {
+    CFG.alert = false; saveCfg(); alertSync();
+    try { const r = await navigator.serviceWorker.ready; await r.periodicSync.unregister("neige-alerte"); } catch {}
+    return alertUI();
+  }
+  if (!alertOk()) { CFG.alert = false; alertUI(); return toast("Alerte possible seulement dans l'app installée, sur Android"); }
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted") { CFG.alert = false; alertUI(); return toast("Notifications refusées"); }
+  try {
+    const r = await navigator.serviceWorker.ready;
+    const st = await navigator.permissions.query({ name: "periodic-background-sync" }).catch(() => ({ state: "granted" }));
+    if (st.state === "denied") throw new Error("denied");
+    await r.periodicSync.register("neige-alerte", { minInterval: 6 * 3600e3 });
+    CFG.alert = true; saveCfg(); await alertSync(); alertUI();
+    r.showNotification("Alerte neige activée", { body: `Je surveille ${FAVS.length ? FAVS.map(f => f.name).join(", ") : "Mes coins"}. Je te préviens dès que la neige arrive (au moins ${Math.max(2, CFG.min)} cm).`, icon: "icon-192.png", badge: "icon-192.png", tag: "neige-on" });
+  } catch { CFG.alert = false; saveCfg(); alertUI(); toast("Ouvre l'app depuis l'écran d'accueil pour activer l'alerte"); }
+}
+function alertUI() {
+  const el = $("#cAlert"); if (!el) return;
+  el.checked = !!CFG.alert;
+  $("#cAlertSub").textContent = CFG.alert ? `Activée : je regarde ${FAVS && FAVS.length ? FAVS.map(f => f.name).join(", ") : "Mes coins"} plusieurs fois par jour` : "Une notification quand la neige arrive sur Mes coins";
+}
+
+/* ---------- Partager un coin ---------- */
+let toastT = 0;
+function toast(t) { const el = $("#toast"); el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => el.hidden = true, 2300); }
+const shareUrl = s => location.origin + location.pathname + "?coin=" + s.lat.toFixed(4) + "," + s.lon.toFixed(4) + "&n=" + encodeURIComponent(favName(s)) + (s.alt ? "&a=" + Math.round(s.alt) : "");
+async function share(s) {
+  const d = S.sheetDay, n = score(s, d);
+  const st = !s.est ? "" : s.kind === "now" ? cap(nowTxt(s)) : s.firstDay >= 0 ? "neige " + dayWord(s.firstDay) + ", " + dayAmtLong(s, s.firstDay) : "pas de neige prévue pour l'instant";
+  const text = `❄ ${favName(s)} : ${st}.${n ? ` Note ${n}/10.` : ""}${s.drive ? ` ${driveTxt(s)} de route depuis ${S.place.label || "chez moi"}.` : ""}`;
+  const url = shareUrl(s);
+  try { if (navigator.share) { await navigator.share({ title: "Où est la neige ?", text, url }); return; } } catch (e) { if (e.name === "AbortError") return; }
+  try { await navigator.clipboard.writeText(text + " " + url); toast("Lien copié, colle-le à qui tu veux"); } catch { prompt("Copie ce lien :", url); }
+}
+// coin reçu par lien : on l'ouvre dès que les résultats sont là
+async function openPending() {
+  const p = S.pending; if (!p || !S.place || $("#results").hidden) return;
+  S.pending = null;
+  let s = (S.favs || []).find(x => dist(x.lat, x.lon, p.lat, p.lon) < 2) || S.pts.find(x => dist(x.lat, x.lon, p.lat, p.lon) < 3);
+  if (!s) { s = { ...p, lift: false }; toast("J'ouvre le coin partagé…"); await loadSpot(s); }
+  if (s.est) openPlace(s, null); else toast("Ce coin ne répond pas pour l'instant");
+}
 
 /* ---------- Noms des lieux (mémorisés ; OpenStreetMap, 1 demande par seconde, Photon en secours) ---------- */
 const NK = "neige.names.v1";
@@ -694,12 +1011,12 @@ function renderCam() {
 
 
 /* ---------- État ---------- */
-const S = { place: null, me: null, pts: [], dates: [], home: null, sel: null, view: null, run: 0, updated: null, stale: false, busy: false, map: null, mapReady: false, sheet: null, sheetDay: null, fitted: false, watch: null, cam: null };
+const S = { place: null, me: null, pts: [], dates: [], home: null, sel: null, view: null, run: 0, updated: null, stale: false, busy: false, map: null, mapReady: false, sheet: null, sheetDay: null, fitted: false, watch: null, cam: null, favs: [], grid: [], play: false, pending: null };
 function show(id) { for (const k of ["welcome", "loading", "error", "results"]) $("#" + k).hidden = k !== id; if (id === "results") setTimeout(dockH, 0); }
 
 /* ---------- Réglages : jusqu'où, neige minimum, accès (mémorisés sur le téléphone) ---------- */
 const REACH = [30, 45, 60, 90, 120, 150, 180, 240, 300, 360, 480, 0];
-const CFG = Object.assign({ mode: "near", near: 150, far: 240, min: 1, walk: true, lift: true }, (() => { try { return JSON.parse(localStorage.getItem("neige.cfg.v1")) || {}; } catch { return {}; } })());
+const CFG = Object.assign({ mode: "near", near: 150, far: 240, min: 1, walk: true, lift: true, heat: true, alert: false }, (() => { try { return JSON.parse(localStorage.getItem("neige.cfg.v1")) || {}; } catch { return {}; } })());
 const saveCfg = () => { try { localStorage.setItem("neige.cfg.v1", JSON.stringify(CFG)); } catch {} };
 const R = () => CFG.mode === "near" ? CFG.near : CFG.mode === "far" ? CFG.far : 0;
 function setReach(r) { if (!r) CFG.mode = "all"; else if (r <= 180) { CFG.near = r; CFG.mode = "near"; } else { CFG.far = r; CFG.mode = "far"; } saveCfg(); }
@@ -728,10 +1045,11 @@ function render(fresh) {
   $("#placeName").textContent = S.place.label || "Ma position";
   const V = viewOf();
   if (!S.sel || !V.all.includes(S.sel)) S.sel = V.near[0] || null;
-  renderSeg(); renderDays(); renderHomebar(); renderCards(V); renderFoot();
+  renderSeg(); renderDays(); renderHomebar(); renderFavs(); renderCards(V); renderFoot();
   setTimeout(() => { dockH(); renderMap(V, fresh); }, 0);
   if ($("#all").open) renderList();
   if ($("#place").open && S.sheet) renderPlace();
+  if ($("#favDlg").open) renderFavDlg();
 }
 function renderFoot() {
   $("#busy").hidden = !S.busy;
@@ -747,7 +1065,7 @@ function renderSeg() {
 function renderDays() {
   const n = Math.min(10, S.dates.length), vs = [null];
   for (let i = 1; i < n; i++) vs.push(i);
-  $("#dchips").innerHTML = vs.map(v => {
+  $("#dchips").innerHTML = `<button type="button" class="dplay glass${S.play ? " on" : ""}" id="playBtn" aria-label="${S.play ? "Arrêter" : "Voir les 10 jours défiler sur la carte"}">${icon(S.play ? "i-pause" : "i-play")}</button>` + vs.map(v => {
     const c = viewOf(v).near.length;
     return `<button type="button" class="dchip glass${v === S.view ? " on" : ""}${c ? "" : " zero"}" data-v="${v ?? ""}" aria-pressed="${v === S.view}"><span>${dayChipTop(v)}</span><b>${v == null ? "Au sol" : dateOf(S.dates[v]).getDate() + " " + MONTHS[dateOf(S.dates[v]).getMonth()].replace(".", "")}</b><i>${c ? icon("i-flake") + c : "rien"}</i></button>`;
   }).join("");
@@ -761,16 +1079,16 @@ function renderHomebar() {
 }
 
 /* Cartes-photos : une par lieu enneigé, la photo est la webcam la plus proche */
-function cardHTML(s, rank, v) {
-  const i = S.pts.indexOf(s), n = amtOf(s, v);
-  const third = s.lift ? chip("i-lift", "Téléphérique") : s.foot ? chip("i-walk", walkTxt(s), "warn") : v == null && s.temp != null ? chip("i-temp", Math.round(s.temp) + " °C") : "";
-  const tag = rank === 0 ? (v == null ? "La plus proche" : "La plus proche " + dayWord(v)) : "N° " + (rank + 1);
+function cardHTML(s, rank, v, best) {
+  const i = S.pts.indexOf(s), n = amtOf(s, v), sc = score(s, v);
+  const third = s.lift ? chip("i-lift", "Téléphérique") : s.foot ? chip("i-walk", walkTxt(s), "warn") : "";
+  const tag = rank === 0 ? (v == null ? "La plus proche" : "La plus proche " + dayWord(v)) : best ? "Meilleure note" : "N° " + (rank + 1);
   return `<article class="card" data-i="${i}" tabindex="0" aria-label="${esc(label(s))}">
     <div class="ph"><svg aria-hidden="true"><use href="#peaks"/></svg><img alt="" data-cam></div>
     <div class="c-top"><span class="tag">${esc(tag)}</span><span class="tag lv" hidden></span></div>
-    <div class="chips">${chip("i-car", driveTxt(s))}${chip("i-peak", nf(s.alt) + " m")}${third}</div>
-    <div class="amt">${n !== "" ? `<b>${n}<small>cm</small></b>` : `<b style="font-size:30px">Il neige</b>`}<span>${esc(amtSub(s, v))}</span></div>
-    <div class="c-bot"><div class="nm"><h3 data-name="${i}">${esc(label(s))}</h3><p>${esc([s.region, kmTxt(s) + " km"].filter(Boolean).join(" · "))}</p></div><a class="go" href="${mapsDir(s)}" target="_blank" rel="noopener"><span class="o">${icon("i-go")}</span>Y aller</a></div>
+    <div class="chips">${chip("i-car", driveTxt(s))}${wxChip(s, v)}${third}</div>
+    <div class="amt">${n !== "" ? `<b>${n}<small>cm</small></b>` : `<b style="font-size:30px">Il neige</b>`}<span>${esc(amtSub(s, v))}</span>${scorePill(sc)}</div>
+    <div class="c-bot"><div class="nm"><h3 data-name="${i}">${esc(label(s))}</h3><p>${esc([s.region, nf(s.alt) + " m", kmTxt(s) + " km"].filter(Boolean).join(" · "))}</p></div><a class="go" href="${mapsDir(s)}" target="_blank" rel="noopener"><span class="o">${icon("i-go")}</span>Y aller</a></div>
   </article>`;
 }
 function infoCard(V) {
@@ -789,7 +1107,8 @@ function infoCard(V) {
 }
 function renderCards(V) {
   const c = $("#cards"), v = S.view;
-  c.innerHTML = V.near.length ? V.near.slice(0, 15).map((s, k) => cardHTML(s, k, v)).join("") : infoCard(V);
+  const top = V.near.slice(0, 15), sc = top.map(s => score(s, v) || 0), mx = Math.max(0, ...sc.slice(1)), bi = mx >= 6 && mx > sc[0] ? sc.indexOf(mx, 1) : -1;
+  c.innerHTML = top.length ? top.map((s, k) => cardHTML(s, k, v, k === bi)).join("") : infoCard(V);
   const k = V.near.indexOf(S.sel);
   c.scrollLeft = k > 0 ? c.children[k].offsetLeft - 14 : 0;
   loadCams();
@@ -830,7 +1149,7 @@ const EMPTY = { type: "FeatureCollection", features: [] };
 const wide = () => innerWidth >= 900;
 function pad() {
   if (wide()) return { top: 40, bottom: 40, left: 480, right: 60 };
-  return { top: Math.round($(".top").getBoundingClientRect().bottom + 18), bottom: $("#dock").offsetHeight + 18, left: 34, right: 34 };
+  return { top: Math.round($(".top").getBoundingClientRect().bottom + 18), bottom: $("#dock").offsetHeight + 18, left: 34, right: 74 };
 }
 function initMap() {
   const m = S.map = new maplibregl.Map({ container: "map", style: "https://tiles.openfreemap.org/styles/positron", center: [S.place.lon, S.place.lat], zoom: 8, attributionControl: { compact: true }, dragRotate: false, pitchWithRotate: false, touchPitch: false });
@@ -838,9 +1157,20 @@ function initMap() {
   m.on("load", () => {
     m.addSource("spots", { type: "geojson", data: EMPTY });
     m.addSource("me", { type: "geojson", data: EMPTY });
+    m.addSource("heat", { type: "geojson", data: EMPTY });
+    m.addSource("favs", { type: "geojson", data: EMPTY });
+    // nappe de neige : chaque point enneigé fait une tache violette, d'environ 10 km quel que soit le zoom
+    m.addLayer({ id: "heat", type: "heatmap", source: "heat", maxzoom: 13, paint: {
+      "heatmap-weight": ["interpolate", ["linear"], ["get", "w"], 0, 0, 1, .25, 40, 1],
+      "heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 5, .8, 10, 1.4],
+      "heatmap-radius": ["interpolate", ["exponential", 2], ["zoom"], 5, 7, 12, 896],
+      "heatmap-color": ["interpolate", ["linear"], ["heatmap-density"], 0, "rgba(106,76,255,0)", .12, "rgba(170,155,255,.26)", .4, "rgba(130,105,255,.4)", .8, "rgba(96,66,245,.52)", 1, "rgba(80,50,230,.6)"],
+      "heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 11, 1, 13, 0] } });
     // cercle de précision du GPS, en mètres réels quel que soit le zoom
     m.addLayer({ id: "me-acc", type: "circle", source: "me", paint: { "circle-color": "#2F7BFF", "circle-opacity": .12, "circle-stroke-color": "#2F7BFF", "circle-stroke-opacity": .3, "circle-stroke-width": 1, "circle-pitch-alignment": "map",
       "circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 0, ["/", ["get", "acc"], ["get", "mpp"]], 22, ["/", ["*", ["get", "acc"], 4194304], ["get", "mpp"]]] } });
+    m.addLayer({ id: "favs-dot", type: "circle", source: "favs", paint: { "circle-radius": 6.5, "circle-color": ["case", ["==", ["get", "sn"], 1], "#6A4CFF", "#FFFFFF"], "circle-stroke-color": "#6A4CFF", "circle-stroke-width": 2.5 } });
+    m.addLayer({ id: "favs-lbl", type: "symbol", source: "favs", layout: { "text-field": ["get", "t"], "text-font": ["Noto Sans Bold"], "text-size": 12, "text-anchor": "top", "text-offset": [0, .9], "text-padding": 3 }, paint: { "text-color": "#5A3EE0", "text-halo-color": "#FFFFFF", "text-halo-width": 2 } });
     m.addLayer({ id: "spots-halo", type: "circle", source: "spots", filter: ["==", ["get", "sel"], 1], paint: { "circle-radius": ["+", ["get", "r"], 11], "circle-color": "#6A4CFF", "circle-opacity": .22 } });
     m.addLayer({ id: "spots", type: "circle", source: "spots", paint: {
       "circle-radius": ["get", "r"],
@@ -849,7 +1179,9 @@ function initMap() {
     m.addLayer({ id: "spots-lbl", type: "symbol", source: "spots", filter: ["==", ["get", "lab"], 1], layout: { "text-field": ["get", "t"], "text-font": ["Noto Sans Bold"], "text-size": 13, "text-anchor": "left", "text-offset": [1.15, 0], "symbol-sort-key": ["get", "o"], "text-padding": 4, "text-max-width": 30 }, paint: { "text-color": "#17142E", "text-halo-color": "#FFFFFF", "text-halo-width": 2.2 } });
     m.addLayer({ id: "me-dot", type: "circle", source: "me", paint: { "circle-radius": 8, "circle-color": "#2F7BFF", "circle-stroke-color": "#FFFFFF", "circle-stroke-width": 3 } });
     m.addLayer({ id: "spots-hit", type: "circle", source: "spots", paint: { "circle-radius": 22, "circle-opacity": 0 } });
-    m.on("click", "spots-hit", e => { const f = e.features && e.features[0]; if (f && S.pts[f.properties.i]) pickSpot(S.pts[f.properties.i]); });
+    m.addLayer({ id: "favs-hit", type: "circle", source: "favs", paint: { "circle-radius": 18, "circle-opacity": 0 } });
+    m.on("click", "spots-hit", e => { const f = e.features && e.features[0]; if (f && S.pts[f.properties.i]) { S.hitAt = Date.now(); pickSpot(S.pts[f.properties.i]); } });
+    m.on("click", "favs-hit", e => { const f = e.features && e.features[0]; if (f && Date.now() - (S.hitAt || 0) > 300 && S.favs[f.properties.k]) openPlace(S.favs[f.properties.k], S.view); });
     m.on("mouseenter", "spots-hit", () => m.getCanvas().style.cursor = "pointer");
     m.on("mouseleave", "spots-hit", () => m.getCanvas().style.cursor = "");
     S.mapReady = true;
@@ -867,6 +1199,22 @@ function setSpots(V) {
   });
   S.map.getSource("spots").setData({ type: "FeatureCollection", features: feats });
 }
+function setFavs() {
+  if (!S.mapReady) return;
+  S.map.getSource("favs").setData({ type: "FeatureCollection", features: (S.favs || []).map((s, k) => ({ type: "Feature", geometry: { type: "Point", coordinates: [s.lon, s.lat] }, properties: { k, sn: s.est && snowAt(s, S.view) ? 1 : 0, t: s.name } })) });
+}
+// pos = 0 maintenant, 1 demain… (peut être entre deux jours pendant la lecture : la neige grossit en douceur)
+const heatW = (g, i) => (i <= 0 ? g[2] : g[3 + i]) ?? 0;
+function setHeat(pos) {
+  if (!S.mapReady) return;
+  if (pos == null) pos = S.view == null ? 0 : S.view;
+  const a = Math.floor(pos), t = pos - a, feats = [];
+  if (CFG.heat !== false) for (const g of S.grid || []) {
+    const w = heatW(g, a) * (1 - t) + heatW(g, a + 1) * t;
+    if (w >= CFG.min * .8) feats.push({ type: "Feature", geometry: { type: "Point", coordinates: [g[1], g[0]] }, properties: { w } });
+  }
+  S.map.getSource("heat").setData({ type: "FeatureCollection", features: feats });
+}
 function setMe() {
   if (!S.mapReady) return;
   const p = S.me || S.place; if (!p) return;
@@ -876,6 +1224,7 @@ function fitView(V) {
   const me = S.me || S.place, pts = V.near.length ? V.near.slice(0, 5) : V.far.slice(0, 1);
   const b = new maplibregl.LngLatBounds([me.lon, me.lat], [me.lon, me.lat]);
   pts.forEach(s => b.extend([s.lon, s.lat]));
+  (S.favs || []).filter(f => f.est && (f.cost ?? f.drive) <= 240).forEach(f => b.extend([f.lon, f.lat])); // ta zone reste en vue
   S.map.fitBounds(b, { padding: pad(), maxZoom: 10, duration: S.fitted ? 700 : 0 });
 }
 function showOnMap(s) {
@@ -887,9 +1236,39 @@ function renderMap(V, fresh) {
   if (!window.maplibregl || !S.place || $("#results").hidden) return;
   if (!S.map) return initMap();
   if (!S.mapReady) return;
-  setSpots(V); setMe();
+  setHeat(); setFavs(); setSpots(V); setMe();
   if (fresh || !S.fitted) { fitView(V); S.fitted = true; }
 }
+
+/* ---------- Les 10 jours qui défilent sur la carte, comme un film ---------- */
+let playT = 0;
+function togglePlay() {
+  if (S.play) return stopPlay();
+  const n = Math.min(10, S.dates.length); if (n < 2) return;
+  const seq = [null]; for (let i = 1; i < n; i++) seq.push(i);
+  let k = S.view == null ? 0 : S.view; if (k >= n - 1) k = 0;
+  S.play = true;
+  if (S.mapReady) { // on cadre tout ce qui va apparaître
+    const me = S.me || S.place, b = new maplibregl.LngLatBounds([me.lon, me.lat], [me.lon, me.lat]);
+    seq.forEach(v => viewOf(v).near.slice(0, 4).forEach(s => b.extend([s.lon, s.lat])));
+    (S.favs || []).filter(f => f.est && (f.cost ?? f.drive) <= 240).forEach(f => b.extend([f.lon, f.lat]));
+    S.map.fitBounds(b, { padding: pad(), maxZoom: 9.5, duration: 600 });
+  }
+  const D = 1300, t0 = Date.now() - k * D; let last = -1;
+  const tick = () => {
+    if (!S.play) return;
+    const p = Math.min((Date.now() - t0) / D, n - 1), i = Math.floor(p);
+    if (i !== last) {
+      last = i; S.view = seq[i]; S.sel = null; render();
+      const b = $(`#dchips [data-v="${seq[i] ?? ""}"]`); if (b) b.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
+    }
+    setHeat(p);
+    if (p >= n - 1) { playT = setTimeout(stopPlay, 900); return; }
+    playT = setTimeout(tick, 80);
+  };
+  tick();
+}
+function stopPlay() { if (!S.play) return; S.play = false; clearTimeout(playT); renderDays(); setHeat(); }
 
 /* ---------- Position GPS en direct (le point bleu suit le téléphone) ---------- */
 function startWatch() {
@@ -925,7 +1304,9 @@ function syncCfg() {
   $("#cReach").value = String(k >= 0 ? k : 4);
   $("#cReachV").textContent = r ? reachTxt(r) + " de route" : "Partout";
   $("#cMin").querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.v === CFG.min));
-  $("#cWalk").checked = CFG.walk; $("#cLift").checked = CFG.lift;
+  $("#cWalk").checked = CFG.walk; $("#cLift").checked = CFG.lift; $("#cHeat").checked = CFG.heat !== false;
+  $("#cFavs").textContent = S.favs.length ? S.favs.map(f => f.name).join(", ") : "Aucun";
+  alertUI();
   $("#cPlace").textContent = S.place ? (S.place.label || "Ma position") + (S.place.gps ? " · GPS" : "") : "";
 }
 
@@ -1119,7 +1500,9 @@ async function run(place, opts = {}) {
     if (navigator.onLine === false) throw Object.assign(new Error("offline"), { offline: true });
     const known = PLACES.map(([name, region, lat, lon, alt, lift]) => ({ name, region, lat, lon, alt, lift: !!lift, dist: dist(me.lat, me.lon, lat, lon), brg: bearing(me.lat, me.lon, lat, lon) }))
       .filter(s => s.dist <= 900).sort((a, b) => a.dist - b.dist).slice(0, 95);
-    const [home, first] = await Promise.all([fetchHome(me).catch(() => null), fetchWeather([...known, ...gridAround(me)])]);
+    seedFavs(me);
+    const favs = syncFavObjs([], me);
+    const [home, first] = await Promise.all([fetchHome(me).catch(() => null), fetchWeather([...known, ...gridAround(me)]), fetchWeather(favs).catch(() => [])]);
     if (runId !== S.run) return;
     // 2e passe : on resserre la recherche sur les reliefs plus proches que la neige déjà trouvée
     const isNow = s => s.depth >= 1 || s.snowing;
@@ -1131,35 +1514,36 @@ async function run(place, opts = {}) {
     const second = extra.length ? await fetchWeather(extra).catch(() => []) : [];
     if (runId !== S.run) return;
     const all = first.concat(second);
-    for (const s of all) {
-      snowModel(s);
-      if (isNow(s)) { s.kind = "now"; s.firstDay = 0; }
-      else { s.firstDay = s.day.findIndex(Boolean); s.kind = s.firstDay >= 0 ? "soon" : "none"; }
-      s.roadKm = s.dist * 1.3; s.drive = s.roadKm / (s.dist < 80 ? 55 : 82) * 60; s.exact = false;
-    }
+    all.forEach(prep);
+    const favOk = favs.filter(f => f.ok); favOk.forEach(prep);
+    const grid = all.filter(s => s.depth >= 1 || s.est.some(e => e >= 1)).map(s => [+s.lat.toFixed(3), +s.lon.toFixed(3), s.depth, ...s.est.slice(0, 10)]);
     const byDist = (a, b) => (a.dist + (a.grid ? 12 : 0)) - (b.dist + (b.grid ? 12 : 0));
     const nows = cluster(all.filter(s => s.kind === "now").sort(byDist), 14);
     const soons = cluster(all.filter(s => s.kind === "soon").sort(byDist), 14).filter(s => !nows.some(n => dist(n.lat, n.lon, s.lat, s.lon) < 14));
     const pts = nows.concat(soons).sort(byDist);
     applyNames(pts);
     if (!quiet) $("#loadMsg").textContent = "Je calcule les routes jusqu'à la neige…";
-    try { await fetchAccess(me, pts); } catch {}
+    try { await fetchAccess(me, [...favOk, ...pts]); } catch {}
     if (runId !== S.run) return;
-    pts.forEach(scoreAccess);
+    pts.forEach(scoreAccess); favOk.forEach(scoreAccess);
     pts.sort((a, b) => a.cost - b.cost);
-    S.pts = pts; S.home = home; S.dates = home?.dates || all[0]?.dates || [];
+    S.pts = pts; S.favs = favs; S.grid = grid; S.home = home; S.dates = home?.dates || all[0]?.dates || [];
     S.updated = new Date(); S.stale = false; S.busy = false;
     if (!quiet || moved) S.fitted = false;
     cache.save();
     if (!quiet) show("results");
     render(!quiet || moved);
     nameGrid(runId, place);
+    openPending();
+    // météo détaillée (ciel, vent, températures) des lieux qu'on montre
+    const det = () => fetchDetails([...favOk, ...pts.slice(0, 40)]).then(() => { if (runId !== S.run) return; render(); cache.save(); if (!pts.slice(0, 8).concat(favOk).some(s => s.wx)) setTimeout(det, 60000); }); // service saturé : on réessaie dans une minute
+    det();
   } catch (e) {
     if (runId !== S.run) return;
     S.busy = false;
     if (quiet) { S.stale = true; renderFoot(); return; }
     const c = cache.load(place);
-    if (c) { applyCache(c); S.stale = true; show("results"); render(true); return; }
+    if (c) { applyCache(c); S.stale = true; show("results"); render(true); openPending(); return; }
     $("#errMsg").textContent = e.status === 429 ? "Trop de recherches en peu de temps. Réessaie dans une minute." : (e.offline || e instanceof TypeError) ? "Pas de connexion internet. Reconnecte-toi, puis réessaie." : "La météo ne répond pas. Réessaie dans un instant.";
     show("error");
   }
@@ -1179,15 +1563,34 @@ function chart(s, sel) {
   const n = Math.min(10, S.dates.length, s.est.length), top = Math.max(10, ...s.est.slice(0, n));
   return Array.from({ length: n }, (_, i) => {
     const e = s.est[i] || 0, f = s.fall[i] || 0, h = e >= 1 ? 6 + Math.min(e, top) / top * 60 : 3;
-    return `<div class="cb${i === sel ? " on" : ""}" title="${dayName(i)} : ≈ ${e} cm au sol${f >= 1 ? ", " + Math.round(f) + " cm de neige fraîche" : ""}"><b>${e >= 1 ? e : ""}</b>${f >= 1 ? icon("i-flake") : ""}<i class="${e >= 1 ? (f >= 1 ? "f" : "") : "z"}" style="height:${h.toFixed(0)}px"></i><em>${i === 0 ? "auj." : DAY_S[dateOf(S.dates[i]).getDay()]}</em></div>`;
+    return `<div class="cb${i === sel ? " on" : ""}" data-d="${i}" title="${dayName(i)} : ≈ ${e} cm au sol${f >= 1 ? ", " + Math.round(f) + " cm de neige fraîche" : ""}"><b>${e >= 1 ? e : ""}</b>${f >= 1 ? icon("i-flake") : ""}<i class="${e >= 1 ? (f >= 1 ? "f" : "") : "z"}" style="height:${h.toFixed(0)}px"></i><em>${i === 0 ? "auj." : DAY_S[dateOf(S.dates[i]).getDay()]}</em></div>`;
+  }).join("");
+}
+function wxStrip(s, sel) {
+  const w = s.wx, n = Math.min(10, S.dates.length, w.code.length);
+  return Array.from({ length: n }, (_, i) => {
+    const k = SKY(w.code[i]) || ["i-cloud", "", ""], sc = score(s, i === 0 && sel == null ? null : i);
+    return `<button type="button" class="wd${i === sel ? " on" : ""}" data-d="${i}" aria-label="${dayName(i)} : ${k[1]}, ${Math.round(w.tmin[i])} à ${Math.round(w.tmax[i])} °C"><svg class="${k[2]}" aria-hidden="true"><use href="#${k[0]}"/></svg><b>${Math.round(w.tmax[i])}°</b><span>${Math.round(w.tmin[i])}°</span><em>${Math.round(w.gust[i] || 0)}</em>${sc ? `<i class="${sc < 4 ? "lo" : ""}">${sc}</i>` : ""}</button>`;
   }).join("");
 }
 function renderPlace() {
   const s = S.sheet, sel = S.sheetDay;
-  $("#pTop").textContent = [s.region, nf(s.alt) + " m d'altitude"].filter(Boolean).join(" · ");
-  $("#pName").textContent = label(s);
+  $("#pTop").textContent = [s.region, s.alt != null ? nf(s.alt) + " m d'altitude" : ""].filter(Boolean).join(" · ");
+  $("#pName").textContent = s.fav ? s.name : label(s);
+  const fv = favIdx(s) >= 0;
+  $("#pFav").className = "b b-glass" + (fv ? " on" : "");
+  $("#pFav").innerHTML = icon(fv ? "i-starf" : "i-star") + (fv ? "Dans Mes coins" : "Épingler");
+  if (!s.est) {
+    $("#pState").textContent = "Pas de données pour ce coin pour l'instant";
+    for (const k of ["#pScore", "#pAccess", "#pWxBox"]) $(k).hidden = true;
+    $("#pPills").innerHTML = ""; $("#pChart").innerHTML = ""; $("#pGo").href = mapsDir(s); $("#pMap").href = mapsSee(s);
+    return renderPlaceCams();
+  }
   let main, sub = "";
-  if (s.kind === "now") {
+  if (s.kind === "none") {
+    main = "Pas de neige au sol pour l'instant";
+    sub = "Rien de prévu sur les 10 prochains jours.";
+  } else if (s.kind === "now") {
     main = cap(nowTxt(s));
     const nx = s.fall.findIndex((v, k) => k > 0 && v >= 1);
     if (nx > 0) sub = `Encore ${dayAmtLong(s, nx)} ${dayWord(nx)}.`;
@@ -1209,6 +1612,17 @@ function renderPlace() {
   $("#pGo").href = mapsDir(s);
   $("#pMap").href = mapsSee(s);
   $("#pChart").innerHTML = chart(s, sel);
+  // la note du jour choisi (ou du premier jour de neige)
+  const dd = sel != null ? (sel === 0 ? null : sel) : s.kind === "soon" ? s.firstDay : null, n = score(s, dd), box = $("#pScore");
+  box.hidden = !n;
+  if (n) box.innerHTML = `<div class="ring" style="--p:${n * 10}"><b>${n}<small>/10</small></b></div><div class="vt"><b>${cap(dd == null ? "en ce moment" : dayWord(dd))} : ${scoreWord(n).toLowerCase()}</b><ul>${reasons(s, dd).map(([ic, t]) => `<li>${icon(ic)}${esc(t)}</li>`).join("")}</ul></div>`;
+  const wb = $("#pWxBox"); wb.hidden = !s.wx;
+  if (s.wx) {
+    $("#pWx").innerHTML = wxStrip(s, sel);
+    const d = dd ?? 0, ln = s.wx.line[d];
+    // limite pluie-neige : seulement pour expliquer un jour sans neige
+    $("#pLine").textContent = "Petit chiffre : rafales de vent (km/h). Pastille : la note du jour." + (ln != null && !(s.fall[d] >= 1) && s.alt && ln > s.alt ? ` ${cap(dayWord(d))}, la neige ne tombe qu'au-dessus de ${nf(ln)} m environ.` : "");
+  }
   renderPlaceCams();
 }
 function renderPlaceCams() {
@@ -1218,7 +1632,7 @@ function renderPlaceCams() {
   if (!s.cams) { g.innerHTML = ""; m.textContent = "Je cherche les webcams…"; return; }
   if (!s.cams.length) { g.innerHTML = ""; m.innerHTML = `Pas de webcam connue à moins de 15 km. ${google}`; return; }
   m.textContent = "";
-  const i = S.pts.indexOf(s);
+  const i = rid(s);
   g.innerHTML = s.cams.slice(0, 8).map((c, j) => `<button class="cam" type="button" data-spot="${i}" data-cam="${j}" aria-label="Voir la webcam ${esc(c.title)}"><img src="${esc(camImg(c))}" alt="">${c.live ? "<i>EN DIRECT</i>" : ""}${isNight(c) && c.imgDay ? '<em class="day">Image de jour</em>' : ""}<b>${esc(c.title)}<em>${esc(c.city)}${c.km < 99 ? " · " + (c.km < 1 ? "<1" : nf(c.km)) + " km" : ""}</em></b></button>`).join("");
 }
 
@@ -1229,7 +1643,7 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("click", e => {
   const b = e.target.closest("[data-cam]");
-  if (b && b.tagName === "BUTTON") { e.preventDefault(); e.stopPropagation(); openCam(S.pts[+b.dataset.spot], +b.dataset.cam); }
+  if (b && b.tagName === "BUTTON") { e.preventDefault(); e.stopPropagation(); openCam(REG[+b.dataset.spot], +b.dataset.cam); }
 }, true);
 for (const d of document.querySelectorAll("dialog")) d.addEventListener("click", e => { if (e.target === d) d.close(); });
 $("#vClose").addEventListener("click", () => { $("#vFrame").removeAttribute("src"); $("#cam").close(); });
@@ -1238,8 +1652,8 @@ $("#vNext").addEventListener("click", () => { S.cam.j = (S.cam.j + 1) % S.cam.s.
 $("#vTabs").addEventListener("click", e => { const b = e.target.closest("[data-mode]"); if (b) { S.cam.mode = b.dataset.mode; renderCam(); } });
 $("#cam").addEventListener("close", () => { $("#vFrame").removeAttribute("src"); });
 
-$("#seg").addEventListener("click", e => { const b = e.target.closest("[data-m]"); if (!b || CFG.mode === b.dataset.m) return; CFG.mode = b.dataset.m; saveCfg(); change(); });
-$("#dchips").addEventListener("click", e => { const b = e.target.closest("[data-v]"); if (!b) return; const v = b.dataset.v === "" ? null : +b.dataset.v; if (v === S.view) return; S.view = v; change(); b.scrollIntoView({ inline: "nearest", block: "nearest", behavior: "smooth" }); });
+$("#seg").addEventListener("click", e => { const b = e.target.closest("[data-m]"); if (!b || CFG.mode === b.dataset.m) return; stopPlay(); CFG.mode = b.dataset.m; saveCfg(); change(); });
+$("#dchips").addEventListener("click", e => { if (e.target.closest("#playBtn")) return togglePlay(); const b = e.target.closest("[data-v]"); if (!b) return; stopPlay(); const v = b.dataset.v === "" ? null : +b.dataset.v; if (v === S.view) return; S.view = v; change(); b.scrollIntoView({ inline: "nearest", block: "nearest", behavior: "smooth" }); });
 $("#cards").addEventListener("scroll", () => { clearTimeout(syncT); syncT = setTimeout(syncSel, 90); }, { passive: true });
 $("#cards").addEventListener("click", e => {
   const a = e.target.closest("[data-act]");
@@ -1256,6 +1670,27 @@ $("#meBtn").addEventListener("click", () => {
   S.map.flyTo({ center: [p.lon, p.lat], zoom: Math.max(S.map.getZoom(), 10), padding: pad(), duration: 900 });
   startWatch();
 });
+$("#favs").addEventListener("click", e => {
+  if (e.target.closest("#favAdd")) return openFavDlg();
+  const b = e.target.closest("[data-f]"); if (b && S.favs[+b.dataset.f]) openPlace(S.favs[+b.dataset.f], S.view);
+});
+function openFavDlg() { $("#fInput").value = ""; $("#fResults").innerHTML = ""; renderFavDlg(); $("#favDlg").showModal(); }
+$("#cFavBtn").addEventListener("click", () => { $("#cfg").close(); openFavDlg(); });
+let favT = 0;
+$("#fInput").addEventListener("input", () => { clearTimeout(favT); favT = setTimeout(favSearch, 280); });
+$("#fInput").addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); clearTimeout(favT); favSearch(); } });
+$("#favDlg").addEventListener("click", e => {
+  const rm = e.target.closest("[data-rm]");
+  if (rm) { const o = S.favs[+rm.dataset.rm]; if (o) toggleFav(o); renderFavDlg(); return; }
+  const r = e.target.closest("[data-res]"), g = e.target.closest("[data-sug]");
+  const p = r ? S.favRes[+r.dataset.res] : g ? S.favSug[+g.dataset.sug] : null;
+  if (p) { addFav({ name: p.name, region: p.region || "", lat: +p.lat.toFixed(4), lon: +p.lon.toFixed(4), alt: p.alt ?? null }); $("#fInput").value = ""; $("#fResults").innerHTML = ""; renderFavDlg(); }
+});
+$("#pFav").addEventListener("click", () => { if (S.sheet) { toggleFav(S.sheet); renderPlace(); } });
+$("#pShare").addEventListener("click", () => { if (S.sheet) share(S.sheet); });
+for (const id of ["#pChart", "#pWx"]) $(id).addEventListener("click", e => { const b = e.target.closest("[data-d]"); if (!b || !S.sheet) return; const d = +b.dataset.d; S.sheetDay = S.sheetDay === d ? null : d; renderPlace(); });
+$("#cHeat").addEventListener("change", e => { CFG.heat = e.target.checked; saveCfg(); setHeat(); });
+$("#cAlert").addEventListener("change", e => alertToggle(e.target.checked));
 $("#listBtn").addEventListener("click", () => { renderList(); $("#all").showModal(); $("#all form").scrollTop = 0; });
 $("#cfgBtn").addEventListener("click", () => { syncCfg(); $("#cfg").showModal(); });
 let cfgT = 0;
@@ -1286,6 +1721,8 @@ addEventListener("online", () => { if (S.stale && S.place) run(S.place, { quiet:
 
 (async function start() {
   const q = new URLSearchParams(location.search);
+  const coin = (q.get("coin") || "").split(",").map(Number);
+  if (coin.length === 2 && coin.every(isFinite)) { S.pending = { lat: coin[0], lon: coin[1], name: q.get("n") || "", region: "", alt: q.get("a") ? +q.get("a") : null }; history.replaceState(null, "", location.pathname); }
   if (q.has("lat") && q.has("lon")) return run({ lat: +q.get("lat"), lon: +q.get("lon"), label: q.get("nom") || "", gps: false }, { force: true });
   const saved = store.get();
   try { if (navigator.permissions && navigator.geolocation) S.granted = (await navigator.permissions.query({ name: "geolocation" })).state === "granted"; } catch {}
@@ -1294,8 +1731,12 @@ addEventListener("online", () => { if (S.stale && S.place) run(S.place, { quiet:
     if (c && Date.now() - c.t < 12 * 3600e3) {
       // ouverture instantanée avec les derniers résultats, puis mise à jour discrète s'ils ont plus de 20 min
       S.place = saved; if (saved.gps) S.me = saved;
-      applyCache(c); show("results"); render(true); nameGrid(S.run, saved);
+      applyCache(c); show("results"); render(true); nameGrid(S.run, saved); openPending();
       if (Date.now() - c.t > 20 * 60000) run(saved, { quiet: true, force: true });
+      else { // complète ce qui manque (coin ajouté, météo détaillée) sans tout recharger
+        const miss = S.favs.filter(f => !f.est);
+        Promise.all(miss.map(loadSpot)).then(() => fetchDetails([...S.favs.filter(f => f.est), ...S.pts.slice(0, 40)])).then(() => { render(); cache.save(); });
+      }
     } else run(saved, { force: true });
     if (saved.gps && S.granted) startWatch();
     return;
@@ -1304,7 +1745,7 @@ addEventListener("online", () => { if (S.stale && S.place) run(S.place, { quiet:
   show("welcome");
 })();
 
-if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").then(() => { if (CFG.alert) alertSync(); }).catch(() => {}));
 </script>
 </body>
 </html>
