@@ -20,7 +20,7 @@
    En bas : les jours (Maintenant, Demain…) et des cartes-photos à faire glisser, une par lieu enneigé, synchronisées avec la carte. */
 :root{
   --ink:#10233A; --ink-2:#5F7790; --ink-3:#9FB3C6; --hair:rgba(20,50,90,.1);
-  --bg:#EEF5FB; --blue:#3E8ED0; --blue-ink:#FFFFFF; --amber:#B25E00; --night:#0F2340; --me:#D93A4A;
+  --bg:#EEF5FB; --ok:#1FA672; --mid:#F29D38; --hard:#6B7C8D; --blue:#3E8ED0; --blue-ink:#FFFFFF; --amber:#B25E00; --night:#0F2340; --me:#D93A4A;
   --glass:rgba(255,255,255,.6); --glass-2:rgba(255,255,255,.88); --glass-edge:rgba(255,255,255,.92);
   --shadow:0 18px 44px -20px rgba(15,35,64,.38),0 2px 6px rgba(15,35,64,.06);
   --r:28px; --r-s:18px;
@@ -361,6 +361,42 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
 @keyframes fall{from{transform:translate3d(0,-10px,0)}to{transform:translate3d(var(--x),105vh,0)}}
 @media (prefers-reduced-motion:reduce){.flakes{display:none}}
 .glass{border-color:rgba(255,255,255,.95)!important;box-shadow:0 18px 44px -20px rgba(15,35,64,.35),inset 0 1px 0 rgba(255,255,255,.9),0 0 0 1px rgba(200,215,230,.35)}
+
+/* Balade dans la neige : genre de neige, type de lieu, accès en couleurs, confiance */
+.ad{display:inline-block;flex:none;width:10px;height:10px;border-radius:50%;background:var(--ok)}
+.ad.mid{background:var(--mid)}
+.ad.hard{background:var(--hard)}
+.ad.unk{background:#B8C6D3}
+.chip .ad{box-shadow:0 0 0 2px rgba(255,255,255,.9);margin:0 1px 0 3px}
+.chip.ski{background:rgba(255,255,255,.94);color:var(--ink);border-color:transparent}
+.amt b{font-size:42px}
+.amt .kind{margin-top:5px;font-size:13.5px;font-weight:800;opacity:1;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+.verd{display:flex;align-items:center;gap:10px;width:100%;padding:7px 10px 7px 7px;border-radius:24px;cursor:pointer;font:inherit;color:var(--ink);text-align:left;transition:transform .1s ease-out}
+.verd:active{transform:scale(.985)}
+.verd .vi{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:#fff}
+.verd.no .vi{background:rgba(40,70,100,.12);color:var(--ink-2)}
+.verd .vi svg{width:20px;height:20px}
+.verd .vx{flex:1;min-width:0}
+.verd b{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:800;letter-spacing:-.01em;line-height:1.25;min-width:0}
+.verd b span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.verd small{display:block;font-size:12.5px;font-weight:600;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.verd > svg{flex:none;width:18px;height:18px;color:var(--ink-3)}
+.cf{flex:none;font-style:normal;font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px;background:rgba(31,166,114,.15);color:#0E7A52;white-space:nowrap}
+.cf.c2{background:rgba(62,142,208,.15);color:#2F6FA8}
+.cf.c1{background:rgba(242,157,56,.2);color:#9A5A00}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.fact{padding:11px 12px;border-radius:16px;background:var(--bg);min-width:0}
+.fact span{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink-2)}
+.fact span svg{width:14px;height:14px;color:var(--blue);flex:none}
+.fact b{display:block;margin-top:4px;font-size:16px;font-weight:800;letter-spacing:-.01em;line-height:1.2}
+.fact small{display:block;margin-top:2px;font-size:12.5px;color:var(--ink-2);line-height:1.3}
+.fact.good{background:rgba(31,166,114,.11)}
+.fact.good b{color:#0E7A52}
+.cfrow{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:13px;color:var(--ink-2);line-height:1.35}
+.access.note{color:var(--ink-2);background:var(--bg)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin:8px 0 4px;font-size:12px;font-weight:600;color:var(--ink-2)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.it .t .ad{margin-right:6px}
 </style>
 </head>
 <body>
@@ -397,6 +433,8 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
     <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5L8 5.5Z" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></symbol>
     <symbol id="i-pause" viewBox="0 0 24 24"><path d="M8.5 5.5v13M15.5 5.5v13" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round"/></symbol>
     <symbol id="i-bell" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15l1.5-2Z"/><path d="M10 21h4"/></g></symbol>
+    <symbol id="i-tree" viewBox="0 0 24 24"><path d="M12 3 7 10h2.6L5.5 16.5h13L14.4 10H17L12 3ZM12 16.5V21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-ski" viewBox="0 0 24 24"><path d="M4.5 20.5 12.8 6c.7-1.2 1.8-1.8 3-1.6M10 21.5 18.3 7c.7-1.2 1.8-1.8 3-1.6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="peaks"viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice">
       <defs>
         <linearGradient id="pk-sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0E2A4F"/><stop offset=".6" stop-color="#4F8FC8"/><stop offset="1" stop-color="#CBC0FF"/></linearGradient>
@@ -427,6 +465,7 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
       <button class="rb glass" id="cfgBtn" type="button" aria-label="Réglages"><svg aria-hidden="true"><use href="#i-gear"/></svg></button>
     </div>
     <div class="seg glass" id="seg" role="group" aria-label="Jusqu'où ?"></div>
+    <button class="verd glass" id="verd" type="button" hidden></button>
   </header>
   <button class="rb glass meBtn" id="meBtn" type="button" aria-label="Revenir sur ma position"><svg aria-hidden="true"><use href="#i-loc"/></svg></button>
   <section class="dock" id="dock" aria-live="polite">
@@ -442,7 +481,7 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
   <div class="in">
     <p class="eyebrow">Neige au sol et prévisions 10 jours</p>
     <h1>Où est<br>la neige ?</h1>
-    <p class="lead">La neige la plus proche de chez toi, dans ton rayon. Montagnes, cols, villages : on regarde partout.</p>
+    <p class="lead">La neige la plus proche de chez toi, pour une balade : quelle épaisseur, quel genre de neige, et si on y arrive en voiture.</p>
     <div class="cta"><button class="b b-white" id="locBtn" type="button"><svg aria-hidden="true"><use href="#i-loc"/></svg>Me localiser</button></div>
     <p class="msg" id="locMsg" hidden></p>
     <p class="or">ou tape ta ville</p>
@@ -481,7 +520,8 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
     <p class="eyebrow" id="pTop"></p>
     <h3 id="pName"></h3>
     <p class="pstate" id="pState"></p>
-    <div class="pills" id="pPills"></div>
+    <div class="facts" id="pFacts"></div>
+    <p class="cfrow" id="pConf" hidden></p>
     <p class="access" id="pAccess" hidden></p>
     <div class="verdict" id="pScore" hidden></div>
     <div class="cta"><a class="b b-blue" id="pGo" href="#" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-go"/></svg>Y aller</a><a class="b b-glass" id="pMap" href="#" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-map"/></svg>Voir le lieu</a></div>
@@ -541,6 +581,7 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
       <div class="seg2" id="cMin" role="group" aria-label="Neige minimum"><button type="button" data-v="1">1 cm</button><button type="button" data-v="5">5 cm</button><button type="button" data-v="10">10 cm</button><button type="button" data-v="20">20 cm</button></div>
     </div>
     <div class="set">
+      <label class="tog"><span><b>Stations de ski</b><small>Décoche pour ne voir que la nature, les cols et les villages</small></span><input type="checkbox" id="cSki"><i></i></label>
       <label class="tog"><span><b>Marcher depuis la route</b><small>Neige à plus d'un km du parking</small></span><input type="checkbox" id="cWalk"><i></i></label>
       <label class="tog"><span><b>Téléphérique</b><small>Glaciers et sommets équipés</small></span><input type="checkbox" id="cLift"><i></i></label>
     </div>
@@ -549,8 +590,9 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
       <div class="place-row"><span id="cFavs"></span><button class="b b-glass" id="cFavBtn" type="button">Gérer</button></div>
     </div>
     <div class="set">
-      <label class="tog"><span><b>Alerte neige</b><small id="cAlertSub">Une notification quand la neige arrive sur Mes coins</small></span><input type="checkbox" id="cAlert"><i></i></label>
-      <label class="tog"><span><b>Nappe de neige sur la carte</b><small>La neige en violet, en plus des points</small></span><input type="checkbox" id="cHeat"><i></i></label>
+      <label class="tog"><span><b>Alerte neige près de chez toi</b><small id="cAlertSub"></small></span><input type="checkbox" id="cAlert"><i></i></label>
+      <p class="foot" style="text-align:left;margin:6px 0 10px"><button type="button" id="cAlertTest" hidden>Envoyer une notification d'essai</button></p>
+      <label class="tog"><span><b>Nappe de neige sur la carte</b><small>La neige en blanc, en plus des points</small></span><input type="checkbox" id="cHeat"><i></i></label>
     </div>
     <div class="set">
       <div class="set-h"><span>Point de départ</span></div>
@@ -568,6 +610,7 @@ dialog.viewer[open] .v-in{animation:fade .25s ease}
     <button class="x" value="cancel" aria-label="Fermer">×</button>
     <h3 id="allT"></h3>
     <p class="eyebrow" id="allSub" style="margin-top:4px"></p>
+    <p class="legend"><span><i class="ad"></i>En voiture</span><span><i class="ad mid"></i>Un peu de marche</span><span><i class="ad hard"></i>Difficile</span></p>
     <ol class="list" id="list"></ol>
   </form>
 </dialog>
@@ -705,7 +748,7 @@ const store = {
 
 /* ---------- Mémoire : derniers résultats (ouverture instantanée, hors connexion) ---------- */
 const CK = "neige.cache.v3";
-const FIELDS = ["name","region","lat","lon","alt","grid","lift","dist","brg","depth","snowing","temp","fall","tmax","est","day","kind","firstDay","drive","roadKm","exact","walk","road","roadAlt","climb","foot","hike","cost","tried","wx","fav","ok"];
+const FIELDS = ["name","region","lat","lon","alt","grid","lift","dist","brg","depth","snowing","temp","fall","tmax","est","day","kind","firstDay","drive","roadKm","exact","walk","road","roadAlt","climb","foot","hike","cost","tried","wx","fav","ok","fy"];
 const slim = s => Object.fromEntries(FIELDS.filter(k => s[k] !== undefined).map(k => [k, s[k]]));
 const cache = {
   save() { try { if (S.place && S.updated) localStorage.setItem(CK, JSON.stringify({ lat: S.place.lat, lon: S.place.lon, t: S.updated.getTime(), dates: S.dates, home: S.home, pts: S.pts.map(slim), favs: (S.favs || []).map(slim), grid: S.grid || [] })); } catch {} },
@@ -843,6 +886,88 @@ function wxChip(s, v) {
   return chip(k[0], (t != null ? Math.round(t) + " °" : k[1]) + (g > 55 ? " · vent fort" : " · " + k[1].toLowerCase()));
 }
 
+/* ---------- Balade dans la neige : type de lieu, genre de neige, accès, confiance ---------- */
+const SKI = new Set("Font-Romeu|Les Angles|Porté-Puymorens|Ax-les-Thermes, Bonascre|Guzet|Le Mourtis|Superbagnères|Peyragudes|Saint-Lary|Piau-Engaly|Luz-Ardiden|Cauterets|Gavarnie|Hautacam|Artouste|La Pierre Saint-Martin|Formigal|Baqueira|Soldeu|La Molina|Le Lioran|Super-Besse|Gréolières-les-Neiges|Isola 2000|Auron|Valberg|La Foux d'Allos|Pra-Loup|Superdévoluy|Orcières|Vars|Serre Chevalier|Montgenèvre|La Grave|Les 2 Alpes|Alpe d'Huez|Chamrousse|Vercors, Villard-de-Lans|Les 7 Laux|Valloire|Val Thorens|Courchevel|La Plagne|Les Arcs|Tignes|Val d'Isère|Bonneval-sur-Arc|Les Saisies|Chamonix|Flaine|Avoriaz|Les Rousses|Val d'Ese|Sierra Nevada|Navacerrada|Zermatt|Saas-Fee|Verbier|Crans-Montana|Grindelwald|Andermatt|Davos|Saint-Moritz|Courmayeur|Cervinia|Sestrières|Limone Piemonte|Livigno|Passo del Tonale|Val Gardena|Cortina d'Ampezzo|Abetone|Campo Imperatore|Saint-Anton|Sölden|Kitzbühel|Obertauern|Feldberg|Winterberg|Cairngorm|Zakopane|Kranjska Gora|Bansko|Kopaonik|Parnasse|Oukaïmeden|Gourette|Candanchú".split("|"));
+const TOP = /^(Pic |Puy |Mont |Monte |Plomb |Crêt |Picos |Ballon |Grand Ballon|Signal |Aiguille |Pointe |Balaïtous|Vignemale|Néouvielle|Aneto|Etna|Hohneck|Larrun|Artzamendi|Brocken|Pierre-sur-Haute)/;
+const kindOf = s => s.lift ? "lift" : s.grid ? "nat" : SKI.has(s.name) ? "ski" : /^(Col|Port|Passo) /.test(s.name || "") ? "col" : TOP.test(s.name || "") ? "top" : "nat";
+const KIND = { ski: ["i-ski", "Station de ski", "Pistes, remontées, du monde"], col: ["i-peak", "Col", "Route de montagne"], top: ["i-peak", "Sommet", "Haute montagne"], nat: ["i-tree", "Nature", "Forêt, plateau ou village"], lift: ["i-lift", "Téléphérique", "Glacier ou sommet équipé"] };
+const kindTxt = s => s.grid ? "Pleine nature" : KIND[kindOf(s)][1];
+// épaisseur au sol le jour choisi, puis ce qu'on peut y faire
+const depthAt = (s, v) => v == null ? s.depth : Math.max(s.est[v] || 0, Math.round(s.fall[v] || 0));
+const thickOf = a => a >= 20 ? ["Épaisse", "deep", "épaisse"] : a >= 5 ? ["Bonne pour une balade", "good", "balade"] : a >= 1 ? ["Fine couche", "thin", "fine couche"] : null;
+// état : fraîche (vient de tomber), tassée (elle tient), qui fond (il fait trop doux)
+function stateOf(s, v) {
+  const d = v ?? 0, f = s.fall[d] || 0, fy = d > 0 ? s.fall[d - 1] || 0 : s.fy || 0;
+  const tx = v == null && s.temp != null ? Math.max(s.temp, s.tmax[0] ?? s.temp) : s.wx && s.wx.tmax[d] != null ? s.wx.tmax[d] : s.tmax[d];
+  if (v == null && s.snowing) return ["Fraîche", "il neige en ce moment", "i-flake"];
+  if (f >= 2) return ["Fraîche", "+" + Math.round(f) + " cm ce jour-là", "i-flake"];
+  if (tx != null && tx >= 5) return ["Qui fond", Math.round(tx) + " °C au plus chaud", "i-temp"];
+  if (fy >= 3) return ["Fraîche", "tombée la veille", "i-flake"];
+  return ["Tassée", tx != null && tx <= 0 ? "il gèle, elle tient bien" : "elle tient", "i-flake"];
+}
+// confiance : la neige déjà au sol est sûre, une prévision lointaine ne l'est pas
+function confOf(s, v) {
+  const a = depthAt(s, v), now = v == null || v === 0;
+  const n = now ? (a >= 5 || (v == null && s.snowing) ? 3 : 2) : v <= 2 ? (a >= 3 ? 3 : 2) : v <= 5 ? (a >= 5 ? 2 : 1) : 1;
+  const why = now ? (n === 3 ? "Neige au sol aujourd'hui. Un coup d'œil à la webcam pour confirmer." : "Fine couche : elle a peut-être déjà fondu, regarde la webcam.")
+    : `Prévision à ${v} jour${v > 1 ? "s" : ""} : ` + (n === 3 ? "fiable." : n === 2 ? "probable, à revérifier la veille." : "incertaine, elle peut encore changer.");
+  return [n, ["", "Incertain", "Probable", "Sûr"][n], why];
+}
+const cfPill = c => `<em class="cf c${c[0]}">${c[1]}</em>`;
+// accès : vert = la voiture arrive dans la neige, orange = un peu de marche, gris = téléphérique ou longue rando
+function accessOf(s) {
+  const dr = driveTxt(s);
+  if (s.lift) return { lvl: "hard", ic: "i-lift", t: "Téléphérique", d: "après " + dr + " de route", chip: dr + " · téléphérique" };
+  if (!s.road && !s.exact) return { lvl: "unk", ic: "i-car", t: "À vérifier", d: dr + " de route environ", chip: dr };
+  if (!s.foot) return { lvl: "ok", ic: "i-car", t: "En voiture", d: dr + " de route, la voiture y arrive", chip: dr + " en voiture" };
+  const hard = s.walk > 4 || (s.climb ?? 0) > 450, up = s.climb ? ", " + nf(s.climb) + " m de montée" : "";
+  return { lvl: hard ? "hard" : "mid", ic: "i-walk", t: walkTxt(s), d: "après " + dr + " de route" + up, chip: dr + " + " + walkTxt(s) };
+}
+const accChip = s => { const a = accessOf(s); return `<span class="chip"><i class="ad ${a.lvl}"></i>${icon(s.lift ? "i-lift" : "i-car")}${a.chip}</span>`; };
+
+/* La phrase du haut : y a-t-il une balade dans la neige possible près de chez toi, et quand ? */
+function verdict() {
+  const n = Math.min(10, S.dates.length), vs = [null]; for (let i = 1; i < n; i++) vs.push(i);
+  const pool = S.pts.filter(s => usable(s) && inReach(s) && accessOf(s).lvl !== "hard");
+  let thin = null;
+  for (const v of vs) {
+    const c = pool.filter(s => depthAt(s, v) >= CFG.min).sort((a, b) => a.cost - b.cost);
+    const g = c.find(s => depthAt(s, v) >= 5);
+    if (g) return { s: g, v, good: true };
+    if (c[0] && !thin) thin = { s: c[0], v };
+  }
+  if (thin) return thin;
+  const far = S.pts.filter(usable).sort((a, b) => a.cost - b.cost)[0]; // trop loin, ou accès difficile
+  return far ? { s: far, v: far.kind === "now" ? null : far.firstDay, far: true } : { none: true };
+}
+function renderVerdict() {
+  const el = $("#verd"), r = S.verd = verdict();
+  let t, sub, cf = "";
+  if (r.none) { t = "Pas de neige en vue"; sub = "Rien de prévu sur 10 jours autour de toi"; }
+  else if (r.far) {
+    const s = r.s;
+    t = inReach(s) ? "Pas de balade facile pour l'instant" : "Rien à moins de " + reachTxt(R());
+    sub = (inReach(s) ? "En altitude : " : "Le plus proche : ") + shortName(s) + ", " + driveTxt(s) + (r.v ? ", " + dayWord(r.v) : "");
+  } else {
+    const s = r.s, a = depthAt(s, r.v);
+    t = (r.good ? "Balade possible " : "Un peu de neige ") + (r.v == null ? "aujourd'hui" : dayWord(r.v));
+    sub = shortName(s) + " · " + a + " cm · " + driveTxt(s);
+    cf = cfPill(confOf(s, r.v));
+  }
+  el.hidden = false;
+  el.className = "verd glass" + (r.none || r.far ? " no" : "");
+  el.innerHTML = `<span class="vi">${icon(r.none || r.far ? "i-search" : "i-flake")}</span><span class="vx"><b><span>${esc(t)}</span>${cf}</b><small>${esc(sub)}</small></span>${r.none ? "" : icon("i-chev")}`;
+}
+function goVerdict() {
+  const r = S.verd; if (!r || !r.s) return;
+  stopPlay();
+  if (!inReach(r.s)) setReach(REACH.find(x => x && x >= r.s.cost) || 0);
+  S.view = r.v ?? null; S.sel = r.s;
+  render(); showOnMap(r.s);
+  const dc = $("#dchips .dchip.on"); if (dc) dc.scrollIntoView({ inline: "center", block: "nearest" });
+  if (!viewOf().near.slice(0, 15).includes(r.s)) openPlace(r.s, S.view);
+}
+
 /* ---------- Note « Ça vaut le coup ? » sur 10 : neige, neige fraîche, soleil, vent, trajet ---------- */
 function score(s, v) {
   if (!s.est) return null;
@@ -874,37 +999,80 @@ function reasons(s, v) {
   return out;
 }
 
-/* ---------- Alerte neige : l'app installée regarde Mes coins en arrière-plan (sans serveur) ---------- */
-const ALERT_URL = new URL("alerte.json", location.href).href;
-async function alertSync() {
-  try {
-    const c = await caches.open("neige-alerte"), old = await c.match(ALERT_URL).then(r => r && r.json()).catch(() => null);
-    await c.put(ALERT_URL, new Response(JSON.stringify({ on: !!CFG.alert, min: Math.max(2, CFG.min), favs: (FAVS || []).slice(0, 12), page: new URL(".", location.href).href, seen: old?.seen || {} })));
-  } catch {}
+/* ---------- Alerte « neige près de chez toi » : un petit serveur regarde la météo toutes les 3 h et prévient le téléphone ---------- */
+const PUSH = "https://noiccttaqpisnfsmnxdr.supabase.co/functions/v1/alerte";
+const AK = "neige.alert.v1";
+const alertOk = () => "serviceWorker" in navigator && "Notification" in window && "PushManager" in window;
+const alertLast = () => { try { return JSON.parse(localStorage.getItem(AK) || "null"); } catch { return null; } };
+const b64 = t => Uint8Array.from(atob(t.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(t.length / 4) * 4, "=")), c => c.charCodeAt(0));
+const post = body => fetch(PUSH, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) }).then(r => r.json());
+// Les lieux que le serveur surveille : Mes coins + tout ce qui est à portée (rayon « Près »), même sans neige aujourd'hui
+async function spyPoints(names) {
+  const me = S.me || S.place, reach = CFG.near, seen = [];
+  const add = s => { if (s && s.est && s.alt != null && !s.lift && !seen.some(o => dist(o.lat, o.lon, s.lat, s.lon) < 8)) seen.push(s); };
+  const favs = (S.favs || []).filter(f => f.est);
+  favs.forEach(add); S.pts.filter(s => !s.grid).forEach(add); (S.cand || []).forEach(add); S.pts.forEach(add);
+  const need = seen.filter(s => !s.road && !s.exact).slice(0, 60);
+  if (need.length) { try { await fetchAccess(me, need); } catch {} need.forEach(scoreAccess); }
+  seen.forEach(s => { if (s.cost == null) scoreAccess(s); });
+  const keep = seen.filter(s => favs.includes(s) || (s.cost <= reach && accessOf(s).lvl !== "hard")).sort((a, b) => a.cost - b.cost).slice(0, 48);
+  applyNames(keep);
+  if (names) for (const s of keep.filter(s => s.grid && !s.name).slice(0, 10)) { const nm = await placeName(s, 12).catch(() => null); if (nm) s.name = "Près de " + nm; }
+  const out = keep.map(s => ({ n: shortName(s), la: +s.lat.toFixed(4), lo: +s.lon.toFixed(4), a: Math.round(s.alt), m: Math.round(s.cost), k: kindOf(s), f: s.foot ? +s.walk.toFixed(1) : undefined }));
+  if (S.home && S.home.elev != null) out.unshift({ n: "chez toi", la: +me.lat.toFixed(2), lo: +me.lon.toFixed(2), a: S.home.elev, m: 0, k: "home" });
+  return out;
 }
-const alertOk = () => "serviceWorker" in navigator && "Notification" in window && "periodicSync" in ServiceWorkerRegistration.prototype;
+// (ré)abonne le téléphone et envoie au serveur la liste des lieux à surveiller ; hi = premier abonnement (le serveur répond par une notification)
+let alertBusy = null;
+function alertSync(hi) { return alertBusy = (alertBusy || Promise.resolve()).then(() => alertSend(hi)).catch(() => null); }
+async function alertSend(hi) {
+  if (!CFG.alert || !alertOk() || !S.place || !S.pts) return null;
+  if (Notification.permission !== "granted") return null;
+  const reg = await navigator.serviceWorker.ready;
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) { const { key } = await getJSON(PUSH, 20000); sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64(key) }); hi = true; }
+  const points = await spyPoints(), me = S.me || S.place, min = Math.max(3, CFG.min);
+  if (!points.length) return null;
+  const sig = JSON.stringify([points.map(p => [p.la, p.lo, p.m]), CFG.near, min, sub.endpoint.slice(-24)]), last = alertLast();
+  if (!hi && last && last.sig === sig && Date.now() - last.t < 24 * 3600e3) return last;
+  const body = (pts, hello) => ({ op: "sub", sub: sub.toJSON(), lat: +me.lat.toFixed(2), lon: +me.lon.toFixed(2), label: S.place.label || "", min, reach: CFG.near, points: pts, hello });
+  const r = await post(body(points, !!hi));
+  if (!r || r.error || r.ok === false) throw new Error(r && r.error || "refus");
+  // ensuite, sans faire attendre : de vrais noms pour les coins qui n'en ont pas encore
+  if (points.some(p => /^À \d/.test(p.n))) spyPoints(true).then(p2 => { if (p2.some((p, i) => !points[i] || p.n !== points[i].n)) post(body(p2, false)); }).catch(() => {});
+  const st = { t: Date.now(), sig, n: points.filter(p => p.k !== "home").length };
+  try { localStorage.setItem(AK, JSON.stringify(st)); } catch {}
+  alertUI();
+  return st;
+}
 async function alertToggle(on) {
   if (!on) {
-    CFG.alert = false; saveCfg(); alertSync();
-    try { const r = await navigator.serviceWorker.ready; await r.periodicSync.unregister("neige-alerte"); } catch {}
-    return alertUI();
+    CFG.alert = false; saveCfg(); alertUI();
+    try { localStorage.removeItem(AK); const reg = await navigator.serviceWorker.ready, sub = await reg.pushManager.getSubscription(); if (sub) { post({ op: "unsub", endpoint: sub.endpoint }).catch(() => {}); await sub.unsubscribe(); } } catch {}
+    return;
   }
-  if (!alertOk()) { CFG.alert = false; alertUI(); return toast("Alerte possible seulement dans l'app installée, sur Android"); }
-  const perm = await Notification.requestPermission();
-  if (perm !== "granted") { CFG.alert = false; alertUI(); return toast("Notifications refusées"); }
+  if (!alertOk()) { alertUI(); return toast("Ce navigateur ne sait pas recevoir d'alertes. Installe l'app sur l'écran d'accueil."); }
+  if (await Notification.requestPermission() !== "granted") { alertUI(); return toast("Notifications refusées : autorise-les pour ce site"); }
+  CFG.alert = true; S.alertWait = true; alertUI();
+  const r = await alertSync(true);
+  S.alertWait = false;
+  if (!r) { CFG.alert = false; saveCfg(); alertUI(); return toast("Alerte impossible pour l'instant. Réessaie dans un moment."); }
+  saveCfg(); alertUI(); toast("Alerte activée : tu viens de recevoir une notification");
+}
+async function alertTest() {
   try {
-    const r = await navigator.serviceWorker.ready;
-    const st = await navigator.permissions.query({ name: "periodic-background-sync" }).catch(() => ({ state: "granted" }));
-    if (st.state === "denied") throw new Error("denied");
-    await r.periodicSync.register("neige-alerte", { minInterval: 6 * 3600e3 });
-    CFG.alert = true; saveCfg(); await alertSync(); alertUI();
-    r.showNotification("Alerte neige activée", { body: `Je surveille ${FAVS.length ? FAVS.map(f => f.name).join(", ") : "Mes coins"}. Je te préviens dès que la neige arrive (au moins ${Math.max(2, CFG.min)} cm).`, icon: "icon-192.png", badge: "icon-192.png", tag: "neige-on" });
-  } catch { CFG.alert = false; saveCfg(); alertUI(); toast("Ouvre l'app depuis l'écran d'accueil pour activer l'alerte"); }
+    const reg = await navigator.serviceWorker.ready, sub = await reg.pushManager.getSubscription();
+    if (!sub) return toast("Réactive l'alerte d'abord");
+    const r = await post({ op: "test", endpoint: sub.endpoint });
+    toast(r && r.ok ? "Notification envoyée" : "L'envoi a échoué. Désactive puis réactive l'alerte.");
+  } catch { toast("Pas de connexion"); }
 }
 function alertUI() {
   const el = $("#cAlert"); if (!el) return;
   el.checked = !!CFG.alert;
-  $("#cAlertSub").textContent = CFG.alert ? `Activée : je regarde ${FAVS && FAVS.length ? FAVS.map(f => f.name).join(", ") : "Mes coins"} plusieurs fois par jour` : "Une notification quand la neige arrive sur Mes coins";
+  const last = alertLast(), far = reachTxt(CFG.near);
+  $("#cAlertSub").textContent = S.alertWait ? "Activation en cours…" : CFG.alert ? `Activée : ${last && last.n ? last.n + " lieux surveillés" : "je surveille"} à moins de ${far}, contrôle toutes les 3 h` : `Une notification dès qu'il y a de la neige à moins de ${far} de chez toi`;
+  $("#cAlertTest").hidden = !CFG.alert || !!S.alertWait;
 }
 
 /* ---------- Partager un coin ---------- */
@@ -1032,13 +1200,13 @@ const reachTxt = r => (!r ? "Partout" : r < 60 ? r + " min" : r % 60 ? fmtDur(r)
 
 /* ---------- Ce qu'on montre : la neige du jour choisi, dans le rayon choisi ---------- */
 const snowAt = (s, v) => !s.est ? false : v == null ? (s.depth >= CFG.min || (s.snowing && CFG.min <= 1)) : (s.est[v] >= CFG.min || s.fall[v] >= CFG.min);
-const usable = s => (CFG.lift || !s.lift) && (CFG.walk || !s.foot);
+const usable = s => (CFG.lift || !s.lift) && (CFG.walk || !s.foot) && (CFG.ski !== false || kindOf(s) !== "ski");
 const inReach = s => !R() || s.cost <= R();
 function viewOf(v = S.view) {
   const all = S.pts.filter(s => usable(s) && snowAt(s, v)).sort((a, b) => a.cost - b.cost);
   return { all, near: all.filter(inReach), far: all.filter(s => !inReach(s)) };
 }
-const amtOf = (s, v) => v == null ? (s.depth >= 1 ? s.depth : "") : s.fall[v] >= 1 ? "+" + Math.round(s.fall[v]) : s.est[v];
+const amtOf = (s, v) => v == null ? (s.depth >= 1 ? s.depth : "") : depthAt(s, v); // toujours l'épaisseur au sol ce jour-là
 const amtSub = (s, v) => v == null ? (s.depth >= 1 ? (s.snowing ? "au sol, il neige" : "au sol") : "en ce moment") : (s.fall[v] >= 1 ? "de neige fraîche " : "au sol ") + dayWord(v);
 const shortName = s => label(s).replace(/^Près de /, "");
 const vWord = v => v == null ? "maintenant" : dayWord(v);
@@ -1053,7 +1221,7 @@ function render(fresh) {
   $("#placeName").textContent = S.place.label || "Ma position";
   const V = viewOf();
   if (!S.sel || !V.all.includes(S.sel)) S.sel = V.near[0] || null;
-  renderSeg(); renderDays(); renderHomebar(); renderFavs(); renderCards(V); renderFoot();
+  renderSeg(); renderVerdict(); renderDays(); renderHomebar(); renderFavs(); renderCards(V); renderFoot();
   setTimeout(() => { dockH(); renderMap(V, fresh); }, 0);
   if ($("#all").open) renderList();
   if ($("#place").open && S.sheet) renderPlace();
@@ -1088,14 +1256,14 @@ function renderHomebar() {
 
 /* Cartes-photos : une par lieu enneigé, la photo est la webcam la plus proche */
 function cardHTML(s, rank, v, best) {
-  const i = S.pts.indexOf(s), n = amtOf(s, v), sc = score(s, v);
-  const third = s.lift ? chip("i-lift", "Téléphérique") : s.foot ? chip("i-walk", walkTxt(s), "warn") : "";
+  const i = S.pts.indexOf(s), n = amtOf(s, v), sc = score(s, v), kd = kindOf(s);
+  const a = depthAt(s, v), th = thickOf(a), st = a >= 1 ? stateOf(s, v) : null, cf = confOf(s, v);
   const tag = rank === 0 ? (v == null ? "La plus proche" : "La plus proche " + dayWord(v)) : best ? "Meilleure note" : "N° " + (rank + 1);
   return `<article class="card" data-i="${i}" tabindex="0" aria-label="${esc(label(s))}">
     <div class="ph"><svg aria-hidden="true"><use href="#peaks"/></svg><img alt="" data-cam></div>
     <div class="c-top"><span class="tag">${esc(tag)}</span><span class="tag lv" hidden></span></div>
-    <div class="chips">${chip("i-car", driveTxt(s))}${wxChip(s, v)}${third}</div>
-    <div class="amt">${n !== "" ? `<b>${n}<small>cm</small></b>` : `<b style="font-size:30px">Il neige</b>`}<span>${esc(amtSub(s, v))}</span>${scorePill(sc)}</div>
+    <div class="chips">${accChip(s)}${chip(KIND[kd][0], kindTxt(s), kd === "ski" ? "ski" : "")}${wxChip(s, v)}</div>
+    <div class="amt">${n !== "" ? `<b>${n}<small>cm</small></b>` : `<b style="font-size:30px">Il neige</b>`}<span class="kind">${th ? th[0] : "Elle commence à tenir"}</span><span>${esc([st && st[0].toLowerCase(), cf[1].toLowerCase()].filter(Boolean).join(" · "))}</span>${scorePill(sc)}</div>
     <div class="c-bot"><div class="nm"><h3 data-name="${i}">${esc(label(s))}</h3><p>${esc([s.region, nf(s.alt) + " m", kmTxt(s) + " km"].filter(Boolean).join(" · "))}</p></div><a class="go" href="${mapsDir(s)}" target="_blank" rel="noopener"><span class="o">${icon("i-go")}</span>Y aller</a></div>
   </article>`;
 }
@@ -1179,10 +1347,10 @@ function initMap() {
       "circle-radius": ["interpolate", ["exponential", 2], ["zoom"], 0, ["/", ["get", "acc"], ["get", "mpp"]], 22, ["/", ["*", ["get", "acc"], 4194304], ["get", "mpp"]]] } });
     m.addLayer({ id: "favs-dot", type: "circle", source: "favs", paint: { "circle-radius": 6.5, "circle-color": ["case", ["==", ["get", "sn"], 1], "#3E8ED0", "#FFFFFF"], "circle-stroke-color": "#3E8ED0", "circle-stroke-width": 2.5 } });
     m.addLayer({ id: "favs-lbl", type: "symbol", source: "favs", layout: { "text-field": ["get", "t"], "text-font": ["Noto Sans Bold"], "text-size": 12, "text-anchor": "top", "text-offset": [0, .9], "text-padding": 3 }, paint: { "text-color": "#2F6FA8", "text-halo-color": "#FFFFFF", "text-halo-width": 2 } });
-    m.addLayer({ id: "spots-halo", type: "circle", source: "spots", filter: ["==", ["get", "sel"], 1], paint: { "circle-radius": ["+", ["get", "r"], 11], "circle-color": "#3E8ED0", "circle-opacity": .22 } });
+    m.addLayer({ id: "spots-halo", type: "circle", source: "spots", filter: ["==", ["get", "sel"], 1], paint: { "circle-radius": ["+", ["get", "r"], 11], "circle-color": ["match", ["get", "ac"], 1, "#F29D38", 2, "#6B7C8D", "#1FA672"], "circle-opacity": .22 } });
     m.addLayer({ id: "spots", type: "circle", source: "spots", paint: {
       "circle-radius": ["get", "r"],
-      "circle-color": ["case", ["==", ["get", "in"], 1], "#3E8ED0", "#C6D6E4"],
+      "circle-color": ["case", ["==", ["get", "in"], 1], ["match", ["get", "ac"], 1, "#F29D38", 2, "#6B7C8D", "#1FA672"], "#C6D6E4"],
       "circle-stroke-color": "#FFFFFF", "circle-stroke-width": ["case", ["==", ["get", "sel"], 1], 3.5, 2.5] } });
     m.addLayer({ id: "spots-lbl", type: "symbol", source: "spots", filter: ["==", ["get", "lab"], 1], layout: { "text-field": ["get", "t"], "text-font": ["Noto Sans Bold"], "text-size": 13, "text-anchor": "left", "text-offset": [1.15, 0], "symbol-sort-key": ["get", "o"], "text-padding": 4, "text-max-width": 30 }, paint: { "text-color": "#10233A", "text-halo-color": "#FFFFFF", "text-halo-width": 2.2 } });
     m.addLayer({ id: "me-dot", type: "circle", source: "me", paint: { "circle-radius": 8, "circle-color": "#D93A4A", "circle-stroke-color": "#FFFFFF", "circle-stroke-width": 3 } });
@@ -1200,9 +1368,9 @@ function setSpots(V) {
   if (!S.mapReady) return;
   const v = S.view, lab = new Set([S.sel, ...(V.near.length ? V.near.slice(0, 3) : V.far.slice(0, 1))].filter(Boolean));
   const feats = V.all.slice(0, 160).map(s => {
-    const n = amtOf(s, v), inn = inReach(s) ? 1 : 0, amt = Math.abs(parseFloat(n) || 0);
+    const n = amtOf(s, v), inn = inReach(s) ? 1 : 0, amt = Math.abs(parseFloat(n) || 0), lv = accessOf(s).lvl;
     return { type: "Feature", geometry: { type: "Point", coordinates: [s.lon, s.lat] }, properties: {
-      i: S.pts.indexOf(s), in: inn, sel: s === S.sel ? 1 : 0, lab: lab.has(s) ? 1 : 0, o: s === S.sel ? 0 : 1 + V.all.indexOf(s),
+      i: S.pts.indexOf(s), in: inn, ac: lv === "mid" ? 1 : lv === "hard" ? 2 : 0, sel: s === S.sel ? 1 : 0, lab: lab.has(s) ? 1 : 0, o: s === S.sel ? 0 : 1 + V.all.indexOf(s),
       r: inn ? 7 + Math.min(amt, 60) / 60 * 6 : 5, t: shortName(s) + (n !== "" ? " · " + n + " cm" : "") } };
   });
   S.map.getSource("spots").setData({ type: "FeatureCollection", features: feats });
@@ -1296,9 +1464,9 @@ function renderList() {
   $("#allT").textContent = v == null ? "Neige au sol" : "Neige " + dayWord(v);
   $("#allSub").textContent = r ? `${V.near.length} lieu${V.near.length > 1 ? "x" : ""} à moins de ${reachTxt(r)} de route` : `${V.all.length} lieu${V.all.length > 1 ? "x" : ""}, du plus rapide au plus loin`;
   const row = (s, far) => {
-    const n = amtOf(s, v);
-    const meta = [nf(s.alt) + " m", driveTxt(s)].join(" · ") + (s.lift ? " · téléphérique" : s.foot ? ` · <em>+ ${walkTxt(s)}</em>` : "");
-    return `<li><button class="it${far ? " far" : ""}" type="button" data-place="${S.pts.indexOf(s)}"${v != null ? ` data-day="${v}"` : ""}><div class="t"><b>${esc(label(s))}</b><span>${meta}</span></div><div class="v"><b>${n !== "" ? n + "<small>cm</small>" : "❄"}</b><span>${v == null ? (n !== "" ? "au sol" : "il neige") : (s.fall[v] >= 1 ? "fraîche" : "au sol")}</span></div><svg class="chev" aria-hidden="true"><use href="#i-chev"/></svg></button></li>`;
+    const n = amtOf(s, v), th = thickOf(depthAt(s, v));
+    const meta = `<i class="ad ${accessOf(s).lvl}"></i>` + [kindTxt(s), nf(s.alt) + " m", driveTxt(s)].join(" · ") + (s.foot && !s.lift ? ` · <em>+ ${walkTxt(s)}</em>` : "");
+    return `<li><button class="it${far ? " far" : ""}" type="button" data-place="${S.pts.indexOf(s)}"${v != null ? ` data-day="${v}"` : ""}><div class="t"><b>${esc(label(s))}</b><span>${meta}</span></div><div class="v"><b>${n !== "" ? n + "<small>cm</small>" : "❄"}</b><span>${th ? th[2] : "il neige"}</span></div><svg class="chev" aria-hidden="true"><use href="#i-chev"/></svg></button></li>`;
   };
   let h = V.near.map(s => row(s)).join("");
   if (!V.near.length) h = `<li class="empty">${r ? `Rien à moins de ${reachTxt(r)} de route.` : "Aucune neige pour l'instant."}</li>`;
@@ -1312,7 +1480,7 @@ function syncCfg() {
   $("#cReach").value = String(k >= 0 ? k : 4);
   $("#cReachV").textContent = r ? reachTxt(r) + " de route" : "Partout";
   $("#cMin").querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.v === CFG.min));
-  $("#cWalk").checked = CFG.walk; $("#cLift").checked = CFG.lift; $("#cHeat").checked = CFG.heat !== false;
+  $("#cSki").checked = CFG.ski !== false; $("#cWalk").checked = CFG.walk; $("#cLift").checked = CFG.lift; $("#cHeat").checked = CFG.heat !== false;
   $("#cFavs").textContent = S.favs.length ? S.favs.map(f => f.name).join(", ") : "Aucun";
   alertUI();
   $("#cPlace").textContent = S.place ? (S.place.label || "Ma position") + (S.place.gps ? " · GPS" : "") : "";
@@ -1435,6 +1603,7 @@ async function fetchWeather(list) {
       s.snowing = SNOW_CODES.has(c.weather_code);
       s.temp = c.temperature_2m;
       s.fall = fallAll.slice(P);
+      s.fy = fallAll[P - 1] || 0; // tombé hier : la neige est encore fraîche
       s.tmax = tmaxAll.slice(P);
       const hs = d.hourly?.snow_depth || [];
       s.mdep = s.fall.map((_, k) => { const v = hs.slice((k + P) * 4, (k + P) * 4 + 4).filter(x => x != null); return v.length ? Math.round(Math.max(...v) * 100) : 0; });
@@ -1450,7 +1619,7 @@ async function fetchHome(me) {
   const d = await getJSON(`${OM}?latitude=${me.lat.toFixed(3)}&longitude=${me.lon.toFixed(3)}&current=snow_depth,weather_code&daily=snowfall_sum&hourly=freezing_level_height&forecast_days=10&timezone=auto`);
   const fz = d.hourly?.freezing_level_height || [];
   const line = d.daily.time.map((_, i) => { const day = fz.slice(i * 24, i * 24 + 24).filter(v => v != null); return day.length ? Math.max(0, Math.round((Math.min(...day) - 300) / 100) * 100) : null; });
-  return { dates: d.daily.time, fall: (d.daily.snowfall_sum || []).map(v => v || 0), line, depth: Math.round((d.current?.snow_depth || 0) * 100), snowing: SNOW_CODES.has(d.current?.weather_code) };
+  return { dates: d.daily.time, fall: (d.daily.snowfall_sum || []).map(v => v || 0), line, depth: Math.round((d.current?.snow_depth || 0) * 100), snowing: SNOW_CODES.has(d.current?.weather_code), elev: d.elevation != null ? Math.round(d.elevation) : null };
 }
 /* Neige au sol jour par jour : ce qui est là + ce qui tombe − ce qui fond (selon la température max) */
 const keep = t => t == null ? .8 : t <= 0 ? .97 : t <= 3 ? .85 : t <= 6 ? .65 : t <= 10 ? .4 : .15;
@@ -1535,6 +1704,7 @@ async function run(place, opts = {}) {
     if (runId !== S.run) return;
     pts.forEach(scoreAccess); favOk.forEach(scoreAccess);
     pts.sort((a, b) => a.cost - b.cost);
+    S.cand = cluster(all.filter(s => !s.lift && s.alt >= 500 && s.drive <= CFG.near * 1.2).sort((a, b) => (a.grid ? 1 : 0) - (b.grid ? 1 : 0) || a.dist - b.dist), 8).slice(0, 80);
     S.pts = pts; S.favs = favs; S.grid = grid; S.home = home; S.dates = home?.dates || all[0]?.dates || [];
     S.updated = new Date(); S.stale = false; S.busy = false;
     if (!quiet || moved) S.fitted = false;
@@ -1546,6 +1716,7 @@ async function run(place, opts = {}) {
     // météo détaillée (ciel, vent, températures) des lieux qu'on montre
     const det = () => fetchDetails([...favOk, ...pts.slice(0, 40)]).then(() => { if (runId !== S.run) return; render(); cache.save(); if (!pts.slice(0, 8).concat(favOk).some(s => s.wx)) setTimeout(det, 60000); }); // service saturé : on réessaie dans une minute
     det();
+    if (CFG.alert) alertSync();
   } catch (e) {
     if (runId !== S.run) return;
     S.busy = false;
@@ -1583,15 +1754,15 @@ function wxStrip(s, sel) {
 }
 function renderPlace() {
   const s = S.sheet, sel = S.sheetDay;
-  $("#pTop").textContent = [s.region, s.alt != null ? nf(s.alt) + " m d'altitude" : ""].filter(Boolean).join(" · ");
+  $("#pTop").textContent = [kindTxt(s), s.region, s.alt != null ? nf(s.alt) + " m" : ""].filter(Boolean).join(" · ");
   $("#pName").textContent = s.fav ? s.name : label(s);
   const fv = favIdx(s) >= 0;
   $("#pFav").className = "b b-glass" + (fv ? " on" : "");
   $("#pFav").innerHTML = icon(fv ? "i-starf" : "i-star") + (fv ? "Dans Mes coins" : "Épingler");
   if (!s.est) {
     $("#pState").textContent = "Pas de données pour ce coin pour l'instant";
-    for (const k of ["#pScore", "#pAccess", "#pWxBox"]) $(k).hidden = true;
-    $("#pPills").innerHTML = ""; $("#pChart").innerHTML = ""; $("#pGo").href = mapsDir(s); $("#pMap").href = mapsSee(s);
+    for (const k of ["#pScore", "#pAccess", "#pWxBox", "#pConf"]) $(k).hidden = true;
+    $("#pFacts").innerHTML = ""; $("#pChart").innerHTML = ""; $("#pGo").href = mapsDir(s); $("#pMap").href = mapsSee(s);
     return renderPlaceCams();
   }
   let main, sub = "";
@@ -1608,20 +1779,28 @@ function renderPlace() {
   }
   if (sel != null && sel !== 0 && sel !== s.firstDay && s.day[sel]) sub = `${dayName(sel)} : ${dayAmtLong(s, sel)}. ` + sub;
   $("#pState").innerHTML = esc(main) + (sub ? `<span>${esc(sub)}</span>` : "");
-  $("#pPills").innerHTML = pill("i-car", driveTxt(s) + " · " + kmTxt(s) + " km") + accessPill(s) + (s.temp != null ? pill("i-temp", Math.round(s.temp) + " ° maintenant") : "");
-  const a = $("#pAccess");
-  if (s.lift) {
-    a.hidden = false;
-    a.textContent = "Accès en téléphérique ou remontée mécanique depuis le bas de la station. Vérifie qu'elle est ouverte avant de partir.";
-  } else if (s.foot) {
-    a.hidden = false;
-    a.textContent = `La route s'arrête à ${fmtKm(s.walk)} de ce point${s.roadAlt != null ? `, à ${nf(s.roadAlt)} m d'altitude. Il reste environ ${nf(s.climb)} m de montée` : ""}, à pied ou en remontée mécanique. « Y aller » t'emmène au bout de la route.`;
-  } else a.hidden = true;
+  // le jour regardé : celui qu'on a touché, sinon le premier jour de neige, sinon maintenant
+  const dd = sel != null ? (sel === 0 ? null : sel) : s.kind === "soon" ? s.firstDay : null;
+  const dep = depthAt(s, dd), th = thickOf(dep), st = th ? stateOf(s, dd) : null, ac = accessOf(s), kd = kindOf(s), cf = confOf(s, dd);
+  const fact = (head, val, sub, cls) => `<div class="fact${cls ? " " + cls : ""}"><span>${head}</span><b>${esc(val)}</b><small>${esc(sub)}</small></div>`;
+  $("#pFacts").innerHTML =
+    fact(icon("i-flake") + "Épaisseur " + (dd == null ? "maintenant" : dayTag(dd)), th ? dep + " cm" : s.snowing && dd == null ? "Il neige" : "Pas de neige", th ? th[0] : s.snowing && dd == null ? "Elle commence à tenir" : "Rien au sol ce jour-là", th && th[1] === "good" ? "good" : "")
+    + fact(icon(st ? st[2] : "i-flake") + "Genre de neige", st ? st[0] : "—", st ? cap(st[1]) : "Pas de neige à décrire")
+    + fact(`<i class="ad ${ac.lvl}"></i>Accès`, ac.t, cap(ac.d))
+    + fact(icon(KIND[kd][0]) + "Lieu", kindTxt(s), s.grid ? "Pas de station, pas de pistes" : KIND[kd][2]);
+  const pc = $("#pConf"); pc.hidden = !th;
+  if (th) pc.innerHTML = cfPill(cf) + `<span>${esc(cf[2])}</span>`;
+  const a = $("#pAccess"), winter = [10, 11, 0, 1, 2].includes(new Date().getMonth()) && s.alt >= 800 ? " En hiver, prends des pneus hiver ou des chaînes (souvent obligatoires en montagne du 1er novembre au 31 mars)." : "";
+  a.hidden = false; a.className = "access";
+  if (s.lift) a.textContent = "Accès en téléphérique ou remontée mécanique depuis le bas de la station. Vérifie qu'elle est ouverte avant de partir.";
+  else if (s.foot) a.textContent = `La route s'arrête à ${fmtKm(s.walk)} de ce point${s.roadAlt != null ? `, à ${nf(s.roadAlt)} m d'altitude. Il reste environ ${nf(s.climb)} m de montée` : ""}, à pied ou en remontée mécanique. « Y aller » t'emmène au bout de la route.` + winter;
+  else if (winter) { a.className = "access note"; a.textContent = "Route de montagne." + winter + " Regarde l'état des routes avant de partir."; }
+  else a.hidden = true;
   $("#pGo").href = mapsDir(s);
   $("#pMap").href = mapsSee(s);
   $("#pChart").innerHTML = chart(s, sel);
   // la note du jour choisi (ou du premier jour de neige)
-  const dd = sel != null ? (sel === 0 ? null : sel) : s.kind === "soon" ? s.firstDay : null, n = score(s, dd), box = $("#pScore");
+  const n = score(s, dd), box = $("#pScore");
   box.hidden = !n;
   if (n) box.innerHTML = `<div class="ring" style="--p:${n * 10}"><b>${n}<small>/10</small></b></div><div class="vt"><b>${cap(dd == null ? "en ce moment" : dayWord(dd))} : ${scoreWord(n).toLowerCase()}</b><ul>${reasons(s, dd).map(([ic, t]) => `<li>${icon(ic)}${esc(t)}</li>`).join("")}</ul></div>`;
   const wb = $("#pWxBox"); wb.hidden = !s.wx;
@@ -1704,7 +1883,11 @@ $("#cfgBtn").addEventListener("click", () => { syncCfg(); $("#cfg").showModal();
 let cfgT = 0;
 $("#cReach").addEventListener("input", e => { const r = REACH[+e.target.value]; setReach(r); $("#cReachV").textContent = r ? reachTxt(r) + " de route" : "Partout"; clearTimeout(cfgT); cfgT = setTimeout(change, 160); });
 $("#cMin").addEventListener("click", e => { const b = e.target.closest("[data-v]"); if (!b) return; CFG.min = +b.dataset.v; saveCfg(); syncCfg(); change(); });
+$("#cSki").addEventListener("change", e => { CFG.ski = e.target.checked; saveCfg(); change(); });
 $("#cWalk").addEventListener("change", e => { CFG.walk = e.target.checked; saveCfg(); change(); });
+$("#verd").addEventListener("click", goVerdict);
+$("#cAlertTest").addEventListener("click", alertTest);
+$("#cfg").addEventListener("close", () => { if (CFG.alert) alertSync(); });
 $("#cLift").addEventListener("change", e => { CFG.lift = e.target.checked; saveCfg(); change(); });
 function openDlg() { $("#dResults").innerHTML = ""; $("#dInput").value = ""; $("#dMsg").hidden = true; $("#dlg").showModal(); }
 $("#placeBtn").addEventListener("click", openDlg);
@@ -1756,7 +1939,7 @@ addEventListener("online", () => { if (S.stale && S.place) run(S.place, { quiet:
 
 /* Flocons sur les écrans d'accueil et de chargement */
 for (const sc of document.querySelectorAll(".screen")) { const f = document.createElement("div"); f.className = "flakes"; f.innerHTML = Array.from({ length: 34 }, () => `<i style="left:${(Math.random() * 100).toFixed(1)}%;--z:${(2 + Math.random() * 5).toFixed(1)}px;--o:${(.35 + Math.random() * .55).toFixed(2)};--d:${(7 + Math.random() * 9).toFixed(1)}s;--t:-${(Math.random() * 16).toFixed(1)}s;--x:${(Math.random() * 60 - 30).toFixed(0)}px"></i>`).join(""); sc.prepend(f); }
-if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").then(() => { if (CFG.alert) alertSync(); }).catch(() => {}));
+if ("serviceWorker" in navigator) addEventListener("load", () => navigator.serviceWorker.register("sw.js").then(r => { try { r.periodicSync && r.periodicSync.unregister("neige-alerte"); } catch {} }).catch(() => {}));
 </script>
 </body>
 </html>
